@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - Public Communications</title>
+    <link rel="stylesheet" href="src/css/output.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-blue-600">AnimaID</h1>
+                    <span class="ml-3 text-sm text-gray-500">Animation Center</span>
+                </div>
+                <nav class="flex space-x-6">
+                    <a href="#news" class="text-gray-700 hover:text-blue-600 font-medium">News</a>
+                    <a href="#calendar" class="text-gray-700 hover:text-blue-600 font-medium">Calendar</a>
+                    <a href="#contact" class="text-gray-700 hover:text-blue-600 font-medium">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-6xl font-bold mb-4">Welcome to AnimaID</h1>
+                <p class="text-xl md:text-2xl mb-8 opacity-90">Your trusted partner in children's education and development</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="#news" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                        Latest News
+                    </a>
+                    <a href="#calendar" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
+                        View Calendar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- News Section -->
+        <section id="news" class="mb-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Latest News & Announcements</h2>
+                <p class="text-lg text-gray-600">Stay informed about important updates, events, and announcements</p>
+            </div>
+
+            <!-- Communications List -->
+            <div id="communications-list" class="space-y-6">
+                <!-- Communications will be loaded here -->
+            </div>
+
+            <!-- Loading indicator -->
+            <div id="loading" class="text-center py-12">
+                <i class="fas fa-spinner fa-spin text-gray-400 text-3xl"></i>
+                <p class="mt-4 text-gray-500">Loading announcements...</p>
+            </div>
+
+            <!-- Empty state -->
+            <div id="empty-state" class="text-center py-12 hidden">
+                <i class="fas fa-info-circle text-gray-300 text-6xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No announcements at this time</h3>
+                <p class="text-gray-500">Check back later for updates and important information.</p>
+            </div>
+
+            <!-- Load More Button -->
+            <div id="load-more-container" class="text-center mt-8 hidden">
+                <button id="load-more-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium">
+                    <i class="fas fa-plus mr-2"></i>Load More Announcements
+                </button>
+            </div>
+        </section>
+
+        <!-- Calendar Preview Section -->
+        <section id="calendar" class="mb-16 bg-gray-50 rounded-lg p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
+                <p class="text-lg text-gray-600">Discover our exciting activities and events</p>
+            </div>
+
+            <div id="events-preview" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Events will be loaded here -->
+            </div>
+
+            <div class="text-center mt-8">
+                <a href="#calendar" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold inline-flex items-center">
+                    <i class="fas fa-calendar mr-2"></i>View Full Calendar
+                </a>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="bg-white rounded-lg shadow-sm p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
+                <p class="text-lg text-gray-600">We'd love to hear from you</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <i class="fas fa-map-marker-alt text-3xl text-blue-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Visit Us</h3>
+                    <p class="text-gray-600">Via Roma 123<br>Milano, Italy</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-phone text-3xl text-blue-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Call Us</h3>
+                    <p class="text-gray-600">+39 02 1234567</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-envelope text-3xl text-blue-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Email Us</h3>
+                    <p class="text-gray-600">info@animaid.local</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <p class="text-gray-400">&copy; 2025 AnimaID. All rights reserved.</p>
+                <p class="text-sm text-gray-500 mt-2">Committed to excellence in children's education and development.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Comment Modal -->
+    <div id="comment-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Add Comment</h3>
+                <button id="close-comment-modal-btn" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="comment-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                    <input type="text" id="comment-author-name" required
+                           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email (Optional)</label>
+                    <input type="email" id="comment-author-email"
+                           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Comment *</label>
+                    <textarea id="comment-content" rows="4" required
+                              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Share your thoughts..."></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t">
+                    <button type="button" id="cancel-comment-btn"
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-medium">
+                        Cancel
+                    </button>
+                    <button type="submit" id="submit-comment-btn"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                        <i class="fas fa-paper-plane mr-2"></i>Submit Comment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentPage = 1;
+        let isLoading = false;
+        let hasMorePages = true;
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadCommunications();
+            loadUpcomingEvents();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Load more button
+            document.getElementById('load-more-btn').addEventListener('click', loadMoreCommunications);
+
+            // Comment modal
+            document.getElementById('close-comment-modal-btn').addEventListener('click', closeCommentModal);
+            document.getElementById('cancel-comment-btn').addEventListener('click', closeCommentModal);
+            document.getElementById('comment-form').addEventListener('submit', submitComment);
+
+            // Close comment modal when clicking outside
+            document.getElementById('comment-modal').addEventListener('click', function(e) {
+                if (e.target === this) closeCommentModal();
+            });
+
+            // Smooth scrolling for navigation
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        }
+
+        // Load communications
+        function loadCommunications(page = 1, append = false) {
+            if (isLoading) return;
+
+            isLoading = true;
+            showLoading();
+
+            const params = new URLSearchParams({
+                public: 1,
+                page: page,
+                limit: 10
+            });
+
+            fetch(`/api/communications?${params}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (append) {
+                        appendCommunications(data.communications);
+                    } else {
+                        renderCommunications(data.communications);
+                    }
+
+                    hasMorePages = data.pagination.page < data.pagination.pages;
+                    toggleLoadMoreButton();
+                } else {
+                    showError('Failed to load announcements');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading communications:', error);
+                showError('Failed to load announcements');
+            })
+            .finally(() => {
+                isLoading = false;
+                hideLoading();
+            });
+        }
+
+        // Render communications list
+        function renderCommunications(communications) {
+            const container = document.getElementById('communications-list');
+
+            if (communications.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+                container.innerHTML = '';
+                return;
+            }
+
+            document.getElementById('empty-state').classList.add('hidden');
+
+            container.innerHTML = communications.map(comm => `
+                <div class="communication-card bg-white rounded-lg shadow-lg p-8 priority-${comm.priority}">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-bullhorn text-blue-600 text-lg"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-gray-900">${escapeHtml(comm.title)}</h3>
+                                    <div class="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                                        <span><i class="fas fa-calendar mr-1"></i>${formatDate(comm.created_at)}</span>
+                                        <span><i class="fas fa-eye mr-1"></i>${comm.view_count} views</span>
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                            ${comm.communication_type.charAt(0).toUpperCase() + comm.communication_type.slice(1)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="prose prose-lg max-w-none mb-6">
+                                <p class="text-gray-700 leading-relaxed">${escapeHtml(comm.content)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${comm.attachments && comm.attachments.length > 0 ? `
+                        <div class="border-t pt-6 mb-6">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Attachments</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                ${comm.attachments.map(att => `
+                                    <div class="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                                        <i class="fas fa-file text-gray-400 text-lg"></i>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-900">${escapeHtml(att.original_name)}</p>
+                                            <p class="text-xs text-gray-500">${formatFileSize(att.file_size)}</p>
+                                        </div>
+                                        <a href="/uploads/communications/${att.file_name}" target="_blank"
+                                           class="text-blue-600 hover:text-blue-800 font-medium">
+                                            <i class="fas fa-download mr-1"></i>Download
+                                        </a>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${comm.comments && comm.comments.length > 0 ? `
+                        <div class="border-t pt-6 mb-6">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Comments (${comm.comments.length})</h4>
+                            <div class="space-y-4">
+                                ${comm.comments.slice(0, 3).map(comment => `
+                                    <div class="bg-gray-50 rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-medium text-gray-900">${comment.author_name || 'Anonymous'}</span>
+                                            <span class="text-xs text-gray-500">${formatDate(comment.created_at)}</span>
+                                        </div>
+                                        <p class="text-gray-700">${escapeHtml(comment.content)}</p>
+                                    </div>
+                                `).join('')}
+                                ${comm.comments.length > 3 ? `<p class="text-sm text-gray-500 mt-2">And ${comm.comments.length - 3} more comments...</p>` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="flex items-center justify-between pt-6 border-t">
+                        <div class="flex items-center space-x-4">
+                            ${comm.expires_at ? `<span class="text-sm text-orange-600"><i class="fas fa-clock mr-1"></i>Expires ${formatDate(comm.expires_at)}</span>` : ''}
+                        </div>
+                        <button onclick="openCommentModal(${comm.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            <i class="fas fa-comment mr-2"></i>Add Comment
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Append communications (for load more)
+        function appendCommunications(communications) {
+            const container = document.getElementById('communications-list');
+
+            const html = communications.map(comm => `
+                <div class="communication-card bg-white rounded-lg shadow-lg p-8 priority-${comm.priority}">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-bullhorn text-blue-600 text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-gray-900">${escapeHtml(comm.title)}</h3>
+                                    <div class="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                                        <span><i class="fas fa-calendar mr-1"></i>${formatDate(comm.created_at)}</span>
+                                        <span><i class="fas fa-eye mr-1"></i>${comm.view_count} views</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="prose prose-lg max-w-none mb-6">
+                                <p class="text-gray-700 leading-relaxed">${escapeHtml(comm.content)}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-6 border-t">
+                        <div class="flex items-center space-x-4">
+                            ${comm.expires_at ? `<span class="text-sm text-orange-600"><i class="fas fa-clock mr-1"></i>Expires ${formatDate(comm.expires_at)}</span>` : ''}
+                        </div>
+                        <button onclick="openCommentModal(${comm.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            <i class="fas fa-comment mr-2"></i>Add Comment
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        // Load more communications
+        function loadMoreCommunications() {
+            currentPage++;
+            loadCommunications(currentPage, true);
+        }
+
+        // Toggle load more button
+        function toggleLoadMoreButton() {
+            const container = document.getElementById('load-more-container');
+            if (hasMorePages) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        // Load upcoming events
+        function loadUpcomingEvents() {
+            fetch('/api/calendar?limit=6&is_public=1&status=published')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    renderUpcomingEvents(data.events);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading events:', error);
+            });
+        }
+
+        // Render upcoming events
+        function renderUpcomingEvents(events) {
+            const container = document.getElementById('events-preview');
+
+            if (events.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 col-span-full">No upcoming events at this time.</p>';
+                return;
+            }
+
+            container.innerHTML = events.map(event => `
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar text-blue-600"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">${escapeHtml(event.title)}</h3>
+                            <p class="text-gray-600 text-sm mb-3 line-clamp-2">${escapeHtml(event.description || 'No description available')}</p>
+                            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                <span><i class="fas fa-clock mr-1"></i>${formatDate(event.start_date)}</span>
+                                ${event.location ? `<span><i class="fas fa-map-marker-alt mr-1"></i>${event.location}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Comment modal functions
+        function openCommentModal(communicationId) {
+            document.getElementById('comment-form').reset();
+            document.getElementById('submit-comment-btn').dataset.communicationId = communicationId;
+            document.getElementById('comment-modal').classList.remove('hidden');
+        }
+
+        function closeCommentModal() {
+            document.getElementById('comment-modal').classList.add('hidden');
+        }
+
+        function submitComment(e) {
+            e.preventDefault();
+
+            const communicationId = document.getElementById('submit-comment-btn').dataset.communicationId;
+            const formData = {
+                content: document.getElementById('comment-content').value,
+                author_name: document.getElementById('comment-author-name').value,
+                author_email: document.getElementById('comment-author-email').value,
+                is_internal: 0 // Public comment
+            };
+
+            const submitBtn = document.getElementById('submit-comment-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+            submitBtn.disabled = true;
+
+            fetch(`/api/communications/${communicationId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeCommentModal();
+                    loadCommunications(); // Reload to show new comment
+                    showSuccess('Comment submitted successfully');
+                } else {
+                    showError(data.error || 'Failed to submit comment');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting comment:', error);
+                showError('Failed to submit comment');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function showError(message) {
+            // Simple error display - could be enhanced with toast notifications
+            alert('Error: ' + message);
+        }
+
+        function showSuccess(message) {
+            // Simple success display - could be enhanced with toast notifications
+            alert('Success: ' + message);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Make functions global for onclick handlers
+        window.openCommentModal = openCommentModal;
+    </script>
+</body>
+</html>

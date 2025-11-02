@@ -1,0 +1,18 @@
+{
+  "name": "animaid",
+  "version": "1.0.0",
+  "description": "Animation Center Management Platform",
+  "main": "index.php",
+  "scripts": {
+    "build-css": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --watch",
+    "build-css-prod": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32"
+  },
+  "keywords": ["animation", "center", "management", "php", "tailwindcss"],
+  "author": "AnimaID Team",
+  "license": "MIT"
+}

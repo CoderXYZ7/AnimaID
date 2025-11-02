@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - Communications</title>
+    <link rel="stylesheet" href="src/css/output.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading communications...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden">
+
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-circle text-blue-600 text-2xl"></i>
+                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <a href="dashboard.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
+                        </a>
+                        <button id="logout-btn" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Communications</h1>
+                    <p class="mt-2 text-gray-600">Manage internal notices and public announcements</p>
+                </div>
+                <button id="create-communication-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                    <i class="fas fa-plus mr-2"></i>Create Communication
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow mb-6 p-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="status-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Status</option>
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select id="type-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Types</option>
+                        <option value="notice">Notice</option>
+                        <option value="announcement">Announcement</option>
+                        <option value="news">News</option>
+                        <option value="alert">Alert</option>
+                        <option value="message">Message</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                    <select id="priority-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Priorities</option>
+                        <option value="low">Low</option>
+                        <option value="normal">Normal</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Audience</label>
+                    <select id="audience-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Audiences</option>
+                        <option value="all_staff">All Staff</option>
+                        <option value="organizzatore">Organizzatore</option>
+                        <option value="responsabile">Responsabile</option>
+                        <option value="animatore">Animatore</option>
+                        <option value="aiutoanimatore">Aiutoanimatore</option>
+                        <option value="parents">Parents</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-between">
+                <button id="apply-filters-btn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium">
+                    <i class="fas fa-filter mr-2"></i>Apply Filters
+                </button>
+                <button id="clear-filters-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-medium">
+                    <i class="fas fa-times mr-2"></i>Clear Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Communications List -->
+        <div id="communications-list" class="space-y-4">
+            <!-- Communications will be loaded here -->
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="mt-8 flex justify-center">
+            <!-- Pagination will be loaded here -->
+        </div>
+
+        <!-- Loading indicator -->
+        <div id="loading" class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-gray-400 text-2xl"></i>
+            <p class="mt-2 text-gray-500">Loading communications...</p>
+        </div>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="text-center py-12 hidden">
+            <i class="fas fa-inbox text-gray-300 text-6xl mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No communications found</h3>
+            <p class="text-gray-500 mb-4">Get started by creating your first communication.</p>
+            <button id="create-first-communication-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                <i class="fas fa-plus mr-2"></i>Create Communication
+            </button>
+        </div>
+        </main>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="error-screen" class="hidden fixed inset-0 bg-gray-50 flex items-center justify-center">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
+            <p class="text-gray-600 mb-6">You don't have permission to access communications.</p>
+            <a href="dashboard.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Create/Edit Communication Modal -->
+    <div id="communication-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-lg font-medium text-gray-900">Create Communication</h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="communication-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                        <input type="text" id="communication-title" required
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+                        <select id="communication-type" required
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="notice">Notice</option>
+                            <option value="announcement">Announcement</option>
+                            <option value="news">News</option>
+                            <option value="alert">Alert</option>
+                            <option value="message">Message</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                        <select id="communication-priority"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="normal">Normal</option>
+                            <option value="low">Low</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Audience</label>
+                        <select id="communication-audience"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all_staff">All Staff</option>
+                            <option value="organizzatore">Organizzatore</option>
+                            <option value="responsabile">Responsabile</option>
+                            <option value="animatore">Animatore</option>
+                            <option value="aiutoanimatore">Aiutoanimatore</option>
+                            <option value="parents">Parents</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="communication-status"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Content *</label>
+                    <textarea id="communication-content" rows="8" required
+                              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Enter your communication content here..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Expiration Date (Optional)</label>
+                        <input type="datetime-local" id="communication-expires"
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="communication-public" class="mr-2">
+                        <label class="text-sm font-medium text-gray-700">Make this communication public</label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t">
+                    <button type="button" id="cancel-communication-btn"
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-medium">
+                        Cancel
+                    </button>
+                    <button type="submit" id="save-communication-btn"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                        <i class="fas fa-save mr-2"></i>Save Communication
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Communication Modal -->
+    <div id="view-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="view-modal-title" class="text-lg font-medium text-gray-900">Communication Details</h3>
+                <button id="close-view-modal-btn" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div id="communication-details" class="space-y-6">
+                <!-- Communication details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = window.location.origin + '/api';
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const errorScreen = document.getElementById('error-screen');
+
+        let currentUser = null;
+        let userToken = null;
+        let currentPage = 1;
+        let currentFilters = {};
+
+        // Initialize page
+        async function initPage() {
+            try {
+                // Check authentication
+                userToken = localStorage.getItem('animaid_token');
+                const userData = localStorage.getItem('animaid_user');
+
+                if (!userToken || !userData) {
+                    showErrorScreen();
+                    return;
+                }
+
+                currentUser = JSON.parse(userData);
+
+                // Verify token and check permissions
+                const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    localStorage.removeItem('animaid_token');
+                    localStorage.removeItem('animaid_user');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Check if user has communications permissions
+                const hasPermission = await checkCommunicationsPermission();
+                if (!hasPermission) {
+                    showErrorScreen();
+                    return;
+                }
+
+                // Load initial data
+                await loadCommunications();
+
+                // Show main content
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Page initialization error:', error);
+                showErrorScreen();
+            }
+        }
+
+        // Check if user has communications permissions
+        async function checkCommunicationsPermission() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/communications?page=1&limit=1`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', logout);
+
+            // Create communication
+            document.getElementById('create-communication-btn').addEventListener('click', () => openCommunicationModal());
+            document.getElementById('create-first-communication-btn').addEventListener('click', () => openCommunicationModal());
+
+            // Modal controls
+            document.getElementById('close-modal-btn').addEventListener('click', closeCommunicationModal);
+            document.getElementById('cancel-communication-btn').addEventListener('click', closeCommunicationModal);
+            document.getElementById('close-view-modal-btn').addEventListener('click', closeViewModal);
+
+            // Form submission
+            document.getElementById('communication-form').addEventListener('submit', saveCommunication);
+
+            // Filters
+            document.getElementById('apply-filters-btn').addEventListener('click', applyFilters);
+            document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
+
+            // Close modals when clicking outside
+            document.getElementById('communication-modal').addEventListener('click', function(e) {
+                if (e.target === this) closeCommunicationModal();
+            });
+            document.getElementById('view-modal').addEventListener('click', function(e) {
+                if (e.target === this) closeViewModal();
+            });
+        }
+
+        // Load communications
+        function loadCommunications(page = 1) {
+            currentPage = page;
+            showLoading();
+
+            const params = new URLSearchParams({
+                page: page,
+                limit: 20,
+                ...currentFilters
+            });
+
+            fetch(`/api/communications?${params}`, {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    renderCommunications(data.communications);
+                    renderPagination(data.pagination);
+                } else {
+                    showError('Failed to load communications');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading communications:', error);
+                showError('Failed to load communications');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+        }
+
+        // Render communications list
+        function renderCommunications(communications) {
+            const container = document.getElementById('communications-list');
+
+            if (communications.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+                container.innerHTML = '';
+                return;
+            }
+
+            document.getElementById('empty-state').classList.add('hidden');
+
+            container.innerHTML = communications.map(comm => `
+                <div class="communication-card bg-white rounded-lg shadow p-6 priority-${comm.priority}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-900">${escapeHtml(comm.title)}</h3>
+                                <span class="px-2 py-1 text-xs rounded-full status-${comm.status}">
+                                    ${comm.status.charAt(0).toUpperCase() + comm.status.slice(1)}
+                                </span>
+                                ${comm.is_public ? '<span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Public</span>' : ''}
+                            </div>
+                            <div class="flex items-center space-x-4 text-sm text-gray-500 mb-2">
+                                <span><i class="fas fa-user mr-1"></i>${comm.created_by_name || 'Unknown'}</span>
+                                <span><i class="fas fa-calendar mr-1"></i>${formatDate(comm.created_at)}</span>
+                                <span><i class="fas fa-eye mr-1"></i>${comm.view_count} views</span>
+                            </div>
+                            <p class="text-gray-700 line-clamp-3">${escapeHtml(comm.content.substring(0, 200))}${comm.content.length > 200 ? '...' : ''}</p>
+                        </div>
+                        <div class="flex space-x-2 ml-4">
+                            <button onclick="viewCommunication(${comm.id})" class="text-blue-600 hover:text-blue-800 p-2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="editCommunication(${comm.id})" class="text-gray-600 hover:text-gray-800 p-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteCommunication(${comm.id})" class="text-red-600 hover:text-red-800 p-2">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <div class="flex items-center space-x-4">
+                            <span><i class="fas fa-tag mr-1"></i>${comm.communication_type}</span>
+                            <span><i class="fas fa-users mr-1"></i>${comm.target_audience || 'All'}</span>
+                            ${comm.expires_at ? `<span><i class="fas fa-clock mr-1"></i>Expires ${formatDate(comm.expires_at)}</span>` : ''}
+                        </div>
+                        ${comm.published_at ? `<span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Published ${formatDate(comm.published_at)}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render pagination
+        function renderPagination(pagination) {
+            const container = document.getElementById('pagination');
+
+            if (pagination.pages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<div class="flex items-center justify-center space-x-2">';
+
+            // Previous button
+            if (pagination.page > 1) {
+                html += `<button onclick="loadCommunications(${pagination.page - 1})" class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50">Previous</button>`;
+            }
+
+            // Page numbers
+            for (let i = Math.max(1, pagination.page - 2); i <= Math.min(pagination.pages, pagination.page + 2); i++) {
+                if (i === pagination.page) {
+                    html += `<span class="px-3 py-2 text-sm bg-blue-600 text-white border border-blue-600 rounded-md">${i}</span>`;
+                } else {
+                    html += `<button onclick="loadCommunications(${i})" class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50">${i}</button>`;
+                }
+            }
+
+            // Next button
+            if (pagination.page < pagination.pages) {
+                html += `<button onclick="loadCommunications(${pagination.page + 1})" class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50">Next</button>`;
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Open communication modal
+        function openCommunicationModal(communication = null) {
+            const modal = document.getElementById('communication-modal');
+            const form = document.getElementById('communication-form');
+            const title = document.getElementById('modal-title');
+
+            if (communication) {
+                title.textContent = 'Edit Communication';
+                populateCommunicationForm(communication);
+            } else {
+                title.textContent = 'Create Communication';
+                form.reset();
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        // Close communication modal
+        function closeCommunicationModal() {
+            document.getElementById('communication-modal').classList.add('hidden');
+        }
+
+        // Open view modal
+        function viewCommunication(id) {
+            fetch(`/api/communications/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    renderCommunicationDetails(data.communication);
+                    document.getElementById('view-modal').classList.remove('hidden');
+                } else {
+                    showError('Failed to load communication details');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading communication:', error);
+                showError('Failed to load communication details');
+            });
+        }
+
+        // Close view modal
+        function closeViewModal() {
+            document.getElementById('view-modal').classList.add('hidden');
+        }
+
+        // Render communication details
+        function renderCommunicationDetails(communication) {
+            const container = document.getElementById('communication-details');
+            document.getElementById('view-modal-title').textContent = communication.title;
+
+            container.innerHTML = `
+                <div class="border-b pb-4 mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xl font-semibold text-gray-900">${escapeHtml(communication.title)}</h4>
+                        <span class="px-3 py-1 text-sm rounded-full status-${communication.status}">
+                            ${communication.status.charAt(0).toUpperCase() + communication.status.slice(1)}
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+                        <span><i class="fas fa-user mr-1"></i>${communication.created_by_name || 'Unknown'}</span>
+                        <span><i class="fas fa-calendar mr-1"></i>${formatDate(communication.created_at)}</span>
+                        <span><i class="fas fa-eye mr-1"></i>${communication.view_count} views</span>
+                        <span><i class="fas fa-tag mr-1"></i>${communication.communication_type}</span>
+                        <span><i class="fas fa-users mr-1"></i>${communication.target_audience || 'All'}</span>
+                    </div>
+                </div>
+
+                <div class="prose max-w-none mb-6">
+                    <p class="text-gray-700 whitespace-pre-wrap">${escapeHtml(communication.content)}</p>
+                </div>
+
+                ${communication.attachments && communication.attachments.length > 0 ? `
+                    <div class="border-t pt-4">
+                        <h5 class="text-lg font-medium text-gray-900 mb-3">Attachments</h5>
+                        <div class="space-y-2">
+                            ${communication.attachments.map(att => `
+                                <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                    <i class="fas fa-file text-gray-400"></i>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-900">${escapeHtml(att.original_name)}</p>
+                                        <p class="text-xs text-gray-500">${formatFileSize(att.file_size)} • Uploaded by ${att.uploaded_by_name}</p>
+                                    </div>
+                                    <a href="/uploads/communications/${att.file_name}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${communication.comments && communication.comments.length > 0 ? `
+                    <div class="border-t pt-4">
+                        <h5 class="text-lg font-medium text-gray-900 mb-3">Comments</h5>
+                        <div class="space-y-4">
+                            ${communication.comments.map(comment => `
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-medium text-gray-900">${comment.author_name || comment.created_by_name || 'Anonymous'}</span>
+                                        <span class="text-xs text-gray-500">${formatDate(comment.created_at)}</span>
+                                    </div>
+                                    <p class="text-gray-700">${escapeHtml(comment.content)}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Save communication
+        function saveCommunication(e) {
+            e.preventDefault();
+
+            const formData = {
+                title: document.getElementById('communication-title').value,
+                content: document.getElementById('communication-content').value,
+                communication_type: document.getElementById('communication-type').value,
+                priority: document.getElementById('communication-priority').value,
+                target_audience: document.getElementById('communication-audience').value,
+                status: document.getElementById('communication-status').value,
+                is_public: document.getElementById('communication-public').checked ? 1 : 0,
+                expires_at: document.getElementById('communication-expires').value || null
+            };
+
+            const saveBtn = document.getElementById('save-communication-btn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+            saveBtn.disabled = true;
+
+            // Check if this is an edit or create
+            const communicationId = saveBtn.dataset.communicationId;
+
+            const url = communicationId ? `/api/communications/${communicationId}` : '/api/communications';
+            const method = communicationId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userToken}`
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeCommunicationModal();
+                    loadCommunications();
+                    showSuccess(communicationId ? 'Communication updated successfully' : 'Communication created successfully');
+                } else {
+                    showError(data.error || 'Failed to save communication');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving communication:', error);
+                showError('Failed to save communication');
+            })
+            .finally(() => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+                delete saveBtn.dataset.communicationId;
+            });
+        }
+
+        // Edit communication
+        function editCommunication(id) {
+            fetch(`/api/communications/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    openCommunicationModal(data.communication);
+                    document.getElementById('save-communication-btn').dataset.communicationId = id;
+                } else {
+                    showError('Failed to load communication for editing');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading communication:', error);
+                showError('Failed to load communication for editing');
+            });
+        }
+
+        // Delete communication
+        function deleteCommunication(id) {
+            if (!confirm('Are you sure you want to delete this communication? This action cannot be undone.')) {
+                return;
+            }
+
+            fetch(`/api/communications/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCommunications();
+                    showSuccess('Communication deleted successfully');
+                } else {
+                    showError(data.error || 'Failed to delete communication');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting communication:', error);
+                showError('Failed to delete communication');
+            });
+        }
+
+        // Apply filters
+        function applyFilters() {
+            currentFilters = {
+                status: document.getElementById('status-filter').value,
+                communication_type: document.getElementById('type-filter').value,
+                priority: document.getElementById('priority-filter').value,
+                target_audience: document.getElementById('audience-filter').value
+            };
+
+            loadCommunications(1);
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('status-filter').value = '';
+            document.getElementById('type-filter').value = '';
+            document.getElementById('priority-filter').value = '';
+            document.getElementById('audience-filter').value = '';
+
+            currentFilters = {};
+            loadCommunications(1);
+        }
+
+        // Populate form for editing
+        function populateCommunicationForm(communication) {
+            document.getElementById('communication-title').value = communication.title;
+            document.getElementById('communication-content').value = communication.content;
+            document.getElementById('communication-type').value = communication.communication_type;
+            document.getElementById('communication-priority').value = communication.priority;
+            document.getElementById('communication-audience').value = communication.target_audience;
+            document.getElementById('communication-status').value = communication.status;
+            document.getElementById('communication-public').checked = communication.is_public == 1;
+            document.getElementById('communication-expires').value = communication.expires_at ?
+                new Date(communication.expires_at).toISOString().slice(0, 16) : '';
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('animaid_token');
+            localStorage.removeItem('animaid_user');
+            window.location.href = 'login.html';
+        }
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function showErrorScreen() {
+            loadingScreen.classList.add('hidden');
+            mainContent.classList.add('hidden');
+            errorScreen.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            // Simple error display - could be enhanced with toast notifications
+            alert('Error: ' + message);
+        }
+
+        function showSuccess(message) {
+            // Simple success display - could be enhanced with toast notifications
+            alert('Success: ' + message);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Make functions global for onclick handlers
+        window.viewCommunication = viewCommunication;
+        window.editCommunication = editCommunication;
+        window.deleteCommunication = deleteCommunication;
+        window.loadCommunications = loadCommunications;
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initPage();
+            setupEventListeners();
+        });
+    </script>
+</body>
+</html>

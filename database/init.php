@@ -377,6 +377,174 @@ function createTables(PDO $pdo) {
             FOREIGN KEY (staff_member) REFERENCES users(id)
         )
     ");
+
+    // Communications tables
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS communications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title VARCHAR(255) NOT NULL,
+            content TEXT NOT NULL,
+            communication_type VARCHAR(50) NOT NULL, -- notice, announcement, news, alert, message
+            priority VARCHAR(20) DEFAULT 'normal', -- low, normal, high, urgent
+            is_public BOOLEAN DEFAULT 0, -- 0 = internal staff only, 1 = public/parents
+            status VARCHAR(20) DEFAULT 'draft', -- draft, published, archived
+            target_audience VARCHAR(100), -- specific roles, all_staff, parents, etc.
+            event_id INTEGER, -- link to calendar event if related
+            created_by INTEGER NOT NULL,
+            published_by INTEGER,
+            published_at DATETIME,
+            expires_at DATETIME, -- optional expiration date
+            view_count INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (event_id) REFERENCES calendar_events(id) ON DELETE SET NULL,
+            FOREIGN KEY (created_by) REFERENCES users(id),
+            FOREIGN KEY (published_by) REFERENCES users(id)
+        )
+    ");
+
+    // Communication attachments (for files/images)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS communication_attachments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            communication_id INTEGER NOT NULL,
+            file_name VARCHAR(255) NOT NULL,
+            original_name VARCHAR(255) NOT NULL,
+            file_path VARCHAR(500),
+            file_size INTEGER,
+            mime_type VARCHAR(100),
+            uploaded_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (communication_id) REFERENCES communications(id) ON DELETE CASCADE,
+            FOREIGN KEY (uploaded_by) REFERENCES users(id)
+        )
+    ");
+
+    // Communication reads/views tracking
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS communication_reads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            communication_id INTEGER NOT NULL,
+            user_id INTEGER, -- NULL for anonymous public views
+            ip_address VARCHAR(45),
+            user_agent TEXT,
+            read_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (communication_id) REFERENCES communications(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+        )
+    ");
+
+    // Communication comments/replies
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS communication_comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            communication_id INTEGER NOT NULL,
+            parent_comment_id INTEGER, -- for threaded replies
+            content TEXT NOT NULL,
+            is_internal BOOLEAN DEFAULT 1, -- 0 = public comment, 1 = internal staff comment
+            created_by INTEGER, -- NULL for anonymous public comments
+            author_name VARCHAR(255), -- for anonymous public comments
+            author_email VARCHAR(255), -- for anonymous public comments
+            status VARCHAR(20) DEFAULT 'approved', -- approved, pending, rejected
+            moderated_by INTEGER,
+            moderated_at DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (communication_id) REFERENCES communications(id) ON DELETE CASCADE,
+            FOREIGN KEY (parent_comment_id) REFERENCES communication_comments(id) ON DELETE CASCADE,
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (moderated_by) REFERENCES users(id)
+        )
+    ");
+
+    // Notification preferences
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS notification_preferences (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            communication_type VARCHAR(50) NOT NULL,
+            email_enabled BOOLEAN DEFAULT 1,
+            push_enabled BOOLEAN DEFAULT 1,
+            sms_enabled BOOLEAN DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(user_id, communication_type)
+        )
+    ");
+
+    // Media folders table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS media_folders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(255) NOT NULL,
+            description TEXT,
+            parent_id INTEGER,
+            path VARCHAR(1000) NOT NULL,
+            is_shared BOOLEAN DEFAULT 0,
+            created_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (parent_id) REFERENCES media_folders(id) ON DELETE CASCADE,
+            FOREIGN KEY (created_by) REFERENCES users(id)
+        )
+    ");
+
+    // Media files table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS media_files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename VARCHAR(255) NOT NULL,
+            original_name VARCHAR(255) NOT NULL,
+            file_path VARCHAR(1000) NOT NULL,
+            file_size INTEGER NOT NULL,
+            mime_type VARCHAR(100) NOT NULL,
+            file_type VARCHAR(50) NOT NULL, -- image, video, document, audio, etc.
+            folder_id INTEGER,
+            uploaded_by INTEGER NOT NULL,
+            is_shared BOOLEAN DEFAULT 0,
+            share_token VARCHAR(255) UNIQUE,
+            download_count INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (folder_id) REFERENCES media_folders(id) ON DELETE SET NULL,
+            FOREIGN KEY (uploaded_by) REFERENCES users(id)
+        )
+    ");
+
+    // Media sharing permissions
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS media_sharing (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resource_type VARCHAR(20) NOT NULL, -- 'file' or 'folder'
+            resource_id INTEGER NOT NULL,
+            shared_with_user_id INTEGER, -- NULL for public sharing
+            shared_by_user_id INTEGER NOT NULL,
+            permission VARCHAR(20) DEFAULT 'view', -- view, download, edit
+            share_token VARCHAR(255) UNIQUE,
+            expires_at DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (shared_with_user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (shared_by_user_id) REFERENCES users(id)
+        )
+    ");
+
+    // Media file versions (for version control)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS media_file_versions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            file_id INTEGER NOT NULL,
+            version_number INTEGER NOT NULL,
+            filename VARCHAR(255) NOT NULL,
+            file_path VARCHAR(1000) NOT NULL,
+            file_size INTEGER NOT NULL,
+            uploaded_by INTEGER NOT NULL,
+            change_description TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (file_id) REFERENCES media_files(id) ON DELETE CASCADE,
+            FOREIGN KEY (uploaded_by) REFERENCES users(id)
+        )
+    ");
 }
 
 function insertInitialData(PDO $pdo, array $config) {
@@ -468,11 +636,16 @@ function insertInitialData(PDO $pdo, array $config) {
     // Assign permissions to roles
     assignPermissionsToRoles($pdo);
 
+    echo "Role permissions assigned.\n";
+
     // Insert sample spaces
     insertSampleSpaces($pdo);
 
     // Insert sample calendar events
     insertSampleEvents($pdo);
+
+    // Insert sample communications
+    insertSampleCommunications($pdo);
 }
 
 function assignPermissionsToRoles(PDO $pdo) {
@@ -574,6 +747,161 @@ function assignPermissionsToRoles(PDO $pdo) {
 
             $permissionId = $permissions[$permissionName];
             $stmt->execute([$roleId, $permissionId]);
+        }
+    }
+}
+
+function insertSampleCommunications(PDO $pdo) {
+    // Get admin user ID (assuming admin user exists)
+    $adminId = $pdo->query("SELECT id FROM users WHERE username = 'admin' LIMIT 1")->fetchColumn();
+
+    if (!$adminId) {
+        // If no admin user, skip sample communications
+        return;
+    }
+
+    $communications = [
+        [
+            'Welcome to AnimaID!',
+            'Welcome to our new digital management platform. This system will help us coordinate activities, manage registrations, and communicate more effectively with families. Please take a moment to familiarize yourself with the interface.',
+            'announcement',
+            'high',
+            0, // internal staff only
+            'published',
+            'all_staff',
+            null, // no event link
+            $adminId,
+            $adminId,
+            date('Y-m-d H:i:s'), // published immediately
+            null, // no expiration
+            0
+        ],
+        [
+            'New Registration Process',
+            'We have updated our registration process to be more streamlined. Parents can now register their children online and upload required documents digitally. All registrations require approval before children can participate in activities.',
+            'notice',
+            'normal',
+            0, // internal staff only
+            'published',
+            'organizzatore,responsabile',
+            null,
+            $adminId,
+            $adminId,
+            date('Y-m-d H:i:s'),
+            null,
+            0
+        ],
+        [
+            'Parent Information: Holiday Schedule',
+            'Dear Parents, We would like to inform you that the center will be closed from December 24th to January 6th for the holiday season. Regular activities will resume on January 7th. Happy Holidays!',
+            'news',
+            'normal',
+            1, // public
+            'published',
+            'parents',
+            null,
+            $adminId,
+            $adminId,
+            date('Y-m-d H:i:s'),
+            date('Y-m-d H:i:s', strtotime('+30 days')), // expires in 30 days
+            0
+        ],
+        [
+            'Staff Meeting - Tomorrow 9:00 AM',
+            'Important staff meeting tomorrow at 9:00 AM in the Main Activity Room. We will discuss the upcoming holiday activities and review safety protocols. Attendance is mandatory for all staff members.',
+            'alert',
+            'high',
+            0, // internal staff only
+            'published',
+            'all_staff',
+            null,
+            $adminId,
+            $adminId,
+            date('Y-m-d H:i:s'),
+            date('Y-m-d H:i:s', strtotime('+1 day')), // expires tomorrow
+            0
+        ],
+        [
+            'Photo Day Reminder',
+            'This Friday is our monthly photo day! Please remind parents to dress their children in their best clothes. Professional photos will be taken between 10:00 AM and 12:00 PM in the Art Studio.',
+            'announcement',
+            'normal',
+            0, // internal staff only
+            'published',
+            'animatore,aiutoanimatore',
+            null,
+            $adminId,
+            $adminId,
+            date('Y-m-d H:i:s'),
+            null,
+            0
+        ],
+        [
+            'Medical Emergency Protocol Update',
+            'We have updated our medical emergency protocols. Please review the new procedures in the staff handbook. Key changes include: immediate notification to parents, updated emergency contact procedures, and enhanced documentation requirements.',
+            'alert',
+            'urgent',
+            0, // internal staff only
+            'published',
+            'all_staff',
+            null,
+            $adminId,
+            $adminId,
+            date('Y-m-d H:i:s'),
+            null,
+            0
+        ]
+    ];
+
+    $stmt = $pdo->prepare("
+        INSERT OR IGNORE INTO communications
+        (title, content, communication_type, priority, is_public, status, target_audience, event_id, created_by, published_by, published_at, expires_at, view_count)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    foreach ($communications as $comm) {
+        $stmt->execute($comm);
+    }
+
+    // Add some sample comments to the first communication
+    $commId = $pdo->query("SELECT id FROM communications WHERE title = 'Welcome to AnimaID!' LIMIT 1")->fetchColumn();
+
+    if ($commId) {
+        $comments = [
+            [
+                $commId,
+                null, // no parent comment
+                'Great! This looks much more organized than our previous system.',
+                1, // internal comment
+                $adminId,
+                null,
+                null,
+                'approved',
+                null,
+                null
+            ],
+            [
+                $commId,
+                1, // reply to first comment
+                'Agreed! The calendar integration will be very helpful for planning.',
+                1, // internal comment
+                $adminId,
+                null,
+                null,
+                'approved',
+                null,
+                null
+            ]
+        ];
+
+        $stmt = $pdo->prepare("
+            INSERT OR IGNORE INTO communication_comments
+            (communication_id, parent_comment_id, content, is_internal, created_by, author_name, author_email, status, moderated_by, moderated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+
+        foreach ($comments as $comment) {
+            $stmt->execute($comment);
         }
     }
 }

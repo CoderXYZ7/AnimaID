@@ -750,3 +750,256 @@ function handleSpacesRequest(?string $spaceId, string $method, array $body, ?str
             throw new Exception('Method not allowed');
     }
 }
+
+function handleMediaRequest(?string $resourceId, string $method, array $body, ?string $token, Auth $auth): array {
+    global $pathSegments;
+
+    $user = null;
+
+    // For shared resources, token is optional
+    if ($token) {
+        $user = $auth->verifyToken($token);
+    }
+
+    // Check if this is a shared resource: /api/media/shared/{token}
+    if ($resourceId === 'shared' && isset($pathSegments[2])) {
+        $shareToken = $pathSegments[2];
+
+        switch ($method) {
+            case 'GET':
+                $resource = $auth->getSharedResource($shareToken);
+                if (!$resource) {
+                    throw new Exception('Shared resource not found or expired');
+                }
+                return ['resource' => $resource];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is a folder operation: /api/media/folders/{id}
+    if ($resourceId === 'folders' && isset($pathSegments[2])) {
+        $folderId = (int)$pathSegments[2];
+
+        if (!$user) throw new Exception('Authentication required');
+
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'media.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                return ['contents' => $auth->getFolderContents($folderId)];
+
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'media.upload')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->moveMediaFolder($folderId, $body['parent_id'] ?? null);
+                return ['message' => 'Folder moved successfully'];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'media.delete')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                // TODO: Implement folder deletion
+                throw new Exception('Folder deletion not implemented yet');
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is a file operation: /api/media/files/{id}
+    if ($resourceId === 'files' && isset($pathSegments[2])) {
+        $fileId = (int)$pathSegments[2];
+
+        if (!$user) throw new Exception('Authentication required');
+
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'media.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $file = $auth->getMediaFile($fileId);
+                if (!$file) {
+                    throw new Exception('File not found');
+                }
+                return ['file' => $file];
+
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'media.upload')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->moveMediaFile($fileId, $body['folder_id'] ?? null);
+                return ['message' => 'File moved successfully'];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'media.delete')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->deleteMediaFile($fileId);
+                return ['message' => 'File deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is a sharing operation: /api/media/share
+    if ($resourceId === 'share') {
+        if (!$user) throw new Exception('Authentication required');
+
+        switch ($method) {
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'media.upload')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $resourceType = $body['resource_type'] ?? '';
+                $resourceId = (int)($body['resource_id'] ?? 0);
+                $permission = $body['permission'] ?? 'view';
+                $expiresHours = (int)($body['expires_hours'] ?? 24);
+
+                if (!$resourceType || !$resourceId) {
+                    throw new Exception('Resource type and ID are required');
+                }
+
+                $shareToken = $auth->createShareLink($resourceType, $resourceId, $user['id'], $permission, $expiresHours);
+                return [
+                    'share_token' => $shareToken,
+                    'share_url' => "/media/shared/{$shareToken}",
+                    'message' => 'Share link created successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Main media endpoints
+    if ($resourceId === null) {
+        // Handle collection requests
+        switch ($method) {
+            case 'GET':
+                if (!$user || !$auth->checkPermission($user['id'], 'media.view')) {
+                    throw new Exception('Authentication required or insufficient permissions');
+                }
+
+                $page = (int)($_GET['page'] ?? 1);
+                $limit = (int)($_GET['limit'] ?? 20);
+                $folderId = isset($_GET['folder_id']) ? (int)$_GET['folder_id'] : null;
+                $search = $_GET['search'] ?? '';
+
+                $folders = $auth->getMediaFolders($page, $limit, $folderId)['folders'];
+                $files = $auth->getMediaFiles($page, $limit, $folderId, $search)['files'];
+
+                return [
+                    'folders' => $folders,
+                    'files' => $files,
+                    'total_items' => count($folders) + count($files)
+                ];
+
+            case 'POST':
+                if (!$user || !$auth->checkPermission($user['id'], 'media.upload')) {
+                    throw new Exception('Authentication required or insufficient permissions');
+                }
+
+                // Handle file upload
+                if (isset($_FILES['file'])) {
+                    $file = $_FILES['file'];
+
+                    // Validate file
+                    if ($file['error'] !== UPLOAD_ERR_OK) {
+                        throw new Exception('File upload failed');
+                    }
+
+                    // Create uploads/media directory if it doesn't exist
+                    $uploadDir = __DIR__ . '/../uploads/media/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+
+                    // Generate unique filename
+                    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                    $filename = uniqid('media_', true) . '.' . $extension;
+                    $filePath = $uploadDir . $filename;
+
+                    // Move uploaded file
+                    if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+                        throw new Exception('Failed to save uploaded file');
+                    }
+
+                    // Save file info to database
+                    $fileData = [
+                        'original_name' => $file['name'],
+                        'file_path' => $filePath,
+                        'file_size' => $file['size'],
+                        'mime_type' => $file['type'],
+                        'folder_id' => (int)($body['folder_id'] ?? null)
+                    ];
+
+                    $fileId = $auth->uploadMediaFile($fileData, $user['id']);
+                    return [
+                        'file_id' => $fileId,
+                        'message' => 'File uploaded successfully'
+                    ];
+                }
+
+                // Handle folder creation
+                if (isset($body['name']) && isset($body['type']) && $body['type'] === 'folder') {
+                    $folderData = [
+                        'name' => $body['name'],
+                        'description' => $body['description'] ?? '',
+                        'parent_id' => (int)($body['parent_id'] ?? null)
+                    ];
+
+                    $folderId = $auth->createMediaFolder($folderData, $user['id']);
+                    return [
+                        'folder_id' => $folderId,
+                        'message' => 'Folder created successfully'
+                    ];
+                }
+
+                throw new Exception('Invalid request data');
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    } else {
+        // Handle individual resource requests (legacy support)
+        $resourceId = (int)$resourceId;
+
+        if (!$user) throw new Exception('Authentication required');
+
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'media.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $file = $auth->getMediaFile($resourceId);
+                if (!$file) {
+                    throw new Exception('File not found');
+                }
+                return ['file' => $file];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'media.delete')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->deleteMediaFile($resourceId);
+                return ['message' => 'File deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+}

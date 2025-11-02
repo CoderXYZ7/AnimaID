@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for AnimaID */
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .priority-low { border-left: 4px solid #10b981; }
+  .priority-normal { border-left: 4px solid #3b82f6; }
+  .priority-high { border-left: 4px solid #f59e0b; }
+  .priority-urgent { border-left: 4px solid #ef4444; }
+
+  .status-draft { background-color: #f3f4f6; color: #6b7280; }
+  .status-published { background-color: #dcfce7; color: #166534; }
+  .status-archived { background-color: #e5e7eb; color: #374151; }
+
+  .communication-card {
+    transition: all 0.2s ease;
+  }
+  .communication-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+}
+
+@layer utilities {
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+}

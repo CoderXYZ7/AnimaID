@@ -807,6 +807,472 @@ class Auth {
     }
 
     /**
+     * Get communications with pagination and filtering
+     */
+    public function getCommunications(int $page = 1, int $limit = 20, array $filters = []): array {
+        $offset = ($page - 1) * $limit;
+
+        $whereClause = '';
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $whereClause .= ' AND status = ?';
+            $params[] = $filters['status'];
+        }
+
+        if (!empty($filters['communication_type'])) {
+            $whereClause .= ' AND communication_type = ?';
+            $params[] = $filters['communication_type'];
+        }
+
+        if (!empty($filters['priority'])) {
+            $whereClause .= ' AND priority = ?';
+            $params[] = $filters['priority'];
+        }
+
+        if (!empty($filters['target_audience'])) {
+            $whereClause .= ' AND target_audience LIKE ?';
+            $params[] = '%' . $filters['target_audience'] . '%';
+        }
+
+        if (!empty($filters['is_public'])) {
+            $whereClause .= ' AND is_public = ?';
+            $params[] = $filters['is_public'];
+        }
+
+        // Get communications
+        $communications = $this->db->fetchAll("
+            SELECT c.*, u.username as created_by_name
+            FROM communications c
+            LEFT JOIN users u ON c.created_by = u.id
+            WHERE 1=1 {$whereClause}
+            ORDER BY c.created_at DESC
+            LIMIT ? OFFSET ?
+        ", array_merge($params, [$limit, $offset]));
+
+        // Get total count
+        $total = $this->db->fetchOne("
+            SELECT COUNT(*) as count FROM communications c WHERE 1=1 {$whereClause}
+        ", $params)['count'];
+
+        return [
+            'communications' => $communications,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $total,
+                'pages' => ceil($total / $limit)
+            ]
+        ];
+    }
+
+    /**
+     * Create a new communication
+     */
+    public function createCommunication(array $communicationData, int $createdBy): int {
+        // Set default values
+        $communicationData['created_by'] = $createdBy;
+        $communicationData['status'] = $communicationData['status'] ?? 'draft';
+
+        // If publishing immediately, set published info
+        if ($communicationData['status'] === 'published') {
+            $communicationData['published_by'] = $createdBy;
+            $communicationData['published_at'] = date('Y-m-d H:i:s');
+        }
+
+        return $this->db->insert('communications', $communicationData);
+    }
+
+    /**
+     * Get communication details with attachments and comments
+     */
+    public function getCommunicationDetails(int $communicationId): ?array {
+        $communication = $this->db->fetchOne("
+            SELECT c.*, u.username as created_by_name, pu.username as published_by_name
+            FROM communications c
+            LEFT JOIN users u ON c.created_by = u.id
+            LEFT JOIN users pu ON c.published_by = pu.id
+            WHERE c.id = ?
+        ", [$communicationId]);
+
+        if (!$communication) {
+            return null;
+        }
+
+        // Get attachments
+        $communication['attachments'] = $this->db->fetchAll("
+            SELECT ca.*, u.username as uploaded_by_name
+            FROM communication_attachments ca
+            LEFT JOIN users u ON ca.uploaded_by = u.id
+            WHERE ca.communication_id = ?
+            ORDER BY ca.created_at
+        ", [$communicationId]);
+
+        // Get comments
+        $communication['comments'] = $this->db->fetchAll("
+            SELECT cc.*, u.username as created_by_name, m.username as moderated_by_name
+            FROM communication_comments cc
+            LEFT JOIN users u ON cc.created_by = u.id
+            LEFT JOIN users m ON cc.moderated_by = m.id
+            WHERE cc.communication_id = ? AND cc.status = 'approved'
+            ORDER BY cc.created_at
+        ", [$communicationId]);
+
+        return $communication;
+    }
+
+    /**
+     * Update communication
+     */
+    public function updateCommunication(int $communicationId, array $communicationData): void {
+        $allowedFields = ['title', 'content', 'communication_type', 'priority', 'is_public', 'status', 'target_audience', 'expires_at'];
+        $updateData = array_intersect_key($communicationData, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $updateData['updated_at'] = date('Y-m-d H:i:s');
+
+            // If publishing, set published info
+            if (isset($communicationData['status']) && $communicationData['status'] === 'published' && !isset($communicationData['published_at'])) {
+                $updateData['published_by'] = $communicationData['published_by'] ?? 1; // Default to admin
+                $updateData['published_at'] = date('Y-m-d H:i:s');
+            }
+
+            $this->db->update('communications', $updateData, 'id = ?', [$communicationId]);
+        }
+    }
+
+    /**
+     * Delete communication
+     */
+    public function deleteCommunication(int $communicationId): void {
+        $this->db->delete('communications', 'id = ?', [$communicationId]);
+    }
+
+    /**
+     * Record communication view for analytics
+     */
+    public function recordCommunicationView(int $communicationId, ?int $userId): void {
+        // Update view count
+        $this->db->query("UPDATE communications SET view_count = view_count + 1 WHERE id = ?", [$communicationId]);
+
+        // Record individual view
+        $this->db->insert('communication_reads', [
+            'communication_id' => $communicationId,
+            'user_id' => $userId,
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
+        ]);
+    }
+
+    /**
+     * Add comment to communication
+     */
+    public function addCommunicationComment(int $communicationId, array $commentData, ?int $createdBy): int {
+        return $this->db->insert('communication_comments', array_merge($commentData, [
+            'communication_id' => $communicationId,
+            'created_by' => $createdBy
+        ]));
+    }
+
+    /**
+     * Get comments for a communication
+     */
+    public function getCommunicationComments(int $communicationId): array {
+        return $this->db->fetchAll("
+            SELECT cc.*, u.username as created_by_name, m.username as moderated_by_name
+            FROM communication_comments cc
+            LEFT JOIN users u ON cc.created_by = u.id
+            LEFT JOIN users m ON cc.moderated_by = m.id
+            WHERE cc.communication_id = ?
+            ORDER BY cc.created_at
+        ", [$communicationId]);
+    }
+
+    /**
+     * Update comment status (approve/reject)
+     */
+    public function updateCommunicationComment(int $commentId, string $status, int $moderatedBy): void {
+        $this->db->update('communication_comments', [
+            'status' => $status,
+            'moderated_by' => $moderatedBy,
+            'moderated_at' => date('Y-m-d H:i:s')
+        ], 'id = ?', [$commentId]);
+    }
+
+    /**
+     * Get media folders with pagination
+     */
+    public function getMediaFolders(int $page = 1, int $limit = 20, int $parentId = null): array {
+        $offset = ($page - 1) * $limit;
+
+        $whereClause = '';
+        $params = [];
+
+        if ($parentId !== null) {
+            $whereClause = 'WHERE parent_id = ?';
+            $params[] = $parentId;
+        } else {
+            $whereClause = 'WHERE parent_id IS NULL'; // Root folders
+        }
+
+        // Get folders
+        $folders = $this->db->fetchAll("
+            SELECT f.*, u.username as created_by_name,
+                   (SELECT COUNT(*) FROM media_folders WHERE parent_id = f.id) as subfolder_count,
+                   (SELECT COUNT(*) FROM media_files WHERE folder_id = f.id) as file_count
+            FROM media_folders f
+            LEFT JOIN users u ON f.created_by = u.id
+            {$whereClause}
+            ORDER BY f.name
+            LIMIT ? OFFSET ?
+        ", array_merge($params, [$limit, $offset]));
+
+        // Get total count
+        $total = $this->db->fetchOne("
+            SELECT COUNT(*) as count FROM media_folders f {$whereClause}
+        ", $params)['count'];
+
+        return [
+            'folders' => $folders,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $total,
+                'pages' => ceil($total / $limit)
+            ]
+        ];
+    }
+
+    /**
+     * Create media folder
+     */
+    public function createMediaFolder(array $folderData, int $createdBy): int {
+        // Build path
+        $path = $folderData['name'];
+        if (!empty($folderData['parent_id'])) {
+            $parentPath = $this->db->fetchOne("SELECT path FROM media_folders WHERE id = ?", [$folderData['parent_id']])['path'];
+            $path = $parentPath . '/' . $folderData['name'];
+        }
+
+        return $this->db->insert('media_folders', array_merge($folderData, [
+            'path' => $path,
+            'created_by' => $createdBy
+        ]));
+    }
+
+    /**
+     * Get media files with pagination
+     */
+    public function getMediaFiles(int $page = 1, int $limit = 20, int $folderId = null, string $search = ''): array {
+        $offset = ($page - 1) * $limit;
+
+        $whereClause = '';
+        $params = [];
+
+        if ($folderId !== null) {
+            $whereClause .= ' AND mf.folder_id = ?';
+            $params[] = $folderId;
+        }
+
+        if (!empty($search)) {
+            $whereClause .= ' AND (mf.original_name LIKE ? OR mf.filename LIKE ?)';
+            $searchTerm = '%' . $search . '%';
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+
+        // Get files
+        $files = $this->db->fetchAll("
+            SELECT mf.*, u.username as uploaded_by_name, f.name as folder_name
+            FROM media_files mf
+            LEFT JOIN users u ON mf.uploaded_by = u.id
+            LEFT JOIN media_folders f ON mf.folder_id = f.id
+            WHERE 1=1 {$whereClause}
+            ORDER BY mf.created_at DESC
+            LIMIT ? OFFSET ?
+        ", array_merge($params, [$limit, $offset]));
+
+        // Get total count
+        $total = $this->db->fetchOne("
+            SELECT COUNT(*) as count FROM media_files mf WHERE 1=1 {$whereClause}
+        ", $params)['count'];
+
+        return [
+            'files' => $files,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $total,
+                'pages' => ceil($total / $limit)
+            ]
+        ];
+    }
+
+    /**
+     * Upload media file
+     */
+    public function uploadMediaFile(array $fileData, int $uploadedBy): int {
+        // Generate unique filename
+        $extension = pathinfo($fileData['original_name'], PATHINFO_EXTENSION);
+        $filename = uniqid('media_', true) . '.' . $extension;
+
+        // Determine file type
+        $fileType = $this->getFileType($fileData['mime_type']);
+
+        return $this->db->insert('media_files', array_merge($fileData, [
+            'filename' => $filename,
+            'file_type' => $fileType,
+            'uploaded_by' => $uploadedBy
+        ]));
+    }
+
+    /**
+     * Get file type from MIME type
+     */
+    private function getFileType(string $mimeType): string {
+        if (strpos($mimeType, 'image/') === 0) return 'image';
+        if (strpos($mimeType, 'video/') === 0) return 'video';
+        if (strpos($mimeType, 'audio/') === 0) return 'audio';
+        if (in_array($mimeType, ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])) return 'document';
+        return 'other';
+    }
+
+    /**
+     * Get media file details
+     */
+    public function getMediaFile(int $fileId): ?array {
+        return $this->db->fetchOne("
+            SELECT mf.*, u.username as uploaded_by_name, f.name as folder_name
+            FROM media_files mf
+            LEFT JOIN users u ON mf.uploaded_by = u.id
+            LEFT JOIN media_folders f ON mf.folder_id = f.id
+            WHERE mf.id = ?
+        ", [$fileId]);
+    }
+
+    /**
+     * Delete media file
+     */
+    public function deleteMediaFile(int $fileId): void {
+        $file = $this->getMediaFile($fileId);
+        if ($file && file_exists($file['file_path'])) {
+            unlink($file['file_path']);
+        }
+
+        $this->db->delete('media_files', 'id = ?', [$fileId]);
+    }
+
+    /**
+     * Create sharing link for file or folder
+     */
+    public function createShareLink(string $resourceType, int $resourceId, int $sharedBy, string $permission = 'view', int $expiresHours = 24): string {
+        $shareToken = bin2hex(random_bytes(16));
+
+        $this->db->insert('media_sharing', [
+            'resource_type' => $resourceType,
+            'resource_id' => $resourceId,
+            'shared_by_user_id' => $sharedBy,
+            'permission' => $permission,
+            'share_token' => $shareToken,
+            'expires_at' => date('Y-m-d H:i:s', strtotime("+{$expiresHours} hours"))
+        ]);
+
+        // Update the resource as shared
+        if ($resourceType === 'file') {
+            $this->db->update('media_files', ['is_shared' => 1], 'id = ?', [$resourceId]);
+        } else {
+            $this->db->update('media_folders', ['is_shared' => 1], 'id = ?', [$resourceId]);
+        }
+
+        return $shareToken;
+    }
+
+    /**
+     * Get shared resource by token
+     */
+    public function getSharedResource(string $token): ?array {
+        $sharing = $this->db->fetchOne("
+            SELECT * FROM media_sharing
+            WHERE share_token = ? AND (expires_at IS NULL OR expires_at > datetime('now'))
+        ", [$token]);
+
+        if (!$sharing) return null;
+
+        if ($sharing['resource_type'] === 'file') {
+            $resource = $this->getMediaFile($sharing['resource_id']);
+        } else {
+            $resource = $this->db->fetchOne("
+                SELECT f.*, u.username as created_by_name
+                FROM media_folders f
+                LEFT JOIN users u ON f.created_by = u.id
+                WHERE f.id = ?
+            ", [$sharing['resource_id']]);
+        }
+
+        if ($resource) {
+            $resource['sharing'] = $sharing;
+        }
+
+        return $resource;
+    }
+
+    /**
+     * Get folder contents (both folders and files)
+     */
+    public function getFolderContents(int $folderId, int $page = 1, int $limit = 50): array {
+        $folders = $this->getMediaFolders(1, 100, $folderId)['folders'];
+        $files = $this->getMediaFiles(1, 100, $folderId)['files'];
+
+        return [
+            'folders' => $folders,
+            'files' => $files,
+            'total_items' => count($folders) + count($files)
+        ];
+    }
+
+    /**
+     * Move file to different folder
+     */
+    public function moveMediaFile(int $fileId, ?int $newFolderId): void {
+        $this->db->update('media_files', ['folder_id' => $newFolderId], 'id = ?', [$fileId]);
+    }
+
+    /**
+     * Move folder to different parent
+     */
+    public function moveMediaFolder(int $folderId, ?int $newParentId): void {
+        $folder = $this->db->fetchOne("SELECT * FROM media_folders WHERE id = ?", [$folderId]);
+
+        // Build new path
+        $newPath = $folder['name'];
+        if ($newParentId) {
+            $parentPath = $this->db->fetchOne("SELECT path FROM media_folders WHERE id = ?", [$newParentId])['path'];
+            $newPath = $parentPath . '/' . $folder['name'];
+        }
+
+        $this->db->update('media_folders', [
+            'parent_id' => $newParentId,
+            'path' => $newPath
+        ], 'id = ?', [$folderId]);
+
+        // Update paths of all subfolders
+        $this->updateSubfolderPaths($folderId, $newPath);
+    }
+
+    /**
+     * Update paths of subfolders recursively
+     */
+    private function updateSubfolderPaths(int $parentId, string $parentPath): void {
+        $subfolders = $this->db->fetchAll("SELECT id, name FROM media_folders WHERE parent_id = ?", [$parentId]);
+
+        foreach ($subfolders as $subfolder) {
+            $newPath = $parentPath . '/' . $subfolder['name'];
+            $this->db->update('media_folders', ['path' => $newPath], 'id = ?', [$subfolder['id']]);
+            $this->updateSubfolderPaths($subfolder['id'], $newPath);
+        }
+    }
+
+    /**
      * Validate password strength
      */
     private function validatePassword(string $password): void {
