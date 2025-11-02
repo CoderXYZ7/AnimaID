@@ -113,6 +113,9 @@ function handleRequest(string $endpoint, ?string $resourceId, string $method, ar
         case 'attendance':
             return handleAttendanceRequest($resourceId, $method, $body, $token, $auth);
 
+        case 'children':
+            return handleChildrenRequest($resourceId, $method, $body, $token, $auth);
+
         case 'spaces':
             return handleSpacesRequest($resourceId, $method, $body, $token, $auth);
 
@@ -297,6 +300,73 @@ function handlePermissionsRequest(string $method, ?string $token, Auth $auth): a
 
         default:
             throw new Exception('Method not allowed');
+    }
+}
+
+function handleChildrenRequest(?string $childId, string $method, array $body, ?string $token, Auth $auth): array {
+    if (!$token) throw new Exception('Authentication required');
+
+    $user = $auth->verifyToken($token);
+    if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+        throw new Exception('Insufficient permissions');
+    }
+
+    if ($childId === null) {
+        // Handle collection requests
+        switch ($method) {
+            case 'GET':
+                $page = (int)($_GET['page'] ?? 1);
+                $limit = (int)($_GET['limit'] ?? 20);
+
+                $filters = [];
+                if (isset($_GET['status'])) $filters['status'] = $_GET['status'];
+                if (isset($_GET['search'])) $filters['search'] = $_GET['search'];
+                if (isset($_GET['age_min'])) $filters['age_min'] = (int)$_GET['age_min'];
+                if (isset($_GET['age_max'])) $filters['age_max'] = (int)$_GET['age_max'];
+
+                return $auth->getChildren($page, $limit, $filters);
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'registrations.create')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $childId = $auth->createChild($body, $user['id']);
+                return [
+                    'child_id' => $childId,
+                    'message' => 'Child registered successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    } else {
+        // Handle individual child requests
+        $childId = (int)$childId;
+
+        switch ($method) {
+            case 'GET':
+                return ['child' => $auth->getChildDetails($childId)];
+
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->updateChild($childId, $body, $user['id']);
+                return ['message' => 'Child information updated successfully'];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'registrations.delete')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->deleteChild($childId);
+                return ['message' => 'Child record deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
     }
 }
 

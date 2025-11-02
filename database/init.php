@@ -241,6 +241,142 @@ function createTables(PDO $pdo) {
             FOREIGN KEY (booked_by) REFERENCES users(id)
         )
     ");
+
+    // Children/Registrations table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS children (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            first_name VARCHAR(100) NOT NULL,
+            last_name VARCHAR(100) NOT NULL,
+            birth_date DATE,
+            gender VARCHAR(20),
+            address TEXT,
+            phone VARCHAR(50),
+            email VARCHAR(255),
+            nationality VARCHAR(100),
+            language VARCHAR(100),
+            school VARCHAR(255),
+            grade VARCHAR(50),
+            registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+            status VARCHAR(20) DEFAULT 'active', -- active, inactive, suspended, graduated
+            registration_number VARCHAR(50) UNIQUE,
+            created_by INTEGER NOT NULL,
+            updated_by INTEGER,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (created_by) REFERENCES users(id),
+            FOREIGN KEY (updated_by) REFERENCES users(id)
+        )
+    ");
+
+    // Child medical information
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS child_medical (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            child_id INTEGER NOT NULL,
+            blood_type VARCHAR(10),
+            allergies TEXT,
+            medications TEXT,
+            medical_conditions TEXT,
+            doctor_name VARCHAR(255),
+            doctor_phone VARCHAR(50),
+            insurance_provider VARCHAR(255),
+            insurance_number VARCHAR(100),
+            emergency_contact_name VARCHAR(255),
+            emergency_contact_phone VARCHAR(50),
+            emergency_contact_relationship VARCHAR(100),
+            special_needs TEXT,
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
+        )
+    ");
+
+    // Child parents/guardians
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS child_guardians (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            child_id INTEGER NOT NULL,
+            relationship VARCHAR(50) NOT NULL, -- mother, father, guardian, etc.
+            first_name VARCHAR(100) NOT NULL,
+            last_name VARCHAR(100) NOT NULL,
+            phone VARCHAR(50),
+            mobile VARCHAR(50),
+            email VARCHAR(255),
+            address TEXT,
+            workplace VARCHAR(255),
+            work_phone VARCHAR(50),
+            is_primary BOOLEAN DEFAULT 0,
+            can_pickup BOOLEAN DEFAULT 1,
+            emergency_contact BOOLEAN DEFAULT 1,
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE
+        )
+    ");
+
+    // Child documents and files
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS child_documents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            child_id INTEGER NOT NULL,
+            document_type VARCHAR(50) NOT NULL, -- birth_certificate, medical_form, consent_form, photo, etc.
+            file_name VARCHAR(255) NOT NULL,
+            original_name VARCHAR(255) NOT NULL,
+            file_path VARCHAR(500),
+            file_size INTEGER,
+            mime_type VARCHAR(100),
+            uploaded_by INTEGER NOT NULL,
+            expiry_date DATE,
+            is_verified BOOLEAN DEFAULT 0,
+            verified_by INTEGER,
+            verified_at DATETIME,
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE,
+            FOREIGN KEY (uploaded_by) REFERENCES users(id),
+            FOREIGN KEY (verified_by) REFERENCES users(id)
+        )
+    ");
+
+    // Child notes and observations
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS child_notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            child_id INTEGER NOT NULL,
+            note_type VARCHAR(50) NOT NULL, -- observation, incident, achievement, medical, behavioral
+            title VARCHAR(255) NOT NULL,
+            content TEXT NOT NULL,
+            is_private BOOLEAN DEFAULT 0,
+            created_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE,
+            FOREIGN KEY (created_by) REFERENCES users(id)
+        )
+    ");
+
+    // Child activity history (linking to events)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS child_activity_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            child_id INTEGER NOT NULL,
+            event_id INTEGER,
+            activity_type VARCHAR(50) NOT NULL, -- event, workshop, outing, etc.
+            activity_name VARCHAR(255) NOT NULL,
+            activity_date DATE NOT NULL,
+            duration_hours DECIMAL(4,2),
+            staff_member INTEGER,
+            participation_status VARCHAR(20) DEFAULT 'attended', -- attended, absent, partial, excused
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE,
+            FOREIGN KEY (event_id) REFERENCES calendar_events(id) ON DELETE SET NULL,
+            FOREIGN KEY (staff_member) REFERENCES users(id)
+        )
+    ");
 }
 
 function insertInitialData(PDO $pdo, array $config) {

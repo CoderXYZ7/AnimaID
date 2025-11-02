@@ -570,6 +570,197 @@ class Auth {
     }
 
     /**
+     * Get children with pagination and filtering
+     */
+    public function getChildren(int $page = 1, int $limit = 20, array $filters = []): array {
+        $offset = ($page - 1) * $limit;
+
+        $whereClause = '';
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $whereClause .= ' AND c.status = ?';
+            $params[] = $filters['status'];
+        }
+
+        if (!empty($filters['search'])) {
+            $whereClause .= ' AND (c.first_name LIKE ? OR c.last_name LIKE ? OR c.registration_number LIKE ?)';
+            $searchTerm = '%' . $filters['search'] . '%';
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+
+        if (!empty($filters['age_min'])) {
+            $whereClause .= ' AND c.birth_date <= ?';
+            $params[] = date('Y-m-d', strtotime('-' . $filters['age_min'] . ' years'));
+        }
+
+        if (!empty($filters['age_max'])) {
+            $whereClause .= ' AND c.birth_date >= ?';
+            $params[] = date('Y-m-d', strtotime('-' . ($filters['age_max'] + 1) . ' years +1 day'));
+        }
+
+        // Get children
+        $children = $this->db->fetchAll("
+            SELECT c.*,
+                   COUNT(DISTINCT cg.id) as guardians_count,
+                   COUNT(DISTINCT cn.id) as notes_count,
+                   COUNT(DISTINCT cd.id) as documents_count
+            FROM children c
+            LEFT JOIN child_guardians cg ON c.id = cg.child_id
+            LEFT JOIN child_notes cn ON c.id = cn.child_id
+            LEFT JOIN child_documents cd ON c.id = cd.child_id
+            WHERE 1=1 {$whereClause}
+            GROUP BY c.id
+            ORDER BY c.registration_date DESC
+            LIMIT ? OFFSET ?
+        ", array_merge($params, [$limit, $offset]));
+
+        // Get total count
+        $total = $this->db->fetchOne("
+            SELECT COUNT(*) as count FROM children c WHERE 1=1 {$whereClause}
+        ", $params)['count'];
+
+        return [
+            'children' => $children,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $total,
+                'pages' => ceil($total / $limit)
+            ]
+        ];
+    }
+
+    /**
+     * Create a new child
+     */
+    public function createChild(array $childData, int $createdBy): int {
+        // Generate registration number if not provided
+        if (empty($childData['registration_number'])) {
+            $childData['registration_number'] = 'REG-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        }
+
+        $childId = $this->db->insert('children', array_merge($childData, [
+            'created_by' => $createdBy
+        ]));
+
+        return $childId;
+    }
+
+    /**
+     * Update child information
+     */
+    public function updateChild(int $childId, array $childData, int $updatedBy): void {
+        $allowedFields = ['first_name', 'last_name', 'birth_date', 'gender', 'address', 'phone', 'email', 'nationality', 'language', 'school', 'grade', 'status'];
+        $updateData = array_intersect_key($childData, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $updateData['updated_by'] = $updatedBy;
+            $this->db->update('children', $updateData, 'id = ?', [$childId]);
+        }
+    }
+
+    /**
+     * Get child details with all related information
+     */
+    public function getChildDetails(int $childId): array {
+        // Get basic child info
+        $child = $this->db->fetchOne("SELECT * FROM children WHERE id = ?", [$childId]);
+        if (!$child) {
+            throw new Exception('Child not found');
+        }
+
+        // Get medical information
+        $child['medical'] = $this->db->fetchOne("SELECT * FROM child_medical WHERE child_id = ?", [$childId]);
+
+        // Get guardians
+        $child['guardians'] = $this->db->fetchAll("SELECT * FROM child_guardians WHERE child_id = ? ORDER BY is_primary DESC, created_at", [$childId]);
+
+        // Get documents
+        $child['documents'] = $this->db->fetchAll("SELECT * FROM child_documents WHERE child_id = ? ORDER BY created_at DESC", [$childId]);
+
+        // Get notes
+        $child['notes'] = $this->db->fetchAll("SELECT cn.*, u.username as created_by_name FROM child_notes cn JOIN users u ON cn.created_by = u.id WHERE cn.child_id = ? ORDER BY cn.created_at DESC", [$childId]);
+
+        // Get activity history
+        $child['activity_history'] = $this->db->fetchAll("SELECT cah.*, u.username as staff_name FROM child_activity_history cah LEFT JOIN users u ON cah.staff_member = u.id WHERE cah.child_id = ? ORDER BY cah.activity_date DESC", [$childId]);
+
+        return $child;
+    }
+
+    /**
+     * Update child medical information
+     */
+    public function updateChildMedical(int $childId, array $medicalData): void {
+        $existing = $this->db->fetchOne("SELECT id FROM child_medical WHERE child_id = ?", [$childId]);
+
+        if ($existing) {
+            $this->db->update('child_medical', $medicalData, 'child_id = ?', [$childId]);
+        } else {
+            $this->db->insert('child_medical', array_merge($medicalData, ['child_id' => $childId]));
+        }
+    }
+
+    /**
+     * Add child guardian
+     */
+    public function addChildGuardian(int $childId, array $guardianData): int {
+        return $this->db->insert('child_guardians', array_merge($guardianData, [
+            'child_id' => $childId
+        ]));
+    }
+
+    /**
+     * Update child guardian
+     */
+    public function updateChildGuardian(int $guardianId, array $guardianData): void {
+        $allowedFields = ['relationship', 'first_name', 'last_name', 'phone', 'mobile', 'email', 'address', 'workplace', 'work_phone', 'is_primary', 'can_pickup', 'emergency_contact', 'notes'];
+        $updateData = array_intersect_key($guardianData, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $this->db->update('child_guardians', $updateData, 'id = ?', [$guardianId]);
+        }
+    }
+
+    /**
+     * Add child note
+     */
+    public function addChildNote(int $childId, array $noteData, int $createdBy): int {
+        return $this->db->insert('child_notes', array_merge($noteData, [
+            'child_id' => $childId,
+            'created_by' => $createdBy
+        ]));
+    }
+
+    /**
+     * Add child document
+     */
+    public function addChildDocument(int $childId, array $documentData, int $uploadedBy): int {
+        return $this->db->insert('child_documents', array_merge($documentData, [
+            'child_id' => $childId,
+            'uploaded_by' => $uploadedBy
+        ]));
+    }
+
+    /**
+     * Add child activity history
+     */
+    public function addChildActivity(int $childId, array $activityData): int {
+        return $this->db->insert('child_activity_history', array_merge($activityData, [
+            'child_id' => $childId
+        ]));
+    }
+
+    /**
+     * Delete child
+     */
+    public function deleteChild(int $childId): void {
+        $this->db->delete('children', 'id = ?', [$childId]);
+    }
+
+    /**
      * Validate password strength
      */
     private function validatePassword(string $password): void {

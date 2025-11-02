@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - Children Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading children management...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden">
+
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-circle text-blue-600 text-2xl"></i>
+                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <a href="dashboard.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
+                        </a>
+                        <button id="logout-btn" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <!-- Page Header -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">Children Management</h2>
+                        <p class="text-gray-600 mt-1">Manage child registrations, profiles, and documentation</p>
+                    </div>
+                    <button id="add-child-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Add Child
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div>
+                        <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <input
+                            type="text"
+                            id="search-input"
+                            placeholder="Name or registration #"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                    </div>
+                    <div>
+                        <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="graduated">Graduated</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="age-min" class="block text-sm font-medium text-gray-700 mb-1">Min Age</label>
+                        <input
+                            type="number"
+                            id="age-min"
+                            min="0"
+                            max="18"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                    </div>
+                    <div>
+                        <label for="age-max" class="block text-sm font-medium text-gray-700 mb-1">Max Age</label>
+                        <input
+                            type="number"
+                            id="age-max"
+                            min="0"
+                            max="18"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                    </div>
+                    <div class="flex items-end space-x-2">
+                        <button id="filter-btn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-filter mr-2"></i>Filter
+                        </button>
+                        <button id="clear-filters-btn" class="bg-gray-400 hover:bg-gray-500 text-white px-3 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Children List -->
+            <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Registered Children</h3>
+                </div>
+
+                <div class="divide-y divide-gray-200" id="children-list">
+                    <!-- Children will be loaded here -->
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                    <div class="text-sm text-gray-700">
+                        Showing <span id="showing-from">1</span> to <span id="showing-to">10</span> of <span id="total-children">0</span> children
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="prev-page" class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-chevron-left mr-1"></i>Previous
+                        </button>
+                        <button id="next-page" class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Next<i class="fas fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Child Modal -->
+    <div id="child-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-4 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 id="modal-title" class="text-2xl font-semibold text-gray-900">Add New Child</h3>
+                    <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Tab Navigation -->
+                <div class="border-b border-gray-200 mb-6">
+                    <nav class="-mb-px flex space-x-8">
+                        <button id="tab-basic" class="tab-button active border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                            Basic Information
+                        </button>
+                        <button id="tab-medical" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                            Medical Information
+                        </button>
+                        <button id="tab-guardians" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                            Guardians
+                        </button>
+                        <button id="tab-documents" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                            Documents
+                        </button>
+                        <button id="tab-notes" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                            Notes & History
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="tab-content">
+                    <!-- Basic Information Tab -->
+                    <div id="basic-tab" class="tab-content">
+                        <form id="basic-form" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                                    <input
+                                        type="text"
+                                        id="first-name"
+                                        name="first_name"
+                                        required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                                <div>
+                                    <label for="last-name" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                                    <input
+                                        type="text"
+                                        id="last-name"
+                                        name="last_name"
+                                        required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label for="birth-date" class="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
+                                    <input
+                                        type="date"
+                                        id="birth-date"
+                                        name="birth_date"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                                <div>
+                                    <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                    <select
+                                        id="gender"
+                                        name="gender"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="">Select Gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <select
+                                        id="status"
+                                        name="status"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="suspended">Suspended</option>
+                                        <option value="graduated">Graduated</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="nationality" class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                                    <input
+                                        type="text"
+                                        id="nationality"
+                                        name="nationality"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                                <div>
+                                    <label for="language" class="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                                    <input
+                                        type="text"
+                                        id="language"
+                                        name="language"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="school" class="block text-sm font-medium text-gray-700 mb-1">School</label>
+                                    <input
+                                        type="text"
+                                        id="school"
+                                        name="school"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                                <div>
+                                    <label for="grade" class="block text-sm font-medium text-gray-700 mb-1">Grade/Class</label>
+                                    <input
+                                        type="text"
+                                        id="grade"
+                                        name="grade"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                <textarea
+                                    id="address"
+                                    name="address"
+                                    rows="3"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                ></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                    <input
+                                        type="tel"
+                                        id="phone"
+                                        name="phone"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Medical Information Tab -->
+                    <div id="medical-tab" class="tab-content hidden">
+                        <form id="medical-form" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="blood-type" class="block text-sm font-medium text-gray-700 mb-1">Blood Type</label>
+                                    <select
+                                        id="blood-type"
+                                        name="blood_type"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="">Select Blood Type</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="doctor-name" class="block text-sm font-medium text-gray-700 mb-1">Doctor Name</label>
+                                    <input
+                                        type="text"
+                                        id="doctor-name"
+                                        name="doctor_name"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="doctor-phone" class="block text-sm font-medium text-gray-700 mb-1">Doctor Phone</label>
+                                    <input
+                                        type="tel"
+                                        id="doctor-phone"
+                                        name="doctor_phone"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                                <div>
+                                    <label for="insurance-provider" class="block text-sm font-medium text-gray-700 mb-1">Insurance Provider</label>
+                                    <input
+                                        type="text"
+                                        id="insurance-provider"
+                                        name="insurance_provider"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="insurance-number" class="block text-sm font-medium text-gray-700 mb-1">Insurance Number</label>
+                                <input
+                                    type="text"
+                                    id="insurance-number"
+                                    name="insurance_number"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                            </div>
+
+                            <div>
+                                <label for="allergies" class="block text-sm font-medium text-gray-700 mb-1">Allergies</label>
+                                <textarea
+                                    id="allergies"
+                                    name="allergies"
+                                    rows="3"
+                                    placeholder="List any allergies (food, medication, environmental, etc.)"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                ></textarea>
+                            </div>
+
+                            <div>
+                                <label for="medications" class="block text-sm font-medium text-gray-700 mb-1">Medications</label>
+                                <textarea
+                                    id="medications"
+                                    name="medications"
+                                    rows="3"
+                                    placeholder="List current medications and dosages"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                ></textarea>
+                            </div>
+
+                            <div>
+                                <label for="medical-conditions" class="block text-sm font-medium text-gray-700 mb-1">Medical Conditions</label>
+                                <textarea
+                                    id="medical-conditions"
+                                    name="medical_conditions"
+                                    rows="3"
+                                    placeholder="List any medical conditions or chronic illnesses"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                ></textarea>
+                            </div>
+
+                            <div>
+                                <label for="special-needs" class="block text-sm font-medium text-gray-700 mb-1">Special Needs</label>
+                                <textarea
+                                    id="special-needs"
+                                    name="special_needs"
+                                    rows="3"
+                                    placeholder="Any special needs or accommodations required"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                ></textarea>
+                            </div>
+
+                            <div>
+                                <label for="emergency-contact-name" class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Name</label>
+                                <input
+                                    type="text"
+                                    id="emergency-contact-name"
+                                    name="emergency_contact_name"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="emergency-contact-phone" class="block text-sm font-medium text-gray-700 mb-1">Emergency Contact Phone</label>
+                                    <input
+                                        type="tel"
+                                        id="emergency-contact-phone"
+                                        name="emergency_contact_phone"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                                <div>
+                                    <label for="emergency-contact-relationship" class="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
+                                    <input
+                                        type="text"
+                                        id="emergency-contact-relationship"
+                                        name="emergency_contact_relationship"
+                                        placeholder="e.g., Grandmother, Uncle"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="medical-notes" class="block text-sm font-medium text-gray-700 mb-1">Additional Medical Notes</label>
+                                <textarea
+                                    id="medical-notes"
+                                    name="notes"
+                                    rows="3"
+                                    placeholder="Any additional medical information or notes"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                ></textarea>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Guardians Tab -->
+                    <div id="guardians-tab" class="tab-content hidden">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-lg font-medium text-gray-900">Guardians & Parents</h4>
+                                <button id="add-guardian-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Add Guardian
+                                </button>
+                            </div>
+                            <div id="guardians-list" class="space-y-4">
+                                <!-- Guardians will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documents Tab -->
+                    <div id="documents-tab" class="tab-content hidden">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-lg font-medium text-gray-900">Documents & Files</h4>
+                                <button id="add-document-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Add Document
+                                </button>
+                            </div>
+                            <div id="documents-list" class="space-y-4">
+                                <!-- Documents will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes Tab -->
+                    <div id="notes-tab" class="tab-content hidden">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-lg font-medium text-gray-900">Notes & Observations</h4>
+                                <button id="add-note-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Add Note
+                                </button>
+                            </div>
+                            <div id="notes-list" class="space-y-4">
+                                <!-- Notes will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                    <button id="cancel-btn" class="px-6 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="save-child-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-save mr-2"></i>Save Child
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="error-screen" class="hidden fixed inset-0 bg-gray-50 flex items-center justify-center">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
+            <p class="text-gray-600 mb-6">You don't have permission to access children management.</p>
+            <a href="dashboard.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = window.location.origin + '/api';
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const errorScreen = document.getElementById('error-screen');
+        const childrenList = document.getElementById('children-list');
+        const pagination = document.getElementById('pagination');
+        const childModal = document.getElementById('child-modal');
+        const tabContent = document.getElementById('tab-content');
+
+        let currentUser = null;
+        let userToken = null;
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilters = {};
+        let currentChildId = null;
+
+        // Initialize page
+        async function initPage() {
+            try {
+                // Check authentication
+                userToken = localStorage.getItem('animaid_token');
+                const userData = localStorage.getItem('animaid_user');
+
+                if (!userToken || !userData) {
+                    showErrorScreen();
+                    return;
+                }
+
+                currentUser = JSON.parse(userData);
+
+                // Verify token and check permissions
+                const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    localStorage.removeItem('animaid_token');
+                    localStorage.removeItem('animaid_user');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Check if user has children permissions
+                const hasPermission = await checkChildrenPermission();
+                if (!hasPermission) {
+                    showErrorScreen();
+                    return;
+                }
+
+                // Load initial data
+                await loadChildren();
+
+                // Show main content
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Page initialization error:', error);
+                showErrorScreen();
+            }
+        }
+
+        // Check if user has children permissions
+        async function checkChildrenPermission() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/children?page=1&limit=1`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Load children
+        async function loadChildren(page = 1, filters = {}) {
+            try {
+                const params = new URLSearchParams({
+                    page: page,
+                    limit: 10,
+                    ...filters
+                });
+
+                const response = await fetch(`${API_BASE_URL}/children?${params}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load children');
+
+                const data = await response.json();
+
+                displayChildren(data.children);
+                updatePagination(data.pagination);
+
+                currentPage = page;
+                currentFilters = filters;
+
+            } catch (error) {
+                console.error('Error loading children:', error);
+                childrenList.innerHTML = '<div class="px-6 py-4 text-center text-gray-500">Error loading children</div>';
+            }
+        }
+
+        // Display children
+        function displayChildren(children) {
+            if (children.length === 0) {
+                childrenList.innerHTML = '<div class="px-6 py-4 text-center text-gray-500">No children found</div>';
+                return;
+            }
+
+            childrenList.innerHTML = children.map(child => {
+                const age = child.birth_date ? calculateAge(child.birth_date) : 'N/A';
+                const statusColor = getStatusColor(child.status);
+
+                return `
+                    <div class="px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                            <i class="fas fa-child text-blue-600 text-lg"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-sm font-medium text-gray-900">${child.first_name} ${child.last_name}</h4>
+                                        <p class="text-sm text-gray-600">Registration: ${child.registration_number || 'N/A'}</p>
+                                        <div class="flex items-center space-x-4 mt-1">
+                                            <span class="text-xs text-gray-500">
+                                                <i class="fas fa-birthday-cake mr-1"></i>
+                                                Age: ${age}
+                                            </span>
+                                            <span class="text-xs text-gray-500">
+                                                <i class="fas fa-school mr-1"></i>
+                                                ${child.school || 'No school'}
+                                            </span>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">
+                                                ${child.status}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center space-x-2 mt-2">
+                                            <span class="text-xs text-gray-500">
+                                                <i class="fas fa-user-friends mr-1"></i>
+                                                ${child.guardians_count || 0} guardians
+                                            </span>
+                                            <span class="text-xs text-gray-500">
+                                                <i class="fas fa-file-alt mr-1"></i>
+                                                ${child.documents_count || 0} documents
+                                            </span>
+                                            <span class="text-xs text-gray-500">
+                                                <i class="fas fa-sticky-note mr-1"></i>
+                                                ${child.notes_count || 0} notes
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="viewChild(${child.id})" class="text-blue-600 hover:text-blue-900 p-1" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button onclick="editChild(${child.id})" class="text-blue-600 hover:text-blue-900 p-1" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteChild(${child.id})" class="text-red-600 hover:text-red-900 p-1" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Calculate age from birth date
+        function calculateAge(birthDate) {
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+
+            return age;
+        }
+
+        // Get status color
+        function getStatusColor(status) {
+            const colors = {
+                'active': 'bg-green-100 text-green-800',
+                'inactive': 'bg-gray-100 text-gray-800',
+                'suspended': 'bg-red-100 text-red-800',
+                'graduated': 'bg-blue-100 text-blue-800'
+            };
+            return colors[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        // Update pagination
+        function updatePagination(paginationData) {
+            document.getElementById('showing-from').textContent = ((paginationData.page - 1) * paginationData.limit) + 1;
+            document.getElementById('showing-to').textContent = Math.min(paginationData.page * paginationData.limit, paginationData.total);
+            document.getElementById('total-children').textContent = paginationData.total;
+
+            document.getElementById('prev-page').disabled = paginationData.page <= 1;
+            document.getElementById('next-page').disabled = paginationData.page >= paginationData.pages;
+
+            totalPages = paginationData.pages;
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                    btn.classList.add('border-transparent', 'text-gray-500');
+                });
+
+                // Add active class to clicked tab
+                this.classList.add('active', 'border-blue-500', 'text-blue-600');
+                this.classList.remove('border-transparent', 'text-gray-500');
+
+                // Hide all tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                // Show selected tab content
+                const tabId = this.id.replace('tab-', '') + '-tab';
+                document.getElementById(tabId).classList.remove('hidden');
+            });
+        });
+
+        // Add child modal
+        document.getElementById('add-child-btn').addEventListener('click', () => {
+            document.getElementById('modal-title').textContent = 'Add New Child';
+            resetChildForm();
+            currentChildId = null;
+            childModal.classList.remove('hidden');
+            // Switch to basic tab
+            document.getElementById('tab-basic').click();
+        });
+
+        // Close modal
+        document.getElementById('close-modal').addEventListener('click', () => {
+            childModal.classList.add('hidden');
+        });
+
+        document.getElementById('cancel-btn').addEventListener('click', () => {
+            childModal.classList.add('hidden');
+        });
+
+        // Save child
+        document.getElementById('save-child-btn').addEventListener('click', async () => {
+            try {
+                // Collect data from all tabs
+                const basicData = new FormData(document.getElementById('basic-form'));
+                const medicalData = new FormData(document.getElementById('medical-form'));
+
+                const childData = {
+                    first_name: basicData.get('first_name'),
+                    last_name: basicData.get('last_name'),
+                    birth_date: basicData.get('birth_date'),
+                    gender: basicData.get('gender'),
+                    address: basicData.get('address'),
+                    phone: basicData.get('phone'),
+                    email: basicData.get('email'),
+                    nationality: basicData.get('nationality'),
+                    language: basicData.get('language'),
+                    school: basicData.get('school'),
+                    grade: basicData.get('grade'),
+                    status: basicData.get('status'),
+                    // Medical data
+                    blood_type: medicalData.get('blood_type'),
+                    allergies: medicalData.get('allergies'),
+                    medications: medicalData.get('medications'),
+                    medical_conditions: medicalData.get('medical_conditions'),
+                    doctor_name: medicalData.get('doctor_name'),
+                    doctor_phone: medicalData.get('doctor_phone'),
+                    insurance_provider: medicalData.get('insurance_provider'),
+                    insurance_number: medicalData.get('insurance_number'),
+                    emergency_contact_name: medicalData.get('emergency_contact_name'),
+                    emergency_contact_phone: medicalData.get('emergency_contact_phone'),
+                    emergency_contact_relationship: medicalData.get('emergency_contact_relationship'),
+                    special_needs: medicalData.get('special_needs'),
+                    medical_notes: medicalData.get('notes')
+                };
+
+                const method = currentChildId ? 'PUT' : 'POST';
+                const url = currentChildId ? `${API_BASE_URL}/children/${currentChildId}` : `${API_BASE_URL}/children`;
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(childData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    childModal.classList.add('hidden');
+                    await loadChildren(currentPage, currentFilters);
+                    alert(`Child ${currentChildId ? 'updated' : 'created'} successfully!`);
+                } else {
+                    alert('Error: ' + (data.error || `Failed to ${currentChildId ? 'update' : 'create'} child`));
+                }
+
+            } catch (error) {
+                console.error('Error saving child:', error);
+                alert('Network error. Please try again.');
+            }
+        });
+
+        // Filter children
+        document.getElementById('filter-btn').addEventListener('click', () => {
+            const filters = {
+                search: document.getElementById('search-input').value.trim(),
+                status: document.getElementById('status-filter').value,
+                age_min: document.getElementById('age-min').value,
+                age_max: document.getElementById('age-max').value
+            };
+
+            // Remove empty filters
+            Object.keys(filters).forEach(key => {
+                if (!filters[key]) delete filters[key];
+            });
+
+            loadChildren(1, filters);
+        });
+
+        document.getElementById('clear-filters-btn').addEventListener('click', () => {
+            document.getElementById('search-input').value = '';
+            document.getElementById('status-filter').value = '';
+            document.getElementById('age-min').value = '';
+            document.getElementById('age-max').value = '';
+            loadChildren(1, {});
+        });
+
+        // Pagination
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                loadChildren(currentPage - 1, currentFilters);
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                loadChildren(currentPage + 1, currentFilters);
+            }
+        });
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                await fetch(`${API_BASE_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+
+            localStorage.removeItem('animaid_token');
+            localStorage.removeItem('animaid_user');
+            window.location.href = 'login.html';
+        });
+
+        // Utility functions
+        function resetChildForm() {
+            document.getElementById('basic-form').reset();
+            document.getElementById('medical-form').reset();
+            // Reset other tabs if needed
+        }
+
+        function showErrorScreen() {
+            loadingScreen.classList.add('hidden');
+            mainContent.classList.add('hidden');
+            errorScreen.classList.remove('hidden');
+        }
+
+        // Global functions for inline event handlers
+        window.viewChild = function(childId) {
+            // For now, just show an alert. Could open a detailed view modal
+            alert('View child details functionality coming soon! Child ID: ' + childId);
+        };
+
+        window.editChild = async function(childId) {
+            try {
+                // Load child details
+                const response = await fetch(`${API_BASE_URL}/children/${childId}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    alert('Failed to load child details');
+                    return;
+                }
+
+                const data = await response.json();
+                const child = data.child;
+
+                // Populate basic form
+                document.getElementById('modal-title').textContent = 'Edit Child';
+                document.getElementById('first-name').value = child.first_name;
+                document.getElementById('last-name').value = child.last_name;
+                document.getElementById('birth-date').value = child.birth_date || '';
+                document.getElementById('gender').value = child.gender || '';
+                document.getElementById('address').value = child.address || '';
+                document.getElementById('phone').value = child.phone || '';
+                document.getElementById('email').value = child.email || '';
+                document.getElementById('nationality').value = child.nationality || '';
+                document.getElementById('language').value = child.language || '';
+                document.getElementById('school').value = child.school || '';
+                document.getElementById('grade').value = child.grade || '';
+                document.getElementById('status').value = child.status;
+
+                // Populate medical form
+                if (child.medical) {
+                    document.getElementById('blood-type').value = child.medical.blood_type || '';
+                    document.getElementById('allergies').value = child.medical.allergies || '';
+                    document.getElementById('medications').value = child.medical.medications || '';
+                    document.getElementById('medical-conditions').value = child.medical.medical_conditions || '';
+                    document.getElementById('doctor-name').value = child.medical.doctor_name || '';
+                    document.getElementById('doctor-phone').value = child.medical.doctor_phone || '';
+                    document.getElementById('insurance-provider').value = child.medical.insurance_provider || '';
+                    document.getElementById('insurance-number').value = child.medical.insurance_number || '';
+                    document.getElementById('emergency-contact-name').value = child.medical.emergency_contact_name || '';
+                    document.getElementById('emergency-contact-phone').value = child.medical.emergency_contact_phone || '';
+                    document.getElementById('emergency-contact-relationship').value = child.medical.emergency_contact_relationship || '';
+                    document.getElementById('special-needs').value = child.medical.special_needs || '';
+                    document.getElementById('medical-notes').value = child.medical.notes || '';
+                }
+
+                // Store child ID for update
+                currentChildId = childId;
+
+                // Show modal
+                childModal.classList.remove('hidden');
+                // Switch to basic tab
+                document.getElementById('tab-basic').click();
+
+            } catch (error) {
+                console.error('Error loading child for edit:', error);
+                alert('Failed to load child details');
+            }
+        };
+
+        window.deleteChild = async function(childId) {
+            if (!confirm('Are you sure you want to delete this child record? This action cannot be undone and will remove all associated data.')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/children/${childId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (response.ok) {
+                    await loadChildren(currentPage, currentFilters);
+                    alert('Child record deleted successfully!');
+                } else {
+                    alert('Failed to delete child record');
+                }
+
+            } catch (error) {
+                console.error('Error deleting child:', error);
+                alert('Network error. Please try again.');
+            }
+        };
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+
+</body>
+</html>

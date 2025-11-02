@@ -18,6 +18,7 @@ $publicFiles = [
     'dashboard.html' => 'dashboard.html',
     'calendar.html' => 'calendar.html',
     'attendance.html' => 'attendance.html',
+    'children.html' => 'children.html',
     'admin/users.html' => 'admin/users.html',
     'admin/roles.html' => 'admin/roles.html',
     'admin/status.html' => 'admin/status.html',
