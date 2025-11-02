@@ -693,23 +693,33 @@
 
                 // Now check if child is already checked in to this event
                 const today = new Date().toISOString().split('T')[0];
+                console.log('Checking attendance for event:', selectedEventId, 'date:', today);
+
                 const attendanceCheckResponse = await fetch(`${API_BASE_URL}/attendance?event_id=${selectedEventId}&date=${today}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
 
+                console.log('Attendance check response status:', attendanceCheckResponse.status);
+
                 if (attendanceCheckResponse.ok) {
                     const attendanceData = await attendanceCheckResponse.json();
                     const existingRecords = attendanceData.records || [];
+                    console.log('Existing records:', existingRecords);
 
                     // Check if this child is already checked in
-                    const alreadyCheckedIn = existingRecords.some(record =>
-                        record.child_id == childId && record.check_in_time && !record.check_out_time
-                    );
+                    const alreadyCheckedIn = existingRecords.some(record => {
+                        console.log('Checking record:', record.participant_id, 'vs', childId, 'check_in:', record.check_in_time, 'check_out:', record.check_out_time);
+                        return record.participant_id == childId && record.check_in_time && !record.check_out_time;
+                    });
+
+                    console.log('Already checked in:', alreadyCheckedIn);
 
                     if (alreadyCheckedIn) {
                         alert(`${child.first_name} ${child.last_name} is already checked in to this event.`);
                         return;
                     }
+                } else {
+                    console.log('Attendance check failed, proceeding with check-in');
                 }
 
                 // Load event details
