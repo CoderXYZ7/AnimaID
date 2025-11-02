@@ -665,7 +665,17 @@
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
 
-                if (!childResponse.ok) throw new Error('Failed to load child details');
+                if (!childResponse.ok) {
+                    const errorData = await childResponse.json().catch(() => ({}));
+                    if (errorData.error && errorData.error.includes('token')) {
+                        // Token expired, redirect to login
+                        localStorage.removeItem('animaid_token');
+                        localStorage.removeItem('animaid_user');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    throw new Error('Failed to load child details');
+                }
 
                 const childData = await childResponse.json();
                 const child = childData.child;
@@ -675,7 +685,17 @@
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
 
-                if (!eventResponse.ok) throw new Error('Failed to load event details');
+                if (!eventResponse.ok) {
+                    const errorData = await eventResponse.json().catch(() => ({}));
+                    if (errorData.error && errorData.error.includes('token')) {
+                        // Token expired, redirect to login
+                        localStorage.removeItem('animaid_token');
+                        localStorage.removeItem('animaid_user');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    throw new Error('Failed to load event details');
+                }
 
                 const eventData = await eventResponse.json();
 
@@ -696,7 +716,7 @@
 
             } catch (error) {
                 console.error('Error loading child details:', error);
-                alert('Failed to load child details');
+                alert('Failed to load child details. Please try logging in again.');
             }
         };
 
@@ -731,6 +751,13 @@
                     }
                     alert('Check-in successful!');
                 } else {
+                    if (data.error && data.error.includes('token')) {
+                        // Token expired, redirect to login
+                        localStorage.removeItem('animaid_token');
+                        localStorage.removeItem('animaid_user');
+                        window.location.href = 'login.html';
+                        return;
+                    }
                     alert('Error: ' + (data.error || 'Failed to check in'));
                 }
 
