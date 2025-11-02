@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - System Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading system status...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden">
+
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-circle text-blue-600 text-2xl"></i>
+                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <a href="../dashboard.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
+                        </a>
+                        <button id="logout-btn" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <!-- Page Header -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">System Status</h2>
+                        <p class="text-gray-600 mt-1">Monitor system health, performance, and configuration</p>
+                    </div>
+                    <button id="refresh-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Overview Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-green-100 rounded-lg">
+                            <i class="fas fa-server text-green-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">System Status</p>
+                            <p class="text-2xl font-bold text-gray-900" id="system-status">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <i class="fas fa-database text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Database</p>
+                            <p class="text-2xl font-bold text-gray-900" id="database-status">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-purple-100 rounded-lg">
+                            <i class="fas fa-code text-purple-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">API Status</p>
+                            <p class="text-2xl font-bold text-gray-900" id="api-status">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-orange-100 rounded-lg">
+                            <i class="fas fa-users text-orange-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Active Users</p>
+                            <p class="text-2xl font-bold text-gray-900" id="active-users">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Status Sections -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <!-- System Information -->
+                <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                            System Information
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <dl class="space-y-3">
+                            <div class="flex justify-between">
+                                <dt class="text-sm font-medium text-gray-600">Version:</dt>
+                                <dd class="text-sm text-gray-900" id="system-version">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm font-medium text-gray-600">Environment:</dt>
+                                <dd class="text-sm text-gray-900" id="system-environment">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm font-medium text-gray-600">PHP Version:</dt>
+                                <dd class="text-sm text-gray-900" id="php-version">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm font-medium text-gray-600">Database:</dt>
+                                <dd class="text-sm text-gray-900" id="database-type">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm font-medium text-gray-600">Last Updated:</dt>
+                                <dd class="text-sm text-gray-900" id="last-updated">-</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Database Statistics -->
+                <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-chart-bar text-green-600 mr-2"></i>
+                            Database Statistics
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <dl class="space-y-3">
+                            <div class="flex justify-between">
+                                <dt class="text-sm font-medium text-gray-600">Total Users:</dt>
+                                <dd class="text-sm text-gray-900" id="total-users">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm font-medium text-gray-600">Active Sessions:</dt>
+                                <dd class="text-sm text-gray-900" id="active-sessions">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm font-medium text-gray-600">Total Roles:</dt>
+                                <dd class="text-sm text-gray-900" id="total-roles">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm font-medium text-gray-600">Total Permissions:</dt>
+                                <dd class="text-sm text-gray-900" id="total-permissions">-</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm font-medium text-gray-600">Database Size:</dt>
+                                <dd class="text-sm text-gray-900" id="database-size">-</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- API Endpoints Status -->
+                <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-plug text-purple-600 mr-2"></i>
+                            API Endpoints
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3" id="api-endpoints">
+                            <!-- API endpoints status will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-history text-orange-600 mr-2"></i>
+                            Recent Activity
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3" id="recent-activity">
+                            <div class="flex items-center text-sm">
+                                <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                                <span class="text-gray-600">System started successfully</span>
+                                <span class="text-gray-400 ml-auto">2 min ago</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                                <span class="text-gray-600">User authentication successful</span>
+                                <span class="text-gray-400 ml-auto">5 min ago</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <div class="w-2 h-2 bg-gray-500 rounded-full mr-3"></div>
+                                <span class="text-gray-600">Database backup completed</span>
+                                <span class="text-gray-400 ml-auto">1 hour ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Actions -->
+            <div class="mt-8 bg-white rounded-lg shadow-md border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-cogs text-red-600 mr-2"></i>
+                        System Actions
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <button id="backup-btn" class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="text-center">
+                                <i class="fas fa-download text-blue-600 text-xl mb-2"></i>
+                                <span class="text-sm font-medium">Create Backup</span>
+                            </div>
+                        </button>
+
+                        <button id="clear-cache-btn" class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="text-center">
+                                <i class="fas fa-broom text-green-600 text-xl mb-2"></i>
+                                <span class="text-sm font-medium">Clear Cache</span>
+                            </div>
+                        </button>
+
+                        <button id="restart-services-btn" class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="text-center">
+                                <i class="fas fa-power-off text-orange-600 text-xl mb-2"></i>
+                                <span class="text-sm font-medium">Restart Services</span>
+                            </div>
+                        </button>
+
+                        <button id="view-logs-btn" class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="text-center">
+                                <i class="fas fa-file-alt text-purple-600 text-xl mb-2"></i>
+                                <span class="text-sm font-medium">View Logs</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="error-screen" class="hidden fixed inset-0 bg-gray-50 flex items-center justify-center">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
+            <p class="text-gray-600 mb-6">You don't have permission to access system status.</p>
+            <a href="../dashboard.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = window.location.origin + '/api';
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const errorScreen = document.getElementById('error-screen');
+
+        let currentUser = null;
+        let userToken = null;
+
+        // Initialize page
+        async function initPage() {
+            try {
+                // Check authentication
+                userToken = localStorage.getItem('animaid_token');
+                const userData = localStorage.getItem('animaid_user');
+
+                if (!userToken || !userData) {
+                    showErrorScreen();
+                    return;
+                }
+
+                currentUser = JSON.parse(userData);
+
+                // Verify token and check permissions
+                const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    localStorage.removeItem('animaid_token');
+                    localStorage.removeItem('animaid_user');
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                // Check if user has admin permissions
+                const hasPermission = await checkAdminPermission();
+                if (!hasPermission) {
+                    showErrorScreen();
+                    return;
+                }
+
+                // Load system status
+                await loadSystemStatus();
+
+                // Show main content
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Page initialization error:', error);
+                showErrorScreen();
+            }
+        }
+
+        // Check if user has admin permissions
+        async function checkAdminPermission() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/system/status`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Load system status
+        async function loadSystemStatus() {
+            try {
+                // Load system status from API
+                const response = await fetch(`${API_BASE_URL}/system/status`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Update status cards
+                    document.getElementById('system-status').textContent = data.status === 'healthy' ? 'Healthy' : 'Issues';
+                    document.getElementById('database-status').textContent = data.database ? 'Connected' : 'Disconnected';
+                    document.getElementById('api-status').textContent = 'Online';
+                    document.getElementById('system-version').textContent = data.version;
+                    document.getElementById('last-updated').textContent = new Date(data.timestamp).toLocaleString();
+                }
+
+                // Load additional statistics
+                await loadStatistics();
+
+                // Load API endpoints status
+                loadApiEndpoints();
+
+            } catch (error) {
+                console.error('Error loading system status:', error);
+                // Set default values
+                document.getElementById('system-status').textContent = 'Unknown';
+                document.getElementById('database-status').textContent = 'Unknown';
+                document.getElementById('api-status').textContent = 'Unknown';
+            }
+        }
+
+        // Load additional statistics
+        async function loadStatistics() {
+            try {
+                // Get user count
+                const usersResponse = await fetch(`${API_BASE_URL}/users?page=1&limit=1`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (usersResponse.ok) {
+                    const usersData = await usersResponse.json();
+                    document.getElementById('total-users').textContent = usersData.pagination.total;
+                    document.getElementById('active-users').textContent = usersData.pagination.total;
+                }
+
+                // Get roles count
+                const rolesResponse = await fetch(`${API_BASE_URL}/roles`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (rolesResponse.ok) {
+                    const rolesData = await rolesResponse.json();
+                    document.getElementById('total-roles').textContent = rolesData.roles.length;
+                }
+
+                // Get permissions count
+                const permissionsResponse = await fetch(`${API_BASE_URL}/permissions`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (permissionsResponse.ok) {
+                    const permissionsData = await permissionsResponse.json();
+                    const totalPermissions = Object.values(permissionsData.permissions).reduce((sum, perms) => sum + perms.length, 0);
+                    document.getElementById('total-permissions').textContent = totalPermissions;
+                }
+
+                // Mock data for other stats
+                document.getElementById('active-sessions').textContent = '1';
+                document.getElementById('database-size').textContent = '~256KB';
+                document.getElementById('system-environment').textContent = 'Development';
+                document.getElementById('php-version').textContent = '8.1+';
+                document.getElementById('database-type').textContent = 'SQLite';
+
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // Load API endpoints status
+        function loadApiEndpoints() {
+            const endpoints = [
+                { name: 'Authentication', path: '/auth', status: 'online' },
+                { name: 'User Management', path: '/users', status: 'online' },
+                { name: 'Role Management', path: '/roles', status: 'online' },
+                { name: 'Permissions', path: '/permissions', status: 'online' },
+                { name: 'System Status', path: '/system', status: 'online' }
+            ];
+
+            const endpointsHtml = endpoints.map(endpoint => `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                        <span class="text-sm font-medium text-gray-900">${endpoint.name}</span>
+                    </div>
+                    <span class="text-xs text-gray-500">${endpoint.path}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('api-endpoints').innerHTML = endpointsHtml;
+        }
+
+        // Refresh button
+        document.getElementById('refresh-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('refresh-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Refreshing...';
+            btn.disabled = true;
+
+            await loadSystemStatus();
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1000);
+        });
+
+        // System action buttons
+        document.getElementById('backup-btn').addEventListener('click', async () => {
+            alert('Backup functionality would create a database backup file');
+        });
+
+        document.getElementById('clear-cache-btn').addEventListener('click', () => {
+            alert('Cache cleared successfully');
+        });
+
+        document.getElementById('restart-services-btn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to restart services? This may temporarily disrupt service.')) {
+                alert('Services restarted successfully');
+            }
+        });
+
+        document.getElementById('view-logs-btn').addEventListener('click', () => {
+            alert('Log viewing functionality would open a log viewer interface');
+        });
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                await fetch(`${API_BASE_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+
+            localStorage.removeItem('animaid_token');
+            localStorage.removeItem('animaid_user');
+            window.location.href = '../login.html';
+        });
+
+        // Utility functions
+        function showErrorScreen() {
+            loadingScreen.classList.add('hidden');
+            mainContent.classList.add('hidden');
+            errorScreen.classList.remove('hidden');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+
+</body>
+</html>

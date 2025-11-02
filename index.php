@@ -16,6 +16,8 @@ $publicFiles = [
     'index.html' => 'index.html',
     'login.html' => 'login.html',
     'dashboard.html' => 'dashboard.html',
+    'admin/users.html' => 'admin/users.html',
+    'admin/status.html' => 'admin/status.html',
     'styleguide.html' => 'StyleGuide.md', // For demo purposes
 ];
 
