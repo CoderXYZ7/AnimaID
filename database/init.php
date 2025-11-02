@@ -143,6 +143,104 @@ function createTables(PDO $pdo) {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     ");
+
+    // Calendar events table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS calendar_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title VARCHAR(255) NOT NULL,
+            description TEXT,
+            event_type VARCHAR(50) NOT NULL DEFAULT 'activity', -- activity, event, shift, maintenance
+            start_date DATE NOT NULL,
+            end_date DATE NOT NULL,
+            start_time TIME,
+            end_time TIME,
+            is_all_day BOOLEAN DEFAULT 0,
+            location VARCHAR(255),
+            max_participants INTEGER,
+            age_min INTEGER,
+            age_max INTEGER,
+            status VARCHAR(20) DEFAULT 'draft', -- draft, published, cancelled, completed
+            is_public BOOLEAN DEFAULT 0,
+            created_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (created_by) REFERENCES users(id)
+        )
+    ");
+
+    // Event participants (children) table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS event_participants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id INTEGER NOT NULL,
+            child_name VARCHAR(255) NOT NULL,
+            child_surname VARCHAR(255) NOT NULL,
+            birth_date DATE,
+            parent_name VARCHAR(255),
+            parent_email VARCHAR(255),
+            parent_phone VARCHAR(50),
+            emergency_contact VARCHAR(255),
+            medical_notes TEXT,
+            registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+            status VARCHAR(20) DEFAULT 'registered', -- registered, confirmed, cancelled, attended
+            notes TEXT,
+            FOREIGN KEY (event_id) REFERENCES calendar_events(id) ON DELETE CASCADE
+        )
+    ");
+
+    // Attendance records table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS attendance_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            participant_id INTEGER NOT NULL,
+            event_id INTEGER NOT NULL,
+            check_in_time DATETIME,
+            check_out_time DATETIME,
+            check_in_staff INTEGER,
+            check_out_staff INTEGER,
+            status VARCHAR(20) DEFAULT 'present', -- present, absent, late, early_departure
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (participant_id) REFERENCES event_participants(id) ON DELETE CASCADE,
+            FOREIGN KEY (event_id) REFERENCES calendar_events(id) ON DELETE CASCADE,
+            FOREIGN KEY (check_in_staff) REFERENCES users(id),
+            FOREIGN KEY (check_out_staff) REFERENCES users(id)
+        )
+    ");
+
+    // Spaces/Rooms table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS spaces (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(100) NOT NULL,
+            description TEXT,
+            capacity INTEGER,
+            location VARCHAR(255),
+            is_active BOOLEAN DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+
+    // Space bookings table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS space_bookings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            space_id INTEGER NOT NULL,
+            event_id INTEGER,
+            booked_by INTEGER NOT NULL,
+            start_time DATETIME NOT NULL,
+            end_time DATETIME NOT NULL,
+            purpose VARCHAR(255),
+            status VARCHAR(20) DEFAULT 'confirmed', -- pending, confirmed, cancelled
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (space_id) REFERENCES spaces(id) ON DELETE CASCADE,
+            FOREIGN KEY (event_id) REFERENCES calendar_events(id) ON DELETE SET NULL,
+            FOREIGN KEY (booked_by) REFERENCES users(id)
+        )
+    ");
 }
 
 function insertInitialData(PDO $pdo, array $config) {
@@ -233,6 +331,12 @@ function insertInitialData(PDO $pdo, array $config) {
 
     // Assign permissions to roles
     assignPermissionsToRoles($pdo);
+
+    // Insert sample spaces
+    insertSampleSpaces($pdo);
+
+    // Insert sample calendar events
+    insertSampleEvents($pdo);
 }
 
 function assignPermissionsToRoles(PDO $pdo) {
@@ -373,4 +477,136 @@ function createDefaultAdmin(PDO $pdo, array $config) {
     $stmt->execute([$adminId]);
 
     echo "Default admin account created with ID: $adminId\n";
+}
+
+function insertSampleSpaces(PDO $pdo) {
+    $spaces = [
+        ['Main Activity Room', 'Large room for group activities and games', 25, 'Building A - Ground Floor'],
+        ['Art Studio', 'Creative space for painting and crafts', 15, 'Building A - First Floor'],
+        ['Music Room', 'Space for music activities and singing', 12, 'Building A - First Floor'],
+        ['Outdoor Playground', 'External play area with equipment', 30, 'Garden Area'],
+        ['Library', 'Reading and quiet activities space', 10, 'Building B - Ground Floor'],
+        ['Gym', 'Physical activities and sports', 20, 'Building B - Basement'],
+    ];
+
+    $stmt = $pdo->prepare("
+        INSERT OR IGNORE INTO spaces (name, description, capacity, location)
+        VALUES (?, ?, ?, ?)
+    ");
+
+    foreach ($spaces as $space) {
+        $stmt->execute($space);
+    }
+}
+
+function insertSampleEvents(PDO $pdo) {
+    // Get admin user ID (assuming admin user exists)
+    $adminId = $pdo->query("SELECT id FROM users WHERE username = 'admin' LIMIT 1")->fetchColumn();
+
+    if (!$adminId) {
+        // If no admin user, skip sample events
+        return;
+    }
+
+    $events = [
+        [
+            'Welcome Day Activities',
+            'First day activities for new children and families',
+            'event',
+            date('Y-m-d', strtotime('+7 days')),
+            date('Y-m-d', strtotime('+7 days')),
+            '09:00',
+            '12:00',
+            0,
+            'Main Activity Room',
+            20,
+            3,
+            6,
+            'published',
+            1,
+            $adminId
+        ],
+        [
+            'Art Workshop',
+            'Creative painting and crafts session',
+            'activity',
+            date('Y-m-d', strtotime('+10 days')),
+            date('Y-m-d', strtotime('+10 days')),
+            '14:00',
+            '16:00',
+            0,
+            'Art Studio',
+            12,
+            4,
+            8,
+            'published',
+            1,
+            $adminId
+        ],
+        [
+            'Music and Movement',
+            'Songs, dances and rhythm activities',
+            'activity',
+            date('Y-m-d', strtotime('+14 days')),
+            date('Y-m-d', strtotime('+14 days')),
+            '10:00',
+            '11:30',
+            0,
+            'Music Room',
+            15,
+            2,
+            5,
+            'draft',
+            0,
+            $adminId
+        ],
+        [
+            'Outdoor Games Day',
+            'Sports and games in the playground',
+            'event',
+            date('Y-m-d', strtotime('+21 days')),
+            date('Y-m-d', strtotime('+21 days')),
+            '09:30',
+            '16:30',
+            0,
+            'Outdoor Playground',
+            25,
+            5,
+            10,
+            'draft',
+            0,
+            $adminId
+        ],
+    ];
+
+    $stmt = $pdo->prepare("
+        INSERT OR IGNORE INTO calendar_events
+        (title, description, event_type, start_date, end_date, start_time, end_time, is_all_day, location, max_participants, age_min, age_max, status, is_public, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    foreach ($events as $event) {
+        $stmt->execute($event);
+    }
+
+    // Add some sample participants to the first event
+    $eventId = $pdo->query("SELECT id FROM calendar_events WHERE title = 'Welcome Day Activities' LIMIT 1")->fetchColumn();
+
+    if ($eventId) {
+        $participants = [
+            ['Mario', 'Rossi', '2018-03-15', 'Maria Rossi', 'maria.rossi@email.com', '+39 333 1234567', 'Nonna Anna +39 334 7654321', 'No allergies', 'registered', ''],
+            ['Giulia', 'Bianchi', '2017-08-22', 'Luca Bianchi', 'luca.bianchi@email.com', '+39 334 2345678', 'Zia Sofia +39 335 8765432', 'Mild asthma', 'confirmed', ''],
+            ['Alessandro', 'Verdi', '2019-01-10', 'Elena Verdi', 'elena.verdi@email.com', '+39 335 3456789', 'Padre Marco +39 336 9876543', '', 'registered', ''],
+        ];
+
+        $stmt = $pdo->prepare("
+            INSERT OR IGNORE INTO event_participants
+            (event_id, child_name, child_surname, birth_date, parent_name, parent_email, parent_phone, emergency_contact, medical_notes, status, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+
+        foreach ($participants as $participant) {
+            $stmt->execute(array_merge([$eventId], $participant));
+        }
+    }
 }

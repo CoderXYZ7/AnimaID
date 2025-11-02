@@ -115,30 +115,35 @@
             <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-8">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a href="calendar.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-calendar-alt text-green-600 mr-3"></i>
+                        <span class="text-sm font-medium">Calendar</span>
+                    </a>
+
+                    <a href="attendance.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-user-check text-blue-600 mr-3"></i>
+                        <span class="text-sm font-medium">Attendance</span>
+                    </a>
+
                     <a href="admin/users.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                        <i class="fas fa-users text-blue-600 mr-3"></i>
+                        <i class="fas fa-users text-purple-600 mr-3"></i>
                         <span class="text-sm font-medium">Manage Users</span>
                     </a>
 
                     <a href="admin/roles.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                        <i class="fas fa-user-tag text-purple-600 mr-3"></i>
+                        <i class="fas fa-user-tag text-indigo-600 mr-3"></i>
                         <span class="text-sm font-medium">Manage Roles</span>
                     </a>
-
-                    <button class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" id="view-calendar">
-                        <i class="fas fa-calendar-alt text-green-600 mr-3"></i>
-                        <span class="text-sm font-medium">Calendar</span>
-                    </button>
-
-                    <button class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" id="view-reports">
-                        <i class="fas fa-chart-bar text-indigo-600 mr-3"></i>
-                        <span class="text-sm font-medium">Reports</span>
-                    </button>
 
                     <a href="admin/status.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-cog text-orange-600 mr-3"></i>
                         <span class="text-sm font-medium">System Status</span>
                     </a>
+
+                    <button class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" id="view-reports">
+                        <i class="fas fa-chart-bar text-red-600 mr-3"></i>
+                        <span class="text-sm font-medium">Reports</span>
+                    </button>
                 </div>
             </div>
 

@@ -107,6 +107,15 @@ function handleRequest(string $endpoint, ?string $resourceId, string $method, ar
         case 'permissions':
             return handlePermissionsRequest($method, $token, $auth);
 
+        case 'calendar':
+            return handleCalendarRequest($resourceId, $method, $body, $token, $auth);
+
+        case 'attendance':
+            return handleAttendanceRequest($resourceId, $method, $body, $token, $auth);
+
+        case 'spaces':
+            return handleSpacesRequest($resourceId, $method, $body, $token, $auth);
+
         case 'system':
             return handleSystemRequest($resourceId, $method, $token, $auth);
 
@@ -335,5 +344,174 @@ function handleSystemRequest(?string $action, string $method, ?string $token, Au
 
         default:
             throw new Exception('System action not found');
+    }
+}
+
+function handleCalendarRequest(?string $eventId, string $method, array $body, ?string $token, Auth $auth): array {
+    if (!$token) throw new Exception('Authentication required');
+
+    $user = $auth->verifyToken($token);
+    if (!$auth->checkPermission($user['id'], 'calendar.view')) {
+        throw new Exception('Insufficient permissions');
+    }
+
+    if ($eventId === null) {
+        // Handle collection requests
+        switch ($method) {
+            case 'GET':
+                $page = (int)($_GET['page'] ?? 1);
+                $limit = (int)($_GET['limit'] ?? 20);
+
+                $filters = [];
+                if (isset($_GET['status'])) $filters['status'] = $_GET['status'];
+                if (isset($_GET['event_type'])) $filters['event_type'] = $_GET['event_type'];
+                if (isset($_GET['start_date'])) $filters['start_date'] = $_GET['start_date'];
+                if (isset($_GET['end_date'])) $filters['end_date'] = $_GET['end_date'];
+                if (isset($_GET['is_public'])) $filters['is_public'] = (int)$_GET['is_public'];
+
+                return $auth->getCalendarEvents($page, $limit, $filters);
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'calendar.create')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $eventId = $auth->createCalendarEvent($body, $user['id']);
+                return [
+                    'event_id' => $eventId,
+                    'message' => 'Event created successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    } else {
+        // Handle individual event requests
+        $eventId = (int)$eventId;
+
+        switch ($method) {
+            case 'GET':
+                $events = $auth->getCalendarEvents(1, 1)['events'];
+                if (empty($events)) {
+                    throw new Exception('Event not found');
+                }
+
+                $event = $events[0];
+                $event['participants'] = $auth->getEventParticipants($eventId);
+                return ['event' => $event];
+
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'calendar.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->updateCalendarEvent($eventId, $body);
+                return ['message' => 'Event updated successfully'];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'calendar.delete')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->deleteCalendarEvent($eventId);
+                return ['message' => 'Event deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+}
+
+function handleAttendanceRequest(?string $action, string $method, array $body, ?string $token, Auth $auth): array {
+    if (!$token) throw new Exception('Authentication required');
+
+    $user = $auth->verifyToken($token);
+
+    switch ($action) {
+        case 'checkin':
+            if ($method !== 'POST') throw new Exception('Method not allowed');
+            if (!$auth->checkPermission($user['id'], 'attendance.checkin')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $participantId = (int)($body['participant_id'] ?? 0);
+            $eventId = (int)($body['event_id'] ?? 0);
+            $notes = $body['notes'] ?? '';
+
+            if (!$participantId || !$eventId) {
+                throw new Exception('Participant ID and Event ID are required');
+            }
+
+            $auth->checkInOutParticipant($participantId, $eventId, 'checkin', $user['id'], $notes);
+            return ['message' => 'Check-in recorded successfully'];
+
+        case 'checkout':
+            if ($method !== 'POST') throw new Exception('Method not allowed');
+            if (!$auth->checkPermission($user['id'], 'attendance.checkin')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $participantId = (int)($body['participant_id'] ?? 0);
+            $eventId = (int)($body['event_id'] ?? 0);
+            $notes = $body['notes'] ?? '';
+
+            if (!$participantId || !$eventId) {
+                throw new Exception('Participant ID and Event ID are required');
+            }
+
+            $auth->checkInOutParticipant($participantId, $eventId, 'checkout', $user['id'], $notes);
+            return ['message' => 'Check-out recorded successfully'];
+
+        case null:
+            // Get attendance records
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+            if (!$auth->checkPermission($user['id'], 'attendance.view')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $eventId = isset($_GET['event_id']) ? (int)$_GET['event_id'] : null;
+            $participantId = isset($_GET['participant_id']) ? (int)$_GET['participant_id'] : null;
+            $date = $_GET['date'] ?? null;
+
+            return ['records' => $auth->getAttendanceRecords($eventId, $participantId, $date)];
+
+        default:
+            throw new Exception('Attendance action not found');
+    }
+}
+
+function handleSpacesRequest(?string $spaceId, string $method, array $body, ?string $token, Auth $auth): array {
+    if (!$token) throw new Exception('Authentication required');
+
+    $user = $auth->verifyToken($token);
+
+    switch ($method) {
+        case 'GET':
+            if (!$auth->checkPermission($user['id'], 'spaces.view')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            if ($spaceId === null) {
+                return ['spaces' => $auth->getSpaces()];
+            } else {
+                // Get space bookings
+                $startDate = $_GET['start_date'] ?? null;
+                $endDate = $_GET['end_date'] ?? null;
+                return ['bookings' => $auth->getSpaceBookings($startDate, $endDate)];
+            }
+
+        case 'POST':
+            if (!$auth->checkPermission($user['id'], 'spaces.book')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $bookingId = $auth->createSpaceBooking($body, $user['id']);
+            return [
+                'booking_id' => $bookingId,
+                'message' => 'Space booking created successfully'
+            ];
+
+        default:
+            throw new Exception('Method not allowed');
     }
 }

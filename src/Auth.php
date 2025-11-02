@@ -337,6 +337,239 @@ class Auth {
     }
 
     /**
+     * Get calendar events
+     */
+    public function getCalendarEvents(int $page = 1, int $limit = 20, array $filters = []): array {
+        $offset = ($page - 1) * $limit;
+
+        $whereClause = '';
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $whereClause .= ' AND status = ?';
+            $params[] = $filters['status'];
+        }
+
+        if (!empty($filters['event_type'])) {
+            $whereClause .= ' AND event_type = ?';
+            $params[] = $filters['event_type'];
+        }
+
+        if (!empty($filters['start_date'])) {
+            $whereClause .= ' AND start_date >= ?';
+            $params[] = $filters['start_date'];
+        }
+
+        if (!empty($filters['end_date'])) {
+            $whereClause .= ' AND end_date <= ?';
+            $params[] = $filters['end_date'];
+        }
+
+        if (!empty($filters['is_public'])) {
+            $whereClause .= ' AND is_public = ?';
+            $params[] = $filters['is_public'];
+        }
+
+        // Get events
+        $events = $this->db->fetchAll(
+            "SELECT * FROM calendar_events WHERE 1=1 {$whereClause} ORDER BY start_date, start_time LIMIT ? OFFSET ?",
+            array_merge($params, [$limit, $offset])
+        );
+
+        // Get total count
+        $total = $this->db->fetchOne(
+            "SELECT COUNT(*) as count FROM calendar_events WHERE 1=1 {$whereClause}",
+            $params
+        )['count'];
+
+        return [
+            'events' => $events,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $total,
+                'pages' => ceil($total / $limit)
+            ]
+        ];
+    }
+
+    /**
+     * Create calendar event
+     */
+    public function createCalendarEvent(array $eventData, int $createdBy): int {
+        return $this->db->insert('calendar_events', array_merge($eventData, [
+            'created_by' => $createdBy
+        ]));
+    }
+
+    /**
+     * Update calendar event
+     */
+    public function updateCalendarEvent(int $eventId, array $eventData): void {
+        $allowedFields = ['title', 'description', 'event_type', 'start_date', 'end_date', 'start_time', 'end_time', 'is_all_day', 'location', 'max_participants', 'age_min', 'age_max', 'status', 'is_public'];
+        $updateData = array_intersect_key($eventData, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $this->db->update('calendar_events', $updateData, 'id = ?', [$eventId]);
+        }
+    }
+
+    /**
+     * Delete calendar event
+     */
+    public function deleteCalendarEvent(int $eventId): void {
+        $this->db->delete('calendar_events', 'id = ?', [$eventId]);
+    }
+
+    /**
+     * Get event participants
+     */
+    public function getEventParticipants(int $eventId): array {
+        return $this->db->fetchAll(
+            "SELECT * FROM event_participants WHERE event_id = ? ORDER BY registration_date",
+            [$eventId]
+        );
+    }
+
+    /**
+     * Add participant to event
+     */
+    public function addEventParticipant(int $eventId, array $participantData): int {
+        return $this->db->insert('event_participants', array_merge($participantData, [
+            'event_id' => $eventId
+        ]));
+    }
+
+    /**
+     * Update participant
+     */
+    public function updateEventParticipant(int $participantId, array $participantData): void {
+        $allowedFields = ['child_name', 'child_surname', 'birth_date', 'parent_name', 'parent_email', 'parent_phone', 'emergency_contact', 'medical_notes', 'status', 'notes'];
+        $updateData = array_intersect_key($participantData, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $this->db->update('event_participants', $updateData, 'id = ?', [$participantId]);
+        }
+    }
+
+    /**
+     * Check in/out participant
+     */
+    public function checkInOutParticipant(int $participantId, int $eventId, string $action, int $staffId, string $notes = ''): void {
+        $now = date('Y-m-d H:i:s');
+
+        if ($action === 'checkin') {
+            $this->db->insert('attendance_records', [
+                'participant_id' => $participantId,
+                'event_id' => $eventId,
+                'check_in_time' => $now,
+                'check_in_staff' => $staffId,
+                'status' => 'present',
+                'notes' => $notes
+            ]);
+        } elseif ($action === 'checkout') {
+            // Update existing record or create new one
+            $existing = $this->db->fetchOne(
+                "SELECT id FROM attendance_records WHERE participant_id = ? AND event_id = ? AND DATE(check_in_time) = DATE(?)",
+                [$participantId, $eventId, $now]
+            );
+
+            if ($existing) {
+                $this->db->update('attendance_records', [
+                    'check_out_time' => $now,
+                    'check_out_staff' => $staffId,
+                    'notes' => $notes
+                ], 'id = ?', [$existing['id']]);
+            } else {
+                $this->db->insert('attendance_records', [
+                    'participant_id' => $participantId,
+                    'event_id' => $eventId,
+                    'check_out_time' => $now,
+                    'check_out_staff' => $staffId,
+                    'status' => 'present',
+                    'notes' => $notes
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Get attendance records
+     */
+    public function getAttendanceRecords(int $eventId = null, int $participantId = null, string $date = null): array {
+        $whereClause = '';
+        $params = [];
+
+        if ($eventId) {
+            $whereClause .= ' AND ar.event_id = ?';
+            $params[] = $eventId;
+        }
+
+        if ($participantId) {
+            $whereClause .= ' AND ar.participant_id = ?';
+            $params[] = $participantId;
+        }
+
+        if ($date) {
+            $whereClause .= ' AND DATE(ar.check_in_time) = ?';
+            $params[] = $date;
+        }
+
+        return $this->db->fetchAll("
+            SELECT ar.*, ep.child_name, ep.child_surname, ce.title as event_title
+            FROM attendance_records ar
+            JOIN event_participants ep ON ar.participant_id = ep.id
+            JOIN calendar_events ce ON ar.event_id = ce.id
+            WHERE 1=1 {$whereClause}
+            ORDER BY ar.check_in_time DESC
+        ", $params);
+    }
+
+    /**
+     * Get spaces
+     */
+    public function getSpaces(): array {
+        return $this->db->fetchAll("SELECT * FROM spaces WHERE is_active = 1 ORDER BY name");
+    }
+
+    /**
+     * Create space booking
+     */
+    public function createSpaceBooking(array $bookingData, int $bookedBy): int {
+        return $this->db->insert('space_bookings', array_merge($bookingData, [
+            'booked_by' => $bookedBy
+        ]));
+    }
+
+    /**
+     * Get space bookings
+     */
+    public function getSpaceBookings(string $startDate = null, string $endDate = null): array {
+        $whereClause = '';
+        $params = [];
+
+        if ($startDate) {
+            $whereClause .= ' AND start_time >= ?';
+            $params[] = $startDate . ' 00:00:00';
+        }
+
+        if ($endDate) {
+            $whereClause .= ' AND end_time <= ?';
+            $params[] = $endDate . ' 23:59:59';
+        }
+
+        return $this->db->fetchAll("
+            SELECT sb.*, s.name as space_name, s.location, ce.title as event_title, u.username as booked_by_name
+            FROM space_bookings sb
+            JOIN spaces s ON sb.space_id = s.id
+            LEFT JOIN calendar_events ce ON sb.event_id = ce.id
+            JOIN users u ON sb.booked_by = u.id
+            WHERE 1=1 {$whereClause}
+            ORDER BY sb.start_time
+        ", $params);
+    }
+
+    /**
      * Validate password strength
      */
     private function validatePassword(string $password): void {
