@@ -497,6 +497,25 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
 
     $user = $auth->verifyToken($token);
 
+    // Handle individual attendance record operations (DELETE)
+    if ($action !== null && $action !== 'checkin' && $action !== 'checkout') {
+        $recordId = (int)$action;
+
+        switch ($method) {
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'attendance.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->deleteAttendanceRecord($recordId);
+                return ['message' => 'Attendance record deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Handle action-based operations
     switch ($action) {
         case 'checkin':
             if ($method !== 'POST') throw new Exception('Method not allowed');

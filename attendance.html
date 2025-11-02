@@ -462,6 +462,11 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="removeAttendance(${record.id})" class="text-red-600 hover:text-red-900 text-sm px-3 py-1 bg-red-100 rounded-md transition-colors" title="Remove attendance record">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -693,7 +698,7 @@
 
                 // Now check if child is already checked in to this event
                 const today = new Date().toISOString().split('T')[0];
-                console.log('Checking attendance for event:', selectedEventId, 'date:', today);
+                console.log('Checking attendance for event:', selectedEventId, 'child:', childId, 'date:', today);
 
                 const attendanceCheckResponse = await fetch(`${API_BASE_URL}/attendance?event_id=${selectedEventId}&date=${today}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
@@ -706,10 +711,13 @@
                     const existingRecords = attendanceData.records || [];
                     console.log('Existing records:', existingRecords);
 
-                    // Check if this child is already checked in
+                    // Check if this child is already checked in by comparing names
+                    // Since participant_id != child_id, we need to match by name
                     const alreadyCheckedIn = existingRecords.some(record => {
-                        console.log('Checking record:', record.participant_id, 'vs', childId, 'check_in:', record.check_in_time, 'check_out:', record.check_out_time);
-                        return record.participant_id == childId && record.check_in_time && !record.check_out_time;
+                        console.log('Checking record:', record.child_name, record.child_surname, 'vs', child.first_name, child.last_name, 'check_in:', record.check_in_time, 'check_out:', record.check_out_time);
+                        const nameMatches = record.child_name === child.first_name && record.child_surname === child.last_name;
+                        const isCheckedIn = record.check_in_time && !record.check_out_time;
+                        return nameMatches && isCheckedIn;
                     });
 
                     console.log('Already checked in:', alreadyCheckedIn);
@@ -808,6 +816,43 @@
                 alert('Network error. Please try again.');
             }
         });
+
+        // Remove attendance record
+        window.removeAttendance = async function(recordId) {
+            if (!confirm('Are you sure you want to delete this attendance record? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/attendance/${recordId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (response.ok) {
+                    alert('Attendance record deleted successfully!');
+                    // Refresh the attendance records
+                    if (recordsLoaded) {
+                        await loadAttendanceRecords();
+                    }
+                    await loadRecentActivity();
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    if (errorData.error && errorData.error.includes('token')) {
+                        // Token expired, redirect to login
+                        localStorage.removeItem('animaid_token');
+                        localStorage.removeItem('animaid_user');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    alert('Error: ' + (errorData.error || 'Failed to delete attendance record'));
+                }
+
+            } catch (error) {
+                console.error('Error deleting attendance record:', error);
+                alert('Network error. Please try again.');
+            }
+        };
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', initPage);

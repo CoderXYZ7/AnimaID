@@ -559,6 +559,19 @@ class Auth {
     }
 
     /**
+     * Delete attendance record
+     */
+    public function deleteAttendanceRecord(int $recordId): void {
+        // Check if record exists
+        $record = $this->db->fetchOne("SELECT id FROM attendance_records WHERE id = ?", [$recordId]);
+        if (!$record) {
+            throw new Exception('Attendance record not found');
+        }
+
+        $this->db->delete('attendance_records', 'id = ?', [$recordId]);
+    }
+
+    /**
      * Get spaces
      */
     public function getSpaces(): array {
