@@ -466,16 +466,23 @@
         });
 
         // Search functionality
-        document.getElementById('search-btn').addEventListener('click', () => {
-            searchQuery = document.getElementById('search').value.trim();
-            loadUsers(1, searchQuery);
-        });
+        const searchBtn = document.getElementById('search-btn');
+        const searchInput = document.getElementById('search');
 
-        document.getElementById('search').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('search-btn').click();
-            }
-        });
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => {
+                searchQuery = searchInput.value.trim();
+                loadUsers(1, searchQuery);
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchBtn.click();
+                }
+            });
+        }
 
         // Pagination
         document.getElementById('prev-page').addEventListener('click', () => {

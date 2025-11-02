@@ -476,23 +476,36 @@
         });
 
         // System action buttons
-        document.getElementById('backup-btn').addEventListener('click', async () => {
-            alert('Backup functionality would create a database backup file');
-        });
+        const backupBtn = document.getElementById('backup-btn');
+        const clearCacheBtn = document.getElementById('clear-cache-btn');
+        const restartServicesBtn = document.getElementById('restart-services-btn');
+        const viewLogsBtn = document.getElementById('view-logs-btn');
 
-        document.getElementById('clear-cache-btn').addEventListener('click', () => {
-            alert('Cache cleared successfully');
-        });
+        if (backupBtn) {
+            backupBtn.addEventListener('click', async () => {
+                alert('Backup functionality would create a database backup file');
+            });
+        }
 
-        document.getElementById('restart-services-btn').addEventListener('click', () => {
-            if (confirm('Are you sure you want to restart services? This may temporarily disrupt service.')) {
-                alert('Services restarted successfully');
-            }
-        });
+        if (clearCacheBtn) {
+            clearCacheBtn.addEventListener('click', () => {
+                alert('Cache cleared successfully');
+            });
+        }
 
-        document.getElementById('view-logs-btn').addEventListener('click', () => {
-            alert('Log viewing functionality would open a log viewer interface');
-        });
+        if (restartServicesBtn) {
+            restartServicesBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to restart services? This may temporarily disrupt service.')) {
+                    alert('Services restarted successfully');
+                }
+            });
+        }
+
+        if (viewLogsBtn) {
+            viewLogsBtn.addEventListener('click', () => {
+                alert('Log viewing functionality would open a log viewer interface');
+            });
+        }
 
         // Logout
         document.getElementById('logout-btn').addEventListener('click', async () => {

@@ -304,38 +304,21 @@
             window.location.href = 'login.html';
         });
 
-        // Quick actions
-        document.getElementById('view-users').addEventListener('click', function() {
-            alert('User management feature coming soon!');
-        });
+        // Quick actions - Note: view-users and system-status are now links, not buttons
+        const viewCalendarBtn = document.getElementById('view-calendar');
+        const viewReportsBtn = document.getElementById('view-reports');
 
-        document.getElementById('view-calendar').addEventListener('click', function() {
-            alert('Calendar feature coming soon!');
-        });
+        if (viewCalendarBtn) {
+            viewCalendarBtn.addEventListener('click', function() {
+                alert('Calendar feature coming soon!');
+            });
+        }
 
-        document.getElementById('view-reports').addEventListener('click', function() {
-            alert('Reports feature coming soon!');
-        });
-
-        document.getElementById('system-status').addEventListener('click', async function() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/system/status`, {
-                    headers: {
-                        'Authorization': `Bearer ${userToken}`
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    alert(`System Status: ${data.status}\nVersion: ${data.version}\nDatabase: ${data.database ? 'Connected' : 'Disconnected'}`);
-                } else {
-                    alert('Unable to check system status');
-                }
-            } catch (error) {
-                alert('Error checking system status');
-            }
-        });
+        if (viewReportsBtn) {
+            viewReportsBtn.addEventListener('click', function() {
+                alert('Reports feature coming soon!');
+            });
+        }
 
         // Utility functions
         function showErrorScreen() {
