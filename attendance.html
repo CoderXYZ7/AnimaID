@@ -95,7 +95,7 @@
                         <p class="text-sm text-gray-600 mt-1">Select an event, then search for children to check them in</p>
                     </div>
                     <div class="p-6">
-                        <form id="quick-checkin-form" class="space-y-4">
+                        <div id="quick-checkin-form" class="space-y-4">
                             <div>
                                 <label for="event-select" class="block text-sm font-medium text-gray-700 mb-1">Select Event *</label>
                                 <select id="event-select" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -224,7 +224,7 @@
 
     <script>
         // Configuration
-        const API_BASE_URL = window.location.origin + '/api';
+        const API_BASE_URL = 'http://localhost:8000/api';
 
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
@@ -401,10 +401,11 @@
         }
 
         // Load attendance records
-        async function loadAttendanceRecords(page = 1, date = null) {
+        async function loadAttendanceRecords(page = 1, date = null, eventId = null) {
             try {
                 const params = new URLSearchParams({ page: page, limit: 10 });
                 if (date) params.append('date', date);
+                if (eventId) params.append('event_id', eventId);
 
                 const response = await fetch(`${API_BASE_URL}/attendance?${params}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
@@ -561,13 +562,16 @@
         // View records button
         document.getElementById('view-records-btn').addEventListener('click', () => {
             recordsLoaded = true;
-            loadAttendanceRecords(1, document.getElementById('records-date').value);
+            const date = document.getElementById('records-date').value;
+            const eventId = document.getElementById('event-select').value;
+            loadAttendanceRecords(1, date, eventId || null);
         });
 
         // Filter records by date
         document.getElementById('filter-records-btn').addEventListener('click', () => {
             const date = document.getElementById('records-date').value;
-            loadAttendanceRecords(1, date);
+            const eventId = document.getElementById('event-select').value;
+            loadAttendanceRecords(1, date, eventId || null);
         });
 
         // Records pagination
@@ -659,14 +663,21 @@
         window.checkinChild = async function(childId) {
             selectedParticipantId = childId;
 
+            console.log('API_BASE_URL:', API_BASE_URL);
+            console.log('userToken:', userToken ? userToken.substring(0, 20) + '...' : 'null');
+
             try {
-                // Load child details
+                // Load child details first
                 const childResponse = await fetch(`${API_BASE_URL}/children/${childId}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
 
+                console.log('Child response status:', childResponse.status);
+                console.log('Child response ok:', childResponse.ok);
+
                 if (!childResponse.ok) {
                     const errorData = await childResponse.json().catch(() => ({}));
+                    console.log('Error data:', errorData);
                     if (errorData.error && errorData.error.includes('token')) {
                         // Token expired, redirect to login
                         localStorage.removeItem('animaid_token');
@@ -679,6 +690,27 @@
 
                 const childData = await childResponse.json();
                 const child = childData.child;
+
+                // Now check if child is already checked in to this event
+                const today = new Date().toISOString().split('T')[0];
+                const attendanceCheckResponse = await fetch(`${API_BASE_URL}/attendance?event_id=${selectedEventId}&date=${today}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (attendanceCheckResponse.ok) {
+                    const attendanceData = await attendanceCheckResponse.json();
+                    const existingRecords = attendanceData.records || [];
+
+                    // Check if this child is already checked in
+                    const alreadyCheckedIn = existingRecords.some(record =>
+                        record.child_id == childId && record.check_in_time && !record.check_out_time
+                    );
+
+                    if (alreadyCheckedIn) {
+                        alert(`${child.first_name} ${child.last_name} is already checked in to this event.`);
+                        return;
+                    }
+                }
 
                 // Load event details
                 const eventResponse = await fetch(`${API_BASE_URL}/calendar/${selectedEventId}`, {
