@@ -545,9 +545,8 @@
             `).join('');
         }
 
-        // Event select change
-        document.getElementById('event-select').addEventListener('change', (e) => {
-            selectedEventId = e.target.value;
+        // Update quick check-in UI based on selected event
+        function updateQuickCheckInUI() {
             const childSearch = document.getElementById('child-search');
             const childResults = document.getElementById('child-results');
 
@@ -562,6 +561,12 @@
             }
 
             childSearch.value = '';
+        }
+
+        // Event select change
+        document.getElementById('event-select').addEventListener('change', (e) => {
+            selectedEventId = e.target.value;
+            updateQuickCheckInUI();
         });
 
         // View records button
@@ -662,6 +667,7 @@
         window.selectEvent = function(eventId) {
             selectedEventId = eventId;
             document.getElementById('event-select').value = eventId;
+            updateQuickCheckInUI();
             document.getElementById('child-search').focus();
         };
 
