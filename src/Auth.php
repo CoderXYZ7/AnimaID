@@ -272,6 +272,71 @@ class Auth {
     }
 
     /**
+     * Create a new role
+     */
+    public function createRole(string $name, string $displayName, array $permissionIds = []): int {
+        // Create role
+        $roleId = $this->db->insert('roles', [
+            'name' => $name,
+            'display_name' => $displayName
+        ]);
+
+        // Assign permissions
+        if (!empty($permissionIds)) {
+            $this->assignPermissionsToRole($roleId, $permissionIds);
+        }
+
+        return $roleId;
+    }
+
+    /**
+     * Update role information
+     */
+    public function updateRole(int $roleId, array $data): void {
+        $allowedFields = ['name', 'display_name'];
+        $updateData = array_intersect_key($data, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $this->db->update('roles', $updateData, 'id = ?', [$roleId]);
+        }
+
+        // Update permissions if provided
+        if (isset($data['permission_ids'])) {
+            $this->assignPermissionsToRole($roleId, $data['permission_ids']);
+        }
+    }
+
+    /**
+     * Delete a role
+     */
+    public function deleteRole(int $roleId): void {
+        // Remove role permissions
+        $this->db->delete('role_permissions', 'role_id = ?', [$roleId]);
+
+        // Remove user role assignments
+        $this->db->delete('user_roles', 'role_id = ?', [$roleId]);
+
+        // Delete the role
+        $this->db->delete('roles', 'id = ?', [$roleId]);
+    }
+
+    /**
+     * Assign permissions to role
+     */
+    private function assignPermissionsToRole(int $roleId, array $permissionIds): void {
+        // Remove existing permissions
+        $this->db->delete('role_permissions', 'role_id = ?', [$roleId]);
+
+        // Assign new permissions
+        foreach ($permissionIds as $permissionId) {
+            $this->db->insert('role_permissions', [
+                'role_id' => $roleId,
+                'permission_id' => $permissionId
+            ]);
+        }
+    }
+
+    /**
      * Validate password strength
      */
     private function validatePassword(string $password): void {

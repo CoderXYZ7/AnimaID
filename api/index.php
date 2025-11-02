@@ -213,16 +213,54 @@ function handleRolesRequest(?string $roleId, string $method, array $body, ?strin
         throw new Exception('Insufficient permissions');
     }
 
-    switch ($method) {
-        case 'GET':
-            return ['roles' => $auth->getRoles()];
+    if ($roleId === null) {
+        // Handle collection requests
+        switch ($method) {
+            case 'GET':
+                return ['roles' => $auth->getRoles()];
 
-        case 'POST':
-            // Create new role (simplified - would need more implementation)
-            throw new Exception('Role creation not implemented');
+            case 'POST':
+                $name = $body['name'] ?? '';
+                $displayName = $body['display_name'] ?? '';
+                $permissionIds = $body['permission_ids'] ?? [];
 
-        default:
-            throw new Exception('Method not allowed');
+                if (empty($name) || empty($displayName)) {
+                    throw new Exception('Role name and display name are required');
+                }
+
+                $roleId = $auth->createRole($name, $displayName, $permissionIds);
+                return [
+                    'role_id' => $roleId,
+                    'message' => 'Role created successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    } else {
+        // Handle individual role requests
+        $roleId = (int)$roleId;
+
+        switch ($method) {
+            case 'GET':
+                $roles = $auth->getRoles();
+                $role = array_filter($roles, fn($r) => $r['id'] == $roleId);
+                if (empty($role)) {
+                    throw new Exception('Role not found');
+                }
+                return ['role' => array_values($role)[0]];
+
+            case 'PUT':
+                $auth->updateRole($roleId, $body);
+                return ['message' => 'Role updated successfully'];
+
+            case 'DELETE':
+                $auth->deleteRole($roleId);
+                return ['message' => 'Role deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
     }
 }
 
@@ -255,12 +293,35 @@ function handleSystemRequest(?string $action, string $method, ?string $token, Au
         case 'status':
             if ($method !== 'GET') throw new Exception('Method not allowed');
 
-            $config = require __DIR__ . '/../config.php';
-            return [
-                'status' => 'healthy',
-                'version' => $config['system']['version'],
-                'timestamp' => date('c')
-            ];
+            try {
+                $config = require __DIR__ . '/../config.php';
+
+                // Get some basic database stats
+                $db = Database::getInstance();
+                $userCount = $db->fetchOne("SELECT COUNT(*) as count FROM users")['count'];
+                $roleCount = $db->fetchOne("SELECT COUNT(*) as count FROM roles")['count'];
+                $permissionCount = $db->fetchOne("SELECT COUNT(*) as count FROM permissions")['count'];
+
+                return [
+                    'status' => 'healthy',
+                    'version' => $config['system']['version'] ?? '1.0.0',
+                    'database' => true,
+                    'timestamp' => date('c'),
+                    'stats' => [
+                        'users' => $userCount,
+                        'roles' => $roleCount,
+                        'permissions' => $permissionCount
+                    ]
+                ];
+            } catch (Exception $e) {
+                return [
+                    'status' => 'error',
+                    'version' => '1.0.0',
+                    'database' => false,
+                    'timestamp' => date('c'),
+                    'error' => $e->getMessage()
+                ];
+            }
 
         default:
             throw new Exception('System action not found');
