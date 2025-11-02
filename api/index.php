@@ -504,15 +504,15 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
                 throw new Exception('Insufficient permissions');
             }
 
-            $participantId = (int)($body['participant_id'] ?? 0);
+            $childId = (int)($body['child_id'] ?? 0);
             $eventId = (int)($body['event_id'] ?? 0);
             $notes = $body['notes'] ?? '';
 
-            if (!$participantId || !$eventId) {
-                throw new Exception('Participant ID and Event ID are required');
+            if (!$childId || !$eventId) {
+                throw new Exception('Child ID and Event ID are required');
             }
 
-            $auth->checkInOutParticipant($participantId, $eventId, 'checkin', $user['id'], $notes);
+            $auth->checkInOutChild($childId, $eventId, 'checkin', $user['id'], $notes);
             return ['message' => 'Check-in recorded successfully'];
 
         case 'checkout':
@@ -521,15 +521,15 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
                 throw new Exception('Insufficient permissions');
             }
 
-            $participantId = (int)($body['participant_id'] ?? 0);
+            $childId = (int)($body['child_id'] ?? 0);
             $eventId = (int)($body['event_id'] ?? 0);
             $notes = $body['notes'] ?? '';
 
-            if (!$participantId || !$eventId) {
-                throw new Exception('Participant ID and Event ID are required');
+            if (!$childId || !$eventId) {
+                throw new Exception('Child ID and Event ID are required');
             }
 
-            $auth->checkInOutParticipant($participantId, $eventId, 'checkout', $user['id'], $notes);
+            $auth->checkInOutChild($childId, $eventId, 'checkout', $user['id'], $notes);
             return ['message' => 'Check-out recorded successfully'];
 
         case null:

@@ -453,11 +453,44 @@ class Auth {
     }
 
     /**
-     * Check in/out participant
+     * Check in/out child for an event
      */
-    public function checkInOutParticipant(int $participantId, int $eventId, string $action, int $staffId, string $notes = ''): void {
+    public function checkInOutChild(int $childId, int $eventId, string $action, int $staffId, string $notes = ''): void {
         $now = date('Y-m-d H:i:s');
 
+        // Check if child is already registered for this event, if not, add them
+        $existingParticipant = $this->db->fetchOne(
+            "SELECT id FROM event_participants WHERE event_id = ? AND child_name = (SELECT first_name FROM children WHERE id = ?) AND child_surname = (SELECT last_name FROM children WHERE id = ?)",
+            [$eventId, $childId, $childId]
+        );
+
+        if (!$existingParticipant) {
+            // Add child to event participants
+            $child = $this->db->fetchOne("SELECT * FROM children WHERE id = ?", [$childId]);
+            if (!$child) {
+                throw new Exception('Child not found');
+            }
+
+            // Get primary guardian
+            $guardian = $this->db->fetchOne("SELECT * FROM child_guardians WHERE child_id = ? AND is_primary = 1", [$childId]);
+
+            $participantId = $this->db->insert('event_participants', [
+                'event_id' => $eventId,
+                'child_name' => $child['first_name'],
+                'child_surname' => $child['last_name'],
+                'birth_date' => $child['birth_date'],
+                'parent_name' => $guardian ? $guardian['first_name'] . ' ' . $guardian['last_name'] : '',
+                'parent_email' => $guardian ? $guardian['email'] : '',
+                'parent_phone' => $guardian ? $guardian['phone'] : '',
+                'emergency_contact' => $child['medical'] ? $child['medical']['emergency_contact_name'] . ' ' . $child['medical']['emergency_contact_phone'] : '',
+                'medical_notes' => $child['medical'] ? $child['medical']['allergies'] : '',
+                'status' => 'registered'
+            ]);
+        } else {
+            $participantId = $existingParticipant['id'];
+        }
+
+        // Now handle attendance
         if ($action === 'checkin') {
             $this->db->insert('attendance_records', [
                 'participant_id' => $participantId,

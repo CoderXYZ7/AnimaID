@@ -106,7 +106,7 @@
                                 <input
                                     type="text"
                                     id="child-search"
-                                    placeholder="Enter child name..."
+                                    placeholder="Enter child name or registration #..."
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                             </div>
@@ -489,23 +489,17 @@
             }
 
             try {
-                // Load event participants
-                const response = await fetch(`${API_BASE_URL}/calendar/${selectedEventId}`, {
+                // Search children from the children database
+                const response = await fetch(`${API_BASE_URL}/children?search=${encodeURIComponent(query)}&limit=10`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
 
-                if (!response.ok) throw new Error('Failed to load participants');
+                if (!response.ok) throw new Error('Failed to search children');
 
                 const data = await response.json();
-                const participants = data.event.participants || [];
+                const children = data.children || [];
 
-                // Filter participants by search query
-                const filtered = participants.filter(p =>
-                    `${p.child_name} ${p.child_surname}`.toLowerCase().includes(query.toLowerCase()) ||
-                    p.parent_name.toLowerCase().includes(query.toLowerCase())
-                );
-
-                displayChildResults(filtered);
+                displayChildResults(children);
 
             } catch (error) {
                 console.error('Error searching children:', error);
@@ -514,21 +508,21 @@
         }
 
         // Display child search results
-        function displayChildResults(participants) {
+        function displayChildResults(children) {
             const resultsDiv = document.getElementById('child-results');
 
-            if (participants.length === 0) {
+            if (children.length === 0) {
                 resultsDiv.innerHTML = '<div class="text-sm text-gray-500">No children found</div>';
                 return;
             }
 
-            resultsDiv.innerHTML = participants.map(participant => `
+            resultsDiv.innerHTML = children.map(child => `
                 <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                     <div>
-                        <div class="text-sm font-medium text-gray-900">${participant.child_name} ${participant.child_surname}</div>
-                        <div class="text-xs text-gray-600">Parent: ${participant.parent_name}</div>
+                        <div class="text-sm font-medium text-gray-900">${child.first_name} ${child.last_name}</div>
+                        <div class="text-xs text-gray-600">Reg: ${child.registration_number || 'N/A'} | Age: ${child.birth_date ? calculateAge(child.birth_date) : 'N/A'}</div>
                     </div>
-                    <button onclick="checkinChild(${participant.id})" class="text-green-600 hover:text-green-900 text-sm px-3 py-1 bg-green-100 rounded-md">
+                    <button onclick="checkinChild(${child.id})" class="text-green-600 hover:text-green-900 text-sm px-3 py-1 bg-green-100 rounded-md">
                         Check-in
                     </button>
                 </div>
@@ -613,6 +607,20 @@
             errorScreen.classList.remove('hidden');
         }
 
+        // Calculate age from birth date
+        function calculateAge(birthDate) {
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+
+            return age;
+        }
+
         // Global functions for inline event handlers
         window.selectEvent = function(eventId) {
             selectedEventId = eventId;
@@ -620,11 +628,21 @@
             document.getElementById('child-search').focus();
         };
 
-        window.checkinChild = async function(participantId) {
-            selectedParticipantId = participantId;
+        window.checkinChild = async function(childId) {
+            selectedParticipantId = childId;
 
             try {
-                // Load participant details
+                // Load child details
+                const childResponse = await fetch(`${API_BASE_URL}/children/${childId}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!childResponse.ok) throw new Error('Failed to load child details');
+
+                const childData = await childResponse.json();
+                const child = childData.child;
+
+                // Load event details
                 const eventResponse = await fetch(`${API_BASE_URL}/calendar/${selectedEventId}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
@@ -632,9 +650,6 @@
                 if (!eventResponse.ok) throw new Error('Failed to load event details');
 
                 const eventData = await eventResponse.json();
-                const participant = eventData.event.participants.find(p => p.id == participantId);
-
-                if (!participant) throw new Error('Participant not found');
 
                 // Show check-in modal
                 document.getElementById('checkin-modal-title').textContent = 'Check-in Child';
@@ -643,8 +658,8 @@
                         <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-user text-green-600 text-2xl"></i>
                         </div>
-                        <h4 class="text-lg font-semibold text-gray-900 mb-2">${participant.child_name} ${participant.child_surname}</h4>
-                        <p class="text-gray-600 mb-4">Parent: ${participant.parent_name}</p>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">${child.first_name} ${child.last_name}</h4>
+                        <p class="text-gray-600 mb-4">Reg: ${child.registration_number || 'N/A'}</p>
                         <p class="text-sm text-gray-500">Event: ${eventData.event.title}</p>
                     </div>
                 `;
@@ -652,8 +667,8 @@
                 checkinModal.classList.remove('hidden');
 
             } catch (error) {
-                console.error('Error loading participant details:', error);
-                alert('Failed to load participant details');
+                console.error('Error loading child details:', error);
+                alert('Failed to load child details');
             }
         };
 
@@ -672,7 +687,7 @@
                         'Authorization': `Bearer ${userToken}`
                     },
                     body: JSON.stringify({
-                        participant_id: selectedParticipantId,
+                        child_id: selectedParticipantId,
                         event_id: selectedEventId,
                         notes: 'Checked in via quick check-in'
                     })
