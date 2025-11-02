@@ -158,7 +158,10 @@
                 </div>
 
                 <div class="divide-y divide-gray-200" id="attendance-records">
-                    <!-- Attendance records will be loaded here -->
+                    <div class="px-6 py-8 text-center text-gray-500">
+                        <i class="fas fa-list-ul text-3xl mb-2"></i>
+                        <p class="text-sm">Click "View Records" to load attendance records</p>
+                    </div>
                 </div>
 
                 <!-- Records Pagination -->
@@ -240,6 +243,7 @@
         let selectedParticipantId = null;
         let currentRecordsPage = 1;
         let totalRecordsPages = 1;
+        let recordsLoaded = false;
 
         // Initialize page
         async function initPage() {
@@ -277,7 +281,7 @@
                 // Load initial data
                 await loadTodayEvents();
                 await loadRecentActivity();
-                await loadAttendanceRecords();
+                // Don't load attendance records initially - let user click "View Records"
 
                 // Set default date to today
                 document.getElementById('records-date').valueAsDate = new Date();
@@ -554,6 +558,12 @@
             childSearch.value = '';
         });
 
+        // View records button
+        document.getElementById('view-records-btn').addEventListener('click', () => {
+            recordsLoaded = true;
+            loadAttendanceRecords(1, document.getElementById('records-date').value);
+        });
+
         // Filter records by date
         document.getElementById('filter-records-btn').addEventListener('click', () => {
             const date = document.getElementById('records-date').value;
@@ -716,7 +726,9 @@
                 if (response.ok) {
                     checkinModal.classList.add('hidden');
                     await loadRecentActivity();
-                    await loadAttendanceRecords();
+                    if (recordsLoaded) {
+                        await loadAttendanceRecords();
+                    }
                     alert('Check-in successful!');
                 } else {
                     alert('Error: ' + (data.error || 'Failed to check in'));
