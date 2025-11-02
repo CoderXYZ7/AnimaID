@@ -62,24 +62,34 @@ try {
     $statusCode = 500;
     $errorMessage = 'Internal server error';
 
-    if (strpos($e->getMessage(), 'Invalid credentials') !== false) {
+    // More specific error handling
+    $errorMsg = $e->getMessage();
+    if (strpos($errorMsg, 'Invalid credentials') !== false) {
         $statusCode = 401;
         $errorMessage = 'Invalid credentials';
-    } elseif (strpos($e->getMessage(), 'Invalid token') !== false) {
+    } elseif (strpos($errorMsg, 'Invalid token') !== false || strpos($errorMsg, 'Expired token') !== false) {
         $statusCode = 401;
-        $errorMessage = 'Authentication required';
-    } elseif (strpos($e->getMessage(), 'Insufficient permissions') !== false) {
+        $errorMessage = 'Authentication token expired or invalid. Please log in again.';
+    } elseif (strpos($errorMsg, 'Insufficient permissions') !== false) {
         $statusCode = 403;
         $errorMessage = 'Insufficient permissions';
-    } elseif (strpos($e->getMessage(), 'not found') !== false) {
+    } elseif (strpos($errorMsg, 'not found') !== false) {
         $statusCode = 404;
         $errorMessage = 'Resource not found';
+    } elseif (strpos($errorMsg, 'Authentication required') !== false) {
+        $statusCode = 401;
+        $errorMessage = 'Authentication required';
     }
+
+    // Log detailed error for debugging (only in development)
+    error_log("API Error [{$endpoint}]: " . $errorMsg);
 
     http_response_code($statusCode);
     echo json_encode([
         'success' => false,
-        'error' => $errorMessage
+        'error' => $errorMessage,
+        'endpoint' => $endpoint,
+        'method' => $requestMethod
     ]);
 }
 
