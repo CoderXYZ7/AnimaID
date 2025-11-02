@@ -278,11 +278,19 @@
         <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
             <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
-            <p class="text-gray-600 mb-6">You don't have permission to access system status.</p>
-            <a href="../dashboard.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Back to Dashboard
-            </a>
+            <p class="text-gray-600 mb-4">You don't have permission to access system status.</p>
+            <p class="text-sm text-gray-500 mb-6">System status requires admin privileges. Please log in with an admin account or contact your system administrator.</p>
+            <div class="space-y-3">
+                <a href="../login.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Log In
+                </a>
+                <br>
+                <a href="../dashboard.html" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
         </div>
     </div>
 
@@ -327,6 +335,17 @@
                 // Check if user has admin permissions
                 const hasPermission = await checkAdminPermission();
                 if (!hasPermission) {
+                    showErrorScreen();
+                    return;
+                }
+
+                // Double-check user roles from token
+                const hasAdminRole = currentUser.roles && currentUser.roles.some(role =>
+                    role.name === 'technical_admin' ||
+                    role.permissions && role.permissions.some(perm => perm.startsWith('admin.'))
+                );
+
+                if (!hasAdminRole) {
                     showErrorScreen();
                     return;
                 }
