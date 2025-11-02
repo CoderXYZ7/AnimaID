@@ -356,7 +356,7 @@
                         ${user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button onclick="editUser(${user.id})" class="text-blue-600 hover:text-blue-900 mr-3">
+                        <button onclick="editUser(${user.id}, '${user.username}', '${user.email}', ${user.is_active})" class="text-blue-600 hover:text-blue-900 mr-3">
                             <i class="fas fa-edit"></i> Edit
                         </button>
                         <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-900">
@@ -434,14 +434,22 @@
             const userData = {
                 username: formData.get('username'),
                 email: formData.get('email'),
-                password: formData.get('password'),
                 role_ids: Array.from(userForm.querySelectorAll('input[name="roles"]:checked')).map(cb => parseInt(cb.value)),
                 is_active: formData.has('is_active')
             };
 
+            // Only include password for new users
+            if (!userForm.dataset.userId) {
+                userData.password = formData.get('password');
+            }
+
             try {
-                const response = await fetch(`${API_BASE_URL}/users`, {
-                    method: 'POST',
+                const userId = userForm.dataset.userId;
+                const method = userId ? 'PUT' : 'POST';
+                const url = userId ? `${API_BASE_URL}/users/${userId}` : `${API_BASE_URL}/users`;
+
+                const response = await fetch(url, {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${userToken}`
@@ -453,10 +461,11 @@
 
                 if (response.ok) {
                     userModal.classList.add('hidden');
+                    delete userForm.dataset.userId; // Clear edit state
                     await loadUsers(currentPage, searchQuery);
-                    alert('User created successfully!');
+                    alert(`User ${userId ? 'updated' : 'created'} successfully!`);
                 } else {
-                    alert('Error: ' + (data.error || 'Failed to create user'));
+                    alert('Error: ' + (data.error || `Failed to ${userId ? 'update' : 'create'} user`));
                 }
 
             } catch (error) {
@@ -521,9 +530,64 @@
         }
 
         // Global functions for inline event handlers
-        window.editUser = function(userId) {
-            alert('Edit user functionality coming soon! User ID: ' + userId);
+        window.editUser = async function(userId, username, email, isActive) {
+            try {
+                // Load user details including roles
+                const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    alert('Failed to load user details');
+                    return;
+                }
+
+                const userData = await response.json();
+
+                // Populate form
+                document.getElementById('modal-title').textContent = 'Edit User';
+                document.getElementById('username').value = userData.user.username;
+                document.getElementById('email').value = userData.user.email;
+                document.getElementById('is_active').checked = userData.user.is_active;
+
+                // Hide password field for editing
+                document.getElementById('password-section').style.display = 'none';
+                document.getElementById('password').required = false;
+
+                // Load and check user roles
+                const rolesResponse = await fetch(`${API_BASE_URL}/roles`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (rolesResponse.ok) {
+                    const rolesData = await rolesResponse.json();
+                    displayRolesForEdit(rolesData.roles, userData.user.roles);
+                }
+
+                // Store user ID for update
+                userForm.dataset.userId = userId;
+
+                // Show modal
+                userModal.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error loading user for edit:', error);
+                alert('Failed to load user details');
+            }
         };
+
+        // Display roles with user's current roles checked
+        function displayRolesForEdit(allRoles, userRoles) {
+            const rolesList = document.getElementById('roles-list');
+            const userRoleIds = userRoles.map(role => role.id);
+
+            rolesList.innerHTML = allRoles.map(role => `
+                <label class="flex items-center">
+                    <input type="checkbox" name="roles" value="${role.id}" ${userRoleIds.includes(role.id) ? 'checked' : ''} class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <span class="ml-2 text-sm text-gray-700">${role.display_name}</span>
+                </label>
+            `).join('');
+        }
 
         window.deleteUser = async function(userId) {
             if (!confirm('Are you sure you want to delete this user?')) return;
