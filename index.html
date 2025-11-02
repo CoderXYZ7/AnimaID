@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - Animation Center Management Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-circle text-blue-600 text-2xl"></i>
+                    <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
+                    <a href="#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
+                    <a href="#contact" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+                    <a href="login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
+                </nav>
+                <div class="md:hidden flex items-center space-x-2">
+                    <a href="login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </a>
+                    <button class="text-gray-600">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-blue-50 to-green-50 py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Unified Digital Environment for <span class="text-blue-600">Animation Centers</span>
+            </h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                Coordinate staff, organize activities, manage attendance, and provide seamless access for parents and families.
+                A modular, extensible platform designed for multi-deployment across centers.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors">
+                    <i class="fas fa-rocket mr-2"></i>Get Started
+                </button>
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-8 rounded-lg transition-colors">
+                    <i class="fas fa-info-circle mr-2"></i>Learn More
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h3 class="text-3xl font-bold text-gray-900 mb-4">Core Features</h3>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Everything you need to manage animation centers efficiently with a focus on user experience and extensibility.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Staff Coordination</h4>
+                    <p class="text-gray-600">Manage roles, permissions, and shifts with cumulative tags for progressive access.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Activity Management</h4>
+                    <p class="text-gray-600">Organize calendars, registrations, and attendance tracking for all activities.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-comments text-orange-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Communication Hub</h4>
+                    <p class="text-gray-600">Internal messaging, public notices, and media sharing for seamless communication.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-puzzle-piece text-purple-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Modular Applets</h4>
+                    <p class="text-gray-600">Extensible system with hot-pluggable applets for custom features and integrations.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-mobile-alt text-blue-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Multi-Device Access</h4>
+                    <p class="text-gray-600">Responsive web interfaces and mobile apps for staff and public access.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-bar text-green-600 text-xl"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Analytics & Reporting</h4>
+                    <p class="text-gray-600">KPIs, statistics, and insights to optimize resources and planning.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-3xl font-bold text-gray-900 mb-6">Built for Animation Centers</h3>
+                    <p class="text-lg text-gray-600 mb-6">
+                        AnimaID bridges the gap between coordinators, animators, and families, providing a unified platform
+                        that digitizes operations while maintaining the human touch that makes animation centers special.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            Scalable for multiple centers
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            Containerizable and portable
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            Open-source and extensible
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-8">
+                    <h4 class="text-xl font-semibold text-gray-900 mb-4">User Types</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-cog text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium text-gray-900">Technical Admins</h5>
+                                <p class="text-sm text-gray-600">System configuration and management</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-user-tie text-green-600"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium text-gray-900">AnimaID Staff</h5>
+                                <p class="text-sm text-gray-600">Operational management with role tags</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-users text-orange-600"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium text-gray-900">Parents & Families</h5>
+                                <p class="text-sm text-gray-600">Public access and registrations</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-circle text-blue-400 text-2xl"></i>
+                        <h4 class="text-xl font-bold">AnimaID</h4>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Platform</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Modules</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Applets</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">API</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Support</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
