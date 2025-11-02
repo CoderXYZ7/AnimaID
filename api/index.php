@@ -83,13 +83,22 @@ try {
 
     // Log detailed error for debugging (only in development)
     error_log("API Error [{$endpoint}]: " . $errorMsg);
+    error_log("API Error Details - Method: {$requestMethod}, Endpoint: {$endpoint}, UserId: {$resourceId}");
+    error_log("API Error Request Body: " . json_encode($requestBody));
+    error_log("API Error Stack Trace: " . $e->getTraceAsString());
 
     http_response_code($statusCode);
     echo json_encode([
         'success' => false,
         'error' => $errorMessage,
         'endpoint' => $endpoint,
-        'method' => $requestMethod
+        'method' => $requestMethod,
+        'debug_info' => [
+            'error_message' => $errorMsg,
+            'endpoint' => $endpoint,
+            'method' => $requestMethod,
+            'user_id' => $resourceId
+        ]
     ]);
 }
 
@@ -121,6 +130,12 @@ function handleRequest(string $endpoint, ?string $resourceId, string $method, ar
 
         case 'system':
             return handleSystemRequest($resourceId, $method, $token, $auth);
+
+        case 'communications':
+            return handleCommunicationsRequest($resourceId, $method, $body, $token, $auth);
+
+        case 'media':
+            return handleMediaRequest($resourceId, $method, $body, $token, $auth);
 
         default:
             throw new Exception('Endpoint not found');
@@ -168,6 +183,8 @@ function handleUsersRequest(?string $userId, string $method, array $body, ?strin
     if (!$auth->checkPermission($user['id'], 'admin.users')) {
         throw new Exception('Insufficient permissions');
     }
+
+
 
     if ($userId === null) {
         // Handle collection requests
@@ -300,6 +317,135 @@ function handlePermissionsRequest(string $method, ?string $token, Auth $auth): a
 
         default:
             throw new Exception('Method not allowed');
+    }
+}
+
+function handleCommunicationsRequest(?string $communicationId, string $method, array $body, ?string $token, Auth $auth): array {
+    global $pathSegments;
+
+    $user = null;
+
+    // For public communications, token is optional
+    if ($token) {
+        $user = $auth->verifyToken($token);
+    }
+
+    // Check if this is a comments endpoint: /api/communications/{id}/comments
+    if ($communicationId && isset($pathSegments[2]) && $pathSegments[2] === 'comments') {
+        $communicationId = (int)$communicationId;
+
+        switch ($method) {
+            case 'GET':
+                // Get comments for a communication
+                $comments = $auth->getCommunicationComments($communicationId);
+                return ['comments' => $comments];
+
+            case 'POST':
+                // Add comment to communication
+                $commentData = $body;
+                $commentData['communication_id'] = $communicationId;
+
+                // For public comments, no authentication required
+                if (!$user) {
+                    $commentData['created_by'] = null; // Anonymous comment
+                }
+
+                $commentId = $auth->addCommunicationComment($communicationId, $commentData, $user['id'] ?? null);
+                return [
+                    'comment_id' => $commentId,
+                    'message' => 'Comment added successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    if ($communicationId === null) {
+        // Handle collection requests
+        switch ($method) {
+            case 'GET':
+                // Check if requesting public or internal communications
+                $isPublic = isset($_GET['public']) ? (int)$_GET['public'] : 0;
+
+                if ($isPublic) {
+                    // Public communications - no auth required
+                    $page = (int)($_GET['page'] ?? 1);
+                    $limit = (int)($_GET['limit'] ?? 10);
+                    return $auth->getCommunications($page, $limit, ['is_public' => 1, 'status' => 'published']);
+                } else {
+                    // Internal communications - auth required
+                    if (!$user || !$auth->checkPermission($user['id'], 'communications.view')) {
+                        throw new Exception('Authentication required or insufficient permissions');
+                    }
+
+                    $page = (int)($_GET['page'] ?? 1);
+                    $limit = (int)($_GET['limit'] ?? 20);
+
+                    $filters = [];
+                    if (isset($_GET['status'])) $filters['status'] = $_GET['status'];
+                    if (isset($_GET['communication_type'])) $filters['communication_type'] = $_GET['communication_type'];
+                    if (isset($_GET['priority'])) $filters['priority'] = $_GET['priority'];
+                    if (isset($_GET['target_audience'])) $filters['target_audience'] = $_GET['target_audience'];
+
+                    return $auth->getCommunications($page, $limit, $filters);
+                }
+
+            case 'POST':
+                if (!$user || !$auth->checkPermission($user['id'], 'communications.send')) {
+                    throw new Exception('Authentication required or insufficient permissions');
+                }
+
+                $communicationId = $auth->createCommunication($body, $user['id']);
+                return [
+                    'communication_id' => $communicationId,
+                    'message' => 'Communication created successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    } else {
+        // Handle individual communication requests
+        $communicationId = (int)$communicationId;
+
+        switch ($method) {
+            case 'GET':
+                $communication = $auth->getCommunicationDetails($communicationId);
+
+                if (!$communication) {
+                    throw new Exception('Communication not found');
+                }
+
+                // Check if public communication or user has permission to view
+                if (!$communication['is_public'] && (!$user || !$auth->checkPermission($user['id'], 'communications.view'))) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                // Record the view for analytics
+                $auth->recordCommunicationView($communicationId, $user['id'] ?? null);
+
+                return ['communication' => $communication];
+
+            case 'PUT':
+                if (!$user || !$auth->checkPermission($user['id'], 'communications.send')) {
+                    throw new Exception('Authentication required or insufficient permissions');
+                }
+
+                $auth->updateCommunication($communicationId, $body);
+                return ['message' => 'Communication updated successfully'];
+
+            case 'DELETE':
+                if (!$user || !$auth->checkPermission($user['id'], 'communications.manage')) {
+                    throw new Exception('Authentication required or insufficient permissions');
+                }
+
+                $auth->deleteCommunication($communicationId);
+                return ['message' => 'Communication deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
     }
 }
 
