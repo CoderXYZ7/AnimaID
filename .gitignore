@@ -4,3 +4,4 @@ database/*.db
 database/*.sqlite
 database/*.sqlite3
 *.log
+.ottotime
