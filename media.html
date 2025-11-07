@@ -465,3 +465,745 @@
                 renderBreadcrumb();
                 renderMediaContent(data.folders, data.files);
 
+            } catch (error) {
+                console.error('Error loading media content:', error);
+                showError('Failed to load media content');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Render breadcrumb navigation
+        function renderBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            let html = '<a href="#" onclick="navigateToFolder(null)" class="hover:text-blue-600"><i class="fas fa-home mr-1"></i>Home</a>';
+
+            if (breadcrumbPath.length > 0) {
+                breadcrumbPath.forEach((folder, index) => {
+                    html += ' <i class="fas fa-chevron-right text-gray-400 mx-2"></i> ';
+                    if (index === breadcrumbPath.length - 1) {
+                        html += `<span class="text-gray-900">${escapeHtml(folder.name)}</span>`;
+                    } else {
+                        html += `<a href="#" onclick="navigateToFolder(${folder.id})" class="hover:text-blue-600">${escapeHtml(folder.name)}</a>`;
+                    }
+                });
+            }
+
+            breadcrumb.innerHTML = html;
+        }
+
+        // Render media content
+        function renderMediaContent(folders, files) {
+            const gridContainer = document.getElementById('grid-container');
+            const listContainer = document.getElementById('list-container');
+            const emptyState = document.getElementById('empty-state');
+
+            if (folders.length === 0 && files.length === 0) {
+                gridContainer.innerHTML = '';
+                listContainer.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            // Render grid view
+            let gridHtml = '';
+
+            // Add folders first
+            folders.forEach(folder => {
+                gridHtml += `
+                    <div class="folder-item bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+                         onclick="navigateToFolder(${folder.id})">
+                        <div class="text-center">
+                            <i class="fas fa-folder text-yellow-500 text-4xl mb-2"></i>
+                            <p class="text-sm font-medium text-gray-900 truncate">${escapeHtml(folder.name)}</p>
+                            <p class="text-xs text-gray-500">${folder.file_count} items</p>
+                        </div>
+                        <div class="mt-2 flex justify-end space-x-1">
+                            <button onclick="event.stopPropagation(); previewFolder(${folder.id})" class="text-gray-400 hover:text-blue-600 p-1">
+                                <i class="fas fa-eye text-xs"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); downloadFolder(${folder.id})" class="text-gray-400 hover:text-green-600 p-1">
+                                <i class="fas fa-download text-xs"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); showShareModal('folder', ${folder.id})" class="text-gray-400 hover:text-purple-600 p-1">
+                                <i class="fas fa-share text-xs"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); deleteFolder(${folder.id})" class="text-gray-400 hover:text-red-600 p-1">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Add files
+            files.forEach(file => {
+                const fileIcon = getFileIcon(file.file_type);
+                const fileSize = formatFileSize(file.file_size);
+
+                gridHtml += `
+                    <div class="file-item bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                        <div class="text-center">
+                            <i class="${fileIcon} text-blue-500 text-4xl mb-2"></i>
+                            <p class="text-sm font-medium text-gray-900 truncate" title="${escapeHtml(file.original_name)}">${escapeHtml(file.original_name)}</p>
+                            <p class="text-xs text-gray-500">${fileSize}</p>
+                        </div>
+                        <div class="mt-2 flex justify-end space-x-1">
+                            <button onclick="previewFile(${file.id})" class="text-gray-400 hover:text-blue-600 p-1">
+                                <i class="fas fa-eye text-xs"></i>
+                            </button>
+                            <button onclick="downloadFile(${file.id})" class="text-gray-400 hover:text-green-600 p-1">
+                                <i class="fas fa-download text-xs"></i>
+                            </button>
+                            <button onclick="showShareModal('file', ${file.id})" class="text-gray-400 hover:text-purple-600 p-1">
+                                <i class="fas fa-share text-xs"></i>
+                            </button>
+                            <button onclick="deleteFile(${file.id})" class="text-gray-400 hover:text-red-600 p-1">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            gridContainer.innerHTML = gridHtml;
+
+            // Render list view
+            let listHtml = '';
+
+            // Add folders
+            folders.forEach(folder => {
+                listHtml += `
+                    <tr class="hover:bg-gray-50 cursor-pointer" onclick="navigateToFolder(${folder.id})">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <i class="fas fa-folder text-yellow-500 mr-3"></i>
+                                <span class="text-sm font-medium text-gray-900">${escapeHtml(folder.name)}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Folder</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${folder.file_count} items</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(folder.updated_at)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <button onclick="event.stopPropagation(); previewFolder(${folder.id})" class="text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); downloadFolder(${folder.id})" class="text-green-600 hover:text-green-800 mr-2">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); showShareModal('folder', ${folder.id})" class="text-purple-600 hover:text-purple-800 mr-2">
+                                <i class="fas fa-share"></i>
+                            </button>
+                            <button onclick="event.stopPropagation(); deleteFolder(${folder.id})" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Add files
+            files.forEach(file => {
+                const fileIcon = getFileIcon(file.file_type);
+                const fileSize = formatFileSize(file.file_size);
+
+                listHtml += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <i class="${fileIcon} text-blue-500 mr-3"></i>
+                                <span class="text-sm font-medium text-gray-900">${escapeHtml(file.original_name)}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">${file.file_type}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${fileSize}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(file.updated_at)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <button onclick="previewFile(${file.id})" class="text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="downloadFile(${file.id})" class="text-green-600 hover:text-green-800 mr-2">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button onclick="showShareModal('file', ${file.id})" class="text-purple-600 hover:text-purple-800 mr-2">
+                                <i class="fas fa-share"></i>
+                            </button>
+                            <button onclick="deleteFile(${file.id})" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            listContainer.innerHTML = listHtml;
+        }
+
+        // Navigate to folder
+        function navigateToFolder(folderId) {
+            currentFolderId = folderId;
+
+            if (folderId === null) {
+                breadcrumbPath = [];
+            } else {
+                // Build breadcrumb path
+                breadcrumbPath = [];
+                let currentId = folderId;
+
+                // This is a simplified version - in a real implementation,
+                // you'd need to fetch the full path from the server
+                breadcrumbPath.push({ id: folderId, name: 'Current Folder' });
+            }
+
+            loadMediaContent();
+        }
+
+        // Show create folder modal
+        function showCreateFolderModal() {
+            document.getElementById('folder-modal').classList.remove('hidden');
+            document.getElementById('folder-name').focus();
+        }
+
+        // Hide create folder modal
+        function hideCreateFolderModal() {
+            document.getElementById('folder-modal').classList.add('hidden');
+            document.getElementById('folder-form').reset();
+        }
+
+        // Create folder
+        async function createFolder(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('folder-name').value.trim();
+            const description = document.getElementById('folder-description').value.trim();
+
+            if (!name) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/media`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        type: 'folder',
+                        name: name,
+                        description: description,
+                        parent_id: currentFolderId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create folder');
+                }
+
+                hideCreateFolderModal();
+                loadMediaContent();
+                showSuccess('Folder created successfully');
+
+            } catch (error) {
+                console.error('Error creating folder:', error);
+                showError('Failed to create folder');
+            }
+        }
+
+        // Show upload modal
+        function showUploadModal() {
+            document.getElementById('upload-modal').classList.remove('hidden');
+        }
+
+        // Hide upload modal
+        function hideUploadModal() {
+            document.getElementById('upload-modal').classList.add('hidden');
+            document.getElementById('upload-progress').classList.add('hidden');
+            document.getElementById('progress-bar').style.width = '0%';
+        }
+
+        // Handle file selection
+        function handleFileSelection(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                uploadFiles(files);
+            }
+        }
+
+        // Upload files
+        async function uploadFiles(files) {
+            const progressContainer = document.getElementById('upload-progress');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+
+            progressContainer.classList.remove('hidden');
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const formData = new FormData();
+
+                formData.append('file', file);
+                formData.append('folder_id', currentFolderId || '');
+
+                progressText.textContent = `Uploading ${file.name}...`;
+                progressBar.style.width = `${((i) / files.length) * 100}%`;
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/media`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${userToken}`
+                        },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to upload ${file.name}`);
+                    }
+
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                    showError(`Failed to upload ${file.name}`);
+                }
+            }
+
+            progressBar.style.width = '100%';
+            progressText.textContent = 'Upload complete!';
+            setTimeout(() => {
+                hideUploadModal();
+                loadMediaContent();
+                showSuccess('Files uploaded successfully');
+            }, 1000);
+        }
+
+        // Preview file
+        async function previewFile(fileId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/media/files/${fileId}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load file details');
+                }
+
+                const data = await response.json();
+                const file = data.file;
+
+                document.getElementById('preview-title').textContent = file.original_name;
+
+                const previewContent = document.getElementById('preview-content');
+
+                if (file.file_type === 'image') {
+                    previewContent.innerHTML = `<img src="/api/media/files/${fileId}/download" class="max-w-full max-h-full object-contain mx-auto">`;
+                } else if (file.file_type === 'video') {
+                    previewContent.innerHTML = `<video controls class="max-w-full max-h-full mx-auto"><source src="/api/media/files/${fileId}/download" type="${file.mime_type}"></video>`;
+                } else if (file.file_type === 'audio') {
+                    previewContent.innerHTML = `<audio controls class="w-full"><source src="/api/media/files/${fileId}/download" type="${file.mime_type}"></audio>`;
+                } else if (file.file_type === 'document' && file.mime_type === 'application/pdf') {
+                    previewContent.innerHTML = `<iframe src="/api/media/files/${fileId}/download" class="w-full h-full"></iframe>`;
+                } else if (isTextFile(file.mime_type)) {
+                    // Load and display text content
+                    await loadTextFileContent(fileId, file);
+                } else {
+                    previewContent.innerHTML = `
+                        <div class="text-center">
+                            <i class="${getFileIcon(file.file_type)} text-6xl text-gray-400 mb-4"></i>
+                            <p class="text-gray-600">Preview not available for this file type</p>
+                            <p class="text-sm text-gray-500 mt-2">File: ${escapeHtml(file.original_name)}</p>
+                            <p class="text-sm text-gray-500">Size: ${formatFileSize(file.file_size)}</p>
+                            <p class="text-sm text-gray-500">Type: ${file.mime_type}</p>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('preview-modal').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error previewing file:', error);
+                showError('Failed to preview file');
+            }
+        }
+
+        // Check if file is a text file that can be previewed
+        function isTextFile(mimeType) {
+            const textTypes = [
+                'text/plain',
+                'text/csv',
+                'text/markdown',
+                'text/html',
+                'text/css',
+                'text/javascript',
+                'application/json',
+                'application/xml',
+                'application/javascript'
+            ];
+            return textTypes.includes(mimeType) || mimeType.startsWith('text/');
+        }
+
+        // Load and display text file content
+        async function loadTextFileContent(fileId, file) {
+            try {
+                // Use the download endpoint which returns JSON for text files when requested via fetch
+                const response = await fetch(`/api/media/files/${fileId}/download?token=${userToken}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load file content: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to load file content');
+                }
+
+                const content = data.content;
+                const previewContent = document.getElementById('preview-content');
+
+                // Determine syntax highlighting class
+                let syntaxClass = '';
+                if (file.mime_type === 'text/csv') {
+                    syntaxClass = 'language-csv';
+                } else if (file.mime_type === 'application/json') {
+                    syntaxClass = 'language-json';
+                } else if (file.mime_type === 'text/markdown') {
+                    syntaxClass = 'language-markdown';
+                } else if (file.mime_type === 'text/html') {
+                    syntaxClass = 'language-html';
+                } else if (file.mime_type === 'text/css') {
+                    syntaxClass = 'language-css';
+                } else if (file.mime_type.includes('javascript')) {
+                    syntaxClass = 'language-javascript';
+                }
+
+                previewContent.innerHTML = `
+                    <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto max-h-96">
+                        <pre class="whitespace-pre-wrap text-sm"><code class="${syntaxClass}">${escapeHtml(content)}</code></pre>
+                    </div>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p><strong>File:</strong> ${escapeHtml(file.original_name)}</p>
+                        <p><strong>Size:</strong> ${formatFileSize(file.file_size)}</p>
+                        <p><strong>Type:</strong> ${file.mime_type}</p>
+                        <p><strong>Lines:</strong> ${content.split('\n').length}</p>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error loading text file content:', error);
+                const previewContent = document.getElementById('preview-content');
+                previewContent.innerHTML = `
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl mb-4"></i>
+                        <p class="text-gray-600">Failed to load file content for preview</p>
+                        <p class="text-sm text-gray-500 mt-2">File: ${escapeHtml(file.original_name)}</p>
+                        <p class="text-sm text-gray-500">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Preview folder (show folder contents)
+        async function previewFolder(folderId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/media/folders/${folderId}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load folder details');
+                }
+
+                const data = await response.json();
+                const folderContents = data.contents;
+
+                document.getElementById('preview-title').textContent = `Folder: ${data.name || 'Unknown'}`;
+
+                const previewContent = document.getElementById('preview-content');
+
+                let contentHtml = '<div class="space-y-4">';
+
+                if (folderContents.folders.length > 0) {
+                    contentHtml += '<h3 class="text-lg font-semibold text-gray-900">Folders</h3>';
+                    contentHtml += '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
+                    folderContents.folders.forEach(folder => {
+                        contentHtml += `
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+                                <i class="fas fa-folder text-yellow-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-medium text-gray-900 truncate">${escapeHtml(folder.name)}</p>
+                                <p class="text-xs text-gray-500">${folder.file_count} items</p>
+                            </div>
+                        `;
+                    });
+                    contentHtml += '</div>';
+                }
+
+                if (folderContents.files.length > 0) {
+                    contentHtml += '<h3 class="text-lg font-semibold text-gray-900 mt-6">Files</h3>';
+                    contentHtml += '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
+                    folderContents.files.forEach(file => {
+                        const fileIcon = getFileIcon(file.file_type);
+                        const fileSize = formatFileSize(file.file_size);
+                        contentHtml += `
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                                <i class="${fileIcon} text-blue-500 text-2xl mb-2"></i>
+                                <p class="text-sm font-medium text-gray-900 truncate" title="${escapeHtml(file.original_name)}">${escapeHtml(file.original_name)}</p>
+                                <p class="text-xs text-gray-500">${fileSize}</p>
+                            </div>
+                        `;
+                    });
+                    contentHtml += '</div>';
+                }
+
+                if (folderContents.folders.length === 0 && folderContents.files.length === 0) {
+                    contentHtml += '<p class="text-gray-500 text-center py-8">This folder is empty</p>';
+                }
+
+                contentHtml += '</div>';
+                previewContent.innerHTML = contentHtml;
+
+                document.getElementById('preview-modal').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error previewing folder:', error);
+                showError('Failed to preview folder');
+            }
+        }
+
+        // Download folder (create ZIP)
+        function downloadFolder(folderId) {
+            // For now, show a message that folder download is not implemented
+            // In a real implementation, you'd need server-side ZIP creation
+            showError('Folder download is not yet implemented. Please download files individually.');
+        }
+
+        // Delete folder
+        async function deleteFolder(folderId) {
+            if (!confirm('Are you sure you want to delete this folder and all its contents? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/media/folders/${folderId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete folder');
+                }
+
+                loadMediaContent();
+                showSuccess('Folder deleted successfully');
+
+            } catch (error) {
+                console.error('Error deleting folder:', error);
+                showError('Failed to delete folder');
+            }
+        }
+
+        // Download file
+        function downloadFile(fileId) {
+            window.open(`${API_BASE_URL}/media/files/${fileId}/download?token=${userToken}`, '_blank');
+        }
+
+        // Delete file
+        async function deleteFile(fileId) {
+            if (!confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/media/files/${fileId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete file');
+                }
+
+                loadMediaContent();
+                showSuccess('File deleted successfully');
+
+            } catch (error) {
+                console.error('Error deleting file:', error);
+                showError('Failed to delete file');
+            }
+        }
+
+        // Show share modal
+        function showShareModal(resourceType, resourceId) {
+            document.getElementById('share-modal').classList.remove('hidden');
+            document.getElementById('create-share-link-btn').dataset.resourceType = resourceType;
+            document.getElementById('create-share-link-btn').dataset.resourceId = resourceId;
+            document.getElementById('share-link-container').classList.add('hidden');
+        }
+
+        // Hide share modal
+        function hideShareModal() {
+            document.getElementById('share-modal').classList.add('hidden');
+            document.getElementById('share-link-container').classList.add('hidden');
+        }
+
+        // Create share link
+        async function createShareLink() {
+            const resourceType = document.getElementById('create-share-link-btn').dataset.resourceType;
+            const resourceId = document.getElementById('create-share-link-btn').dataset.resourceId;
+            const permission = document.getElementById('share-permission').value;
+            const expiresHours = document.getElementById('share-expiry').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/media/share`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        resource_type: resourceType,
+                        resource_id: resourceId,
+                        permission: permission,
+                        expires_hours: expiresHours
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create share link');
+                }
+
+                const data = await response.json();
+                document.getElementById('share-link').value = window.location.origin + data.share_url;
+                document.getElementById('share-link-container').classList.remove('hidden');
+
+                showSuccess('Share link created successfully');
+
+            } catch (error) {
+                console.error('Error creating share link:', error);
+                showError('Failed to create share link');
+            }
+        }
+
+        // Copy share link
+        function copyShareLink() {
+            const shareLink = document.getElementById('share-link');
+            shareLink.select();
+            document.execCommand('copy');
+            showSuccess('Link copied to clipboard');
+        }
+
+        // Hide preview modal
+        function hidePreviewModal() {
+            document.getElementById('preview-modal').classList.add('hidden');
+        }
+
+        // Change view mode
+        function changeViewMode() {
+            const viewMode = document.getElementById('view-mode').value;
+            const gridView = document.getElementById('grid-view');
+            const listView = document.getElementById('list-view');
+
+            if (viewMode === 'grid') {
+                gridView.classList.remove('hidden');
+                listView.classList.add('hidden');
+            } else {
+                gridView.classList.add('hidden');
+                listView.classList.remove('hidden');
+            }
+
+            currentViewMode = viewMode;
+        }
+
+        // Change sort by
+        function changeSortBy() {
+            currentSortBy = document.getElementById('sort-by').value;
+            // TODO: Implement sorting
+        }
+
+        // Handle search
+        function handleSearch() {
+            const searchTerm = document.getElementById('search-input').value.trim();
+            // TODO: Implement search
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('animaid_token');
+            localStorage.removeItem('animaid_user');
+            window.location.href = 'login.html';
+        }
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function showErrorScreen() {
+            loadingScreen.classList.add('hidden');
+            mainContent.classList.add('hidden');
+            errorScreen.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            // Simple error display - could be enhanced with toast notifications
+            alert('Error: ' + message);
+        }
+
+        function showSuccess(message) {
+            // Simple success display - could be enhanced with toast notifications
+            alert('Success: ' + message);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getFileIcon(fileType) {
+            switch (fileType) {
+                case 'image': return 'fas fa-file-image';
+                case 'video': return 'fas fa-file-video';
+                case 'audio': return 'fas fa-file-audio';
+                case 'document': return 'fas fa-file-alt';
+                default: return 'fas fa-file';
+            }
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initPage();
+            setupEventListeners();
+        });
+    </script>
+</body>
+</html>

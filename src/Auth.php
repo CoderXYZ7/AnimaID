@@ -683,14 +683,26 @@ class Auth {
      * Create a new child
      */
     public function createChild(array $childData, int $createdBy): int {
+        // Separate basic child data from medical data
+        $basicFields = ['first_name', 'last_name', 'birth_date', 'gender', 'address', 'phone', 'email', 'nationality', 'language', 'school', 'grade', 'status', 'registration_number'];
+        $basicData = array_intersect_key($childData, array_flip($basicFields));
+
         // Generate registration number if not provided
-        if (empty($childData['registration_number'])) {
-            $childData['registration_number'] = 'REG-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        if (empty($basicData['registration_number'])) {
+            $basicData['registration_number'] = 'REG-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
         }
 
-        $childId = $this->db->insert('children', array_merge($childData, [
+        $childId = $this->db->insert('children', array_merge($basicData, [
             'created_by' => $createdBy
         ]));
+
+        // Handle medical data separately
+        $medicalFields = ['blood_type', 'allergies', 'medications', 'medical_conditions', 'doctor_name', 'doctor_phone', 'insurance_provider', 'insurance_number', 'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relationship', 'special_needs', 'medical_notes'];
+        $medicalData = array_intersect_key($childData, array_flip($medicalFields));
+
+        if (!empty($medicalData)) {
+            $this->updateChildMedical($childId, $medicalData);
+        }
 
         return $childId;
     }
@@ -706,6 +718,14 @@ class Auth {
             $updateData['updated_by'] = $updatedBy;
             $this->db->update('children', $updateData, 'id = ?', [$childId]);
         }
+
+        // Handle medical data separately
+        $medicalFields = ['blood_type', 'allergies', 'medications', 'medical_conditions', 'doctor_name', 'doctor_phone', 'insurance_provider', 'insurance_number', 'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relationship', 'special_needs', 'medical_notes'];
+        $medicalData = array_intersect_key($childData, array_flip($medicalFields));
+
+        if (!empty($medicalData)) {
+            $this->updateChildMedical($childId, $medicalData);
+        }
     }
 
     /**
@@ -719,13 +739,25 @@ class Auth {
         }
 
         // Get medical information
-        $child['medical'] = $this->db->fetchOne("SELECT * FROM child_medical WHERE child_id = ?", [$childId]);
+        $medical = $this->db->fetchOne("SELECT * FROM child_medical WHERE child_id = ?", [$childId]);
+        if ($medical && isset($medical['notes'])) {
+            $medical['medical_notes'] = $medical['notes'];
+            unset($medical['notes']);
+        }
+        $child['medical'] = $medical;
 
         // Get guardians
         $child['guardians'] = $this->db->fetchAll("SELECT * FROM child_guardians WHERE child_id = ? ORDER BY is_primary DESC, created_at", [$childId]);
 
         // Get documents
         $child['documents'] = $this->db->fetchAll("SELECT * FROM child_documents WHERE child_id = ? ORDER BY created_at DESC", [$childId]);
+
+        // Map document fields for frontend compatibility
+        foreach ($child['documents'] as &$doc) {
+            $doc['name'] = $doc['original_name'];
+            $doc['type'] = $doc['document_type'];
+            $doc['size'] = $doc['file_size'];
+        }
 
         // Get notes
         $child['notes'] = $this->db->fetchAll("SELECT cn.*, u.username as created_by_name FROM child_notes cn JOIN users u ON cn.created_by = u.id WHERE cn.child_id = ? ORDER BY cn.created_at DESC", [$childId]);
@@ -740,6 +772,12 @@ class Auth {
      * Update child medical information
      */
     public function updateChildMedical(int $childId, array $medicalData): void {
+        // Map 'medical_notes' field to 'notes' for database compatibility
+        if (isset($medicalData['medical_notes'])) {
+            $medicalData['notes'] = $medicalData['medical_notes'];
+            unset($medicalData['medical_notes']);
+        }
+
         $existing = $this->db->fetchOne("SELECT id FROM child_medical WHERE child_id = ?", [$childId]);
 
         if ($existing) {
@@ -1270,6 +1308,309 @@ class Auth {
             $this->db->update('media_folders', ['path' => $newPath], 'id = ?', [$subfolder['id']]);
             $this->updateSubfolderPaths($subfolder['id'], $newPath);
         }
+    }
+
+    /**
+     * Delete media folder and all its contents recursively
+     */
+    public function deleteMediaFolder(int $folderId): void {
+        // Get all subfolders recursively
+        $allFolderIds = $this->getAllSubfolderIds($folderId);
+        $allFolderIds[] = $folderId; // Include the main folder
+
+        // Delete all files in these folders
+        foreach ($allFolderIds as $fid) {
+            $files = $this->db->fetchAll("SELECT file_path FROM media_files WHERE folder_id = ?", [$fid]);
+            foreach ($files as $file) {
+                if (file_exists($file['file_path'])) {
+                    unlink($file['file_path']);
+                }
+            }
+            $this->db->delete('media_files', 'folder_id = ?', [$fid]);
+        }
+
+        // Delete all folders (subfolders first due to foreign key constraints)
+        $allFolderIds = array_reverse($allFolderIds); // Delete subfolders first
+        foreach ($allFolderIds as $fid) {
+            $this->db->delete('media_folders', 'id = ?', [$fid]);
+        }
+    }
+
+    /**
+     * Get all subfolder IDs recursively
+     */
+    private function getAllSubfolderIds(int $parentId): array {
+        $subfolderIds = [];
+        $directSubfolders = $this->db->fetchAll("SELECT id FROM media_folders WHERE parent_id = ?", [$parentId]);
+
+        foreach ($directSubfolders as $subfolder) {
+            $subfolderIds[] = $subfolder['id'];
+            // Recursively get subfolders of this subfolder
+            $subfolderIds = array_merge($subfolderIds, $this->getAllSubfolderIds($subfolder['id']));
+        }
+
+        return $subfolderIds;
+    }
+
+    /**
+     * Get animators with pagination and filtering
+     */
+    public function getAnimators(int $page = 1, int $limit = 20, array $filters = []): array {
+        $offset = ($page - 1) * $limit;
+
+        $whereClause = '';
+        $params = [];
+
+        if (!empty($filters['status'])) {
+            $whereClause .= ' AND a.status = ?';
+            $params[] = $filters['status'];
+        }
+
+        if (!empty($filters['search'])) {
+            $whereClause .= ' AND (a.first_name LIKE ? OR a.last_name LIKE ? OR a.animator_number LIKE ? OR a.email LIKE ?)';
+            $searchTerm = '%' . $filters['search'] . '%';
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+
+        // Get animators
+        $animators = $this->db->fetchAll("
+            SELECT a.*,
+                   COUNT(DISTINCT au.user_id) as linked_users_count,
+                   COUNT(DISTINCT an.id) as notes_count,
+                   COUNT(DISTINCT ad.id) as documents_count
+            FROM animators a
+            LEFT JOIN animator_users au ON a.id = au.animator_id
+            LEFT JOIN animator_notes an ON a.id = an.animator_id
+            LEFT JOIN animator_documents ad ON a.id = ad.animator_id
+            WHERE 1=1 {$whereClause}
+            GROUP BY a.id
+            ORDER BY a.hire_date DESC
+            LIMIT ? OFFSET ?
+        ", array_merge($params, [$limit, $offset]));
+
+        // Get total count
+        $total = $this->db->fetchOne("
+            SELECT COUNT(*) as count FROM animators a WHERE 1=1 {$whereClause}
+        ", $params)['count'];
+
+        return [
+            'animators' => $animators,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $total,
+                'pages' => ceil($total / $limit)
+            ]
+        ];
+    }
+
+    /**
+     * Create a new animator
+     */
+    public function createAnimator(array $animatorData, int $createdBy): int {
+        // Generate animator number if not provided
+        if (empty($animatorData['animator_number'])) {
+            $animatorData['animator_number'] = 'ANIM-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        }
+
+        $animatorId = $this->db->insert('animators', array_merge($animatorData, [
+            'created_by' => $createdBy
+        ]));
+
+        return $animatorId;
+    }
+
+    /**
+     * Update animator information
+     */
+    public function updateAnimator(int $animatorId, array $animatorData, int $updatedBy): void {
+        $allowedFields = ['first_name', 'last_name', 'birth_date', 'gender', 'address', 'phone', 'email', 'nationality', 'language', 'education', 'specialization', 'hire_date', 'status'];
+        $updateData = array_intersect_key($animatorData, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $updateData['updated_by'] = $updatedBy;
+            $this->db->update('animators', $updateData, 'id = ?', [$animatorId]);
+        }
+    }
+
+    /**
+     * Get animator details with all related information
+     */
+    public function getAnimatorDetails(int $animatorId): array {
+        // Get basic animator info
+        $animator = $this->db->fetchOne("SELECT * FROM animators WHERE id = ?", [$animatorId]);
+        if (!$animator) {
+            throw new Exception('Animator not found');
+        }
+
+        // Get linked users
+        $animator['linked_users'] = $this->db->fetchAll("
+            SELECT au.*, u.username, u.email
+            FROM animator_users au
+            JOIN users u ON au.user_id = u.id
+            WHERE au.animator_id = ? AND au.is_active = 1
+            ORDER BY au.relationship_type, au.assigned_at
+        ", [$animatorId]);
+
+        // Get documents
+        $animator['documents'] = $this->db->fetchAll("
+            SELECT ad.*, u.username as uploaded_by_name
+            FROM animator_documents ad
+            LEFT JOIN users u ON ad.uploaded_by = u.id
+            WHERE ad.animator_id = ?
+            ORDER BY ad.created_at DESC
+        ", [$animatorId]);
+
+        // Get notes
+        $animator['notes'] = $this->db->fetchAll("
+            SELECT an.*, u.username as created_by_name
+            FROM animator_notes an
+            JOIN users u ON an.created_by = u.id
+            WHERE an.animator_id = ?
+            ORDER BY an.created_at DESC
+        ", [$animatorId]);
+
+        // Get activity history
+        $animator['activity_history'] = $this->db->fetchAll("
+            SELECT aah.*, ce.title as event_title
+            FROM animator_activity_history aah
+            LEFT JOIN calendar_events ce ON aah.event_id = ce.id
+            WHERE aah.animator_id = ?
+            ORDER BY aah.activity_date DESC
+        ", [$animatorId]);
+
+        // Get availability
+        $animator['availability'] = $this->db->fetchAll("
+            SELECT * FROM animator_availability
+            WHERE animator_id = ?
+            ORDER BY day_of_week, start_time
+        ", [$animatorId]);
+
+        return $animator;
+    }
+
+    /**
+     * Link animator to user account
+     */
+    public function linkAnimatorToUser(int $animatorId, int $userId, string $relationshipType, int $assignedBy, string $notes = ''): int {
+        // Check if link already exists
+        $existing = $this->db->fetchOne("
+            SELECT id FROM animator_users 
+            WHERE animator_id = ? AND user_id = ?
+        ", [$animatorId, $userId]);
+
+        if ($existing) {
+            throw new Exception('Animator is already linked to this user');
+        }
+
+        return $this->db->insert('animator_users', [
+            'animator_id' => $animatorId,
+            'user_id' => $userId,
+            'relationship_type' => $relationshipType,
+            'assigned_by' => $assignedBy,
+            'notes' => $notes
+        ]);
+    }
+
+    /**
+     * Unlink animator from user account
+     */
+    public function unlinkAnimatorFromUser(int $animatorId, int $userId): void {
+        $this->db->delete('animator_users', 'animator_id = ? AND user_id = ?', [$animatorId, $userId]);
+    }
+
+    /**
+     * Update animator-user relationship
+     */
+    public function updateAnimatorUserLink(int $animatorId, int $userId, array $updateData): void {
+        $allowedFields = ['relationship_type', 'is_active', 'notes'];
+        $updateData = array_intersect_key($updateData, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $this->db->update('animator_users', $updateData, 'animator_id = ? AND user_id = ?', [$animatorId, $userId]);
+        }
+    }
+
+    /**
+     * Get animators linked to a user
+     */
+    public function getAnimatorsByUser(int $userId): array {
+        return $this->db->fetchAll("
+            SELECT a.*, au.relationship_type, au.assigned_at
+            FROM animators a
+            JOIN animator_users au ON a.id = au.animator_id
+            WHERE au.user_id = ? AND au.is_active = 1
+            ORDER BY au.relationship_type, au.assigned_at
+        ", [$userId]);
+    }
+
+    /**
+     * Get users linked to an animator
+     */
+    public function getUsersByAnimator(int $animatorId): array {
+        return $this->db->fetchAll("
+            SELECT u.*, au.relationship_type, au.assigned_at, au.notes
+            FROM users u
+            JOIN animator_users au ON u.id = au.user_id
+            WHERE au.animator_id = ? AND au.is_active = 1
+            ORDER BY au.relationship_type, au.assigned_at
+        ", [$animatorId]);
+    }
+
+    /**
+     * Add animator document
+     */
+    public function addAnimatorDocument(int $animatorId, array $documentData, int $uploadedBy): int {
+        return $this->db->insert('animator_documents', array_merge($documentData, [
+            'animator_id' => $animatorId,
+            'uploaded_by' => $uploadedBy
+        ]));
+    }
+
+    /**
+     * Add animator note
+     */
+    public function addAnimatorNote(int $animatorId, array $noteData, int $createdBy): int {
+        return $this->db->insert('animator_notes', array_merge($noteData, [
+            'animator_id' => $animatorId,
+            'created_by' => $createdBy
+        ]));
+    }
+
+    /**
+     * Add animator activity history
+     */
+    public function addAnimatorActivity(int $animatorId, array $activityData): int {
+        return $this->db->insert('animator_activity_history', array_merge($activityData, [
+            'animator_id' => $animatorId
+        ]));
+    }
+
+    /**
+     * Set animator availability
+     */
+    public function setAnimatorAvailability(int $animatorId, array $availabilityData): int {
+        // First remove existing availability for this animator
+        $this->db->delete('animator_availability', 'animator_id = ?', [$animatorId]);
+
+        // Insert new availability records
+        foreach ($availabilityData as $dayData) {
+            $this->db->insert('animator_availability', array_merge($dayData, [
+                'animator_id' => $animatorId
+            ]));
+        }
+
+        return count($availabilityData);
+    }
+
+    /**
+     * Delete animator
+     */
+    public function deleteAnimator(int $animatorId): void {
+        $this->db->delete('animators', 'id = ?', [$animatorId]);
     }
 
     /**

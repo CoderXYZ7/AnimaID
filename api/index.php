@@ -44,6 +44,11 @@ if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
     $token = $matches[1];
 }
 
+// For GET requests, also check query parameter as fallback
+if (!$token && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $token = $_GET['token'] ?? null;
+}
+
 try {
     $auth = new Auth();
 
@@ -86,6 +91,9 @@ try {
     error_log("API Error Details - Method: {$requestMethod}, Endpoint: {$endpoint}, UserId: {$resourceId}");
     error_log("API Error Request Body: " . json_encode($requestBody));
     error_log("API Error Stack Trace: " . $e->getTraceAsString());
+    error_log("API Error Auth Header: " . ($authHeader ?? 'null'));
+    error_log("API Error GET Token: " . ($_GET['token'] ?? 'null'));
+    error_log("API Error All Headers: " . json_encode(getallheaders()));
 
     http_response_code($statusCode);
     echo json_encode([
@@ -131,11 +139,17 @@ function handleRequest(string $endpoint, ?string $resourceId, string $method, ar
         case 'system':
             return handleSystemRequest($resourceId, $method, $token, $auth);
 
+        case 'test':
+            return handleTestRequest($resourceId, $method, $token, $auth);
+
         case 'communications':
             return handleCommunicationsRequest($resourceId, $method, $body, $token, $auth);
 
         case 'media':
             return handleMediaRequest($resourceId, $method, $body, $token, $auth);
+
+        case 'animators':
+            return handleAnimatorsRequest($resourceId, $method, $body, $token, $auth);
 
         default:
             throw new Exception('Endpoint not found');
@@ -237,6 +251,248 @@ function handleUsersRequest(?string $userId, string $method, array $body, ?strin
             case 'DELETE':
                 $auth->updateUser($userId, ['is_active' => false]);
                 return ['message' => 'User deactivated successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+}
+
+function handleAnimatorsRequest(?string $animatorId, string $method, array $body, ?string $token, Auth $auth): array {
+    global $pathSegments;
+
+    if (!$token) throw new Exception('Authentication required');
+
+    $user = $auth->verifyToken($token);
+    if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+        throw new Exception('Insufficient permissions');
+    }
+
+    // Check if this is a user linking operation: /api/animators/{id}/users
+    if ($animatorId && isset($pathSegments[2]) && $pathSegments[2] === 'users') {
+        $animatorId = (int)$animatorId;
+
+        switch ($method) {
+            case 'GET':
+                // Get users linked to animator
+                $users = $auth->getUsersByAnimator($animatorId);
+                return ['users' => $users];
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'admin.users')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $userId = (int)($body['user_id'] ?? 0);
+                $relationshipType = $body['relationship_type'] ?? 'primary';
+                $notes = $body['notes'] ?? '';
+
+                if (!$userId) {
+                    throw new Exception('User ID is required');
+                }
+
+                $linkId = $auth->linkAnimatorToUser($animatorId, $userId, $relationshipType, $user['id'], $notes);
+                return [
+                    'link_id' => $linkId,
+                    'message' => 'Animator linked to user successfully'
+                ];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'admin.users')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $userId = (int)($body['user_id'] ?? 0);
+                if (!$userId) {
+                    throw new Exception('User ID is required');
+                }
+
+                $auth->unlinkAnimatorFromUser($animatorId, $userId);
+                return ['message' => 'Animator unlinked from user successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is a documents operation: /api/animators/{id}/documents
+    if ($animatorId && isset($pathSegments[2]) && $pathSegments[2] === 'documents') {
+        $animatorId = (int)$animatorId;
+
+        switch ($method) {
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                // Handle file upload
+                if (isset($_FILES['file'])) {
+                    $file = $_FILES['file'];
+
+                    // Validate file
+                    if ($file['error'] !== UPLOAD_ERR_OK) {
+                        throw new Exception('File upload failed: ' . $file['error']);
+                    }
+
+                    // Check file size (10MB limit)
+                    if ($file['size'] > 10 * 1024 * 1024) {
+                        throw new Exception('File size exceeds 10MB limit');
+                    }
+
+                    // Create uploads/animators directory if it doesn't exist
+                    $uploadDir = __DIR__ . '/../uploads/animators/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+
+                    // Generate unique filename
+                    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                    $filename = uniqid('animator_doc_', true) . '.' . $extension;
+                    $filePath = $uploadDir . $filename;
+
+                    // Move uploaded file
+                    if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+                        throw new Exception('Failed to save uploaded file');
+                    }
+
+                    // Save document info to database
+                    $documentData = [
+                        'document_type' => $_POST['document_type'] ?? 'other',
+                        'original_name' => $file['name'],
+                        'file_name' => $filename,
+                        'file_path' => realpath($filePath),
+                        'file_size' => $file['size'],
+                        'mime_type' => $file['type'],
+                        'expiry_date' => $_POST['expiry_date'] ?? null,
+                        'notes' => $_POST['notes'] ?? ''
+                    ];
+
+                    $documentId = $auth->addAnimatorDocument($animatorId, $documentData, $user['id']);
+                    return [
+                        'document_id' => $documentId,
+                        'message' => 'Document uploaded successfully'
+                    ];
+                }
+                throw new Exception('No file uploaded');
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is a notes operation: /api/animators/{id}/notes
+    if ($animatorId && isset($pathSegments[2]) && $pathSegments[2] === 'notes') {
+        $animatorId = (int)$animatorId;
+
+        switch ($method) {
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $noteType = $body['note_type'] ?? 'observation';
+                $title = $body['title'] ?? '';
+                $content = $body['content'] ?? '';
+                $isPrivate = (bool)($body['is_private'] ?? false);
+
+                if (empty($title) || empty($content)) {
+                    throw new Exception('Title and content are required');
+                }
+
+                $noteData = [
+                    'note_type' => $noteType,
+                    'title' => $title,
+                    'content' => $content,
+                    'is_private' => $isPrivate
+                ];
+
+                $noteId = $auth->addAnimatorNote($animatorId, $noteData, $user['id']);
+                return [
+                    'note_id' => $noteId,
+                    'message' => 'Note added successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is an availability operation: /api/animators/{id}/availability
+    if ($animatorId && isset($pathSegments[2]) && $pathSegments[2] === 'availability') {
+        $animatorId = (int)$animatorId;
+
+        switch ($method) {
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $availabilityData = $body['availability'] ?? [];
+                if (empty($availabilityData)) {
+                    throw new Exception('Availability data is required');
+                }
+
+                $count = $auth->setAnimatorAvailability($animatorId, $availabilityData);
+                return [
+                    'count' => $count,
+                    'message' => 'Availability updated successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    if ($animatorId === null) {
+        // Handle collection requests
+        switch ($method) {
+            case 'GET':
+                $page = (int)($_GET['page'] ?? 1);
+                $limit = (int)($_GET['limit'] ?? 20);
+
+                $filters = [];
+                if (isset($_GET['status'])) $filters['status'] = $_GET['status'];
+                if (isset($_GET['search'])) $filters['search'] = $_GET['search'];
+
+                return $auth->getAnimators($page, $limit, $filters);
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'registrations.create')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $animatorId = $auth->createAnimator($body, $user['id']);
+                return [
+                    'animator_id' => $animatorId,
+                    'message' => 'Animator created successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    } else {
+        // Handle individual animator requests
+        $animatorId = (int)$animatorId;
+
+        switch ($method) {
+            case 'GET':
+                return ['animator' => $auth->getAnimatorDetails($animatorId)];
+
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->updateAnimator($animatorId, $body, $user['id']);
+                return ['message' => 'Animator information updated successfully'];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'registrations.delete')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->deleteAnimator($animatorId);
+                return ['message' => 'Animator deleted successfully'];
 
             default:
                 throw new Exception('Method not allowed');
@@ -450,11 +706,34 @@ function handleCommunicationsRequest(?string $communicationId, string $method, a
 }
 
 function handleChildrenRequest(?string $childId, string $method, array $body, ?string $token, Auth $auth): array {
+    global $pathSegments;
+
     if (!$token) throw new Exception('Authentication required');
 
     $user = $auth->verifyToken($token);
     if (!$auth->checkPermission($user['id'], 'registrations.view')) {
         throw new Exception('Insufficient permissions');
+    }
+
+    // Check if this is a sub-resource request: /api/children/{id}/{resource}
+    if ($childId && isset($pathSegments[2])) {
+        $childId = (int)$childId;
+        $resource = $pathSegments[2];
+        $resourceId = $pathSegments[3] ?? null;
+
+        switch ($resource) {
+            case 'guardians':
+                return handleChildGuardiansRequest($childId, $resourceId, $method, $body, $user, $auth);
+
+            case 'documents':
+                return handleChildDocumentsRequest($childId, $resourceId, $method, $body, $user, $auth);
+
+            case 'notes':
+                return handleChildNotesRequest($childId, $resourceId, $method, $body, $user, $auth);
+
+            default:
+                throw new Exception('Unknown child resource');
+        }
     }
 
     if ($childId === null) {
@@ -513,6 +792,301 @@ function handleChildrenRequest(?string $childId, string $method, array $body, ?s
             default:
                 throw new Exception('Method not allowed');
         }
+    }
+}
+
+function handleChildGuardiansRequest(int $childId, ?string $guardianId, string $method, array $body, array $user, Auth $auth): array {
+    if ($guardianId === null) {
+        // Handle collection requests for child guardians
+        switch ($method) {
+            case 'GET':
+                // Guardians are already included in getChildDetails, but we can provide a separate endpoint
+                $child = $auth->getChildDetails($childId);
+                return ['guardians' => $child['guardians'] ?? []];
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $guardianId = $auth->addChildGuardian($childId, $body);
+                return [
+                    'guardian_id' => $guardianId,
+                    'message' => 'Guardian added successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    } else {
+        // Handle individual guardian requests
+        $guardianId = (int)$guardianId;
+
+        switch ($method) {
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->updateChildGuardian($guardianId, $body);
+                return ['message' => 'Guardian updated successfully'];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                // For deletion, we need to remove the guardian from the child_guardians table
+                $auth->db->delete('child_guardians', 'id = ? AND child_id = ?', [$guardianId, $childId]);
+                return ['message' => 'Guardian removed successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+}
+
+function handleChildDocumentsRequest(int $childId, ?string $documentId, string $method, array $body, array $user, Auth $auth): array {
+    if ($documentId === null) {
+        // Handle collection requests for child documents
+        switch ($method) {
+            case 'GET':
+                // Documents are already included in getChildDetails, but we can provide a separate endpoint
+                $child = $auth->getChildDetails($childId);
+                return ['documents' => $child['documents'] ?? []];
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                // Handle file upload
+                if (isset($_FILES['file'])) {
+                    $file = $_FILES['file'];
+
+                    // Validate file
+                    if ($file['error'] !== UPLOAD_ERR_OK) {
+                        throw new Exception('File upload failed: ' . $file['error']);
+                    }
+
+                    // Check file size (10MB limit)
+                    if ($file['size'] > 10 * 1024 * 1024) {
+                        throw new Exception('File size exceeds 10MB limit');
+                    }
+
+                    // Create uploads/children directory if it doesn't exist
+                    $uploadDir = __DIR__ . '/../uploads/children/';
+                    if (!is_dir($uploadDir)) {
+                        if (!mkdir($uploadDir, 0755, true)) {
+                            throw new Exception('Failed to create upload directory');
+                        }
+                    }
+
+                    // Generate unique filename
+                    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                    $filename = uniqid('child_doc_', true) . '.' . $extension;
+                    $filePath = $uploadDir . $filename;
+
+                    // Move uploaded file
+                    if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+                        throw new Exception('Failed to save uploaded file');
+                    }
+
+                    // Verify file was saved
+                    if (!file_exists($filePath)) {
+                        throw new Exception('File was not saved correctly');
+                    }
+
+                    // Get real path (but limit length to prevent database issues)
+                    $realPath = realpath($filePath);
+                    if ($realPath === false) {
+                        $realPath = $filePath; // Fallback to relative path
+                    }
+
+                    // Truncate path if too long for database
+                    if (strlen($realPath) > 500) {
+                        $realPath = substr($realPath, -500); // Keep last 500 chars
+                    }
+
+                    // Save document info to database
+                    $documentData = [
+                        'document_type' => $_POST['document_type'] ?? 'other',
+                        'original_name' => $file['name'],
+                        'file_name' => $filename,
+                        'file_path' => $realPath,
+                        'file_size' => $file['size'],
+                        'mime_type' => $file['type'],
+                        'expiry_date' => !empty($_POST['expiry_date']) ? $_POST['expiry_date'] : null,
+                        'notes' => $_POST['notes'] ?? ''
+                    ];
+
+                    $documentId = $auth->addChildDocument($childId, $documentData, $user['id']);
+                    return [
+                        'document_id' => $documentId,
+                        'message' => 'Document uploaded successfully'
+                    ];
+                }
+                throw new Exception('No file uploaded');
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    } else {
+        // Handle individual document requests
+        $documentId = (int)$documentId;
+
+        switch ($method) {
+            case 'GET':
+                // For downloading documents
+                // Check for token in query parameter (for direct browser downloads)
+                $queryToken = $_GET['token'] ?? null;
+                if ($queryToken) {
+                    try {
+                        $user = $auth->verifyToken($queryToken);
+                    } catch (Exception $e) {
+                        http_response_code(401);
+                        echo json_encode(['success' => false, 'error' => 'Invalid token']);
+                        exit;
+                    }
+                } elseif (!$user) {
+                    http_response_code(401);
+                    echo json_encode(['success' => false, 'error' => 'Authentication required']);
+                    exit;
+                }
+
+                if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+                    http_response_code(403);
+                    echo json_encode(['success' => false, 'error' => 'Insufficient permissions']);
+                    exit;
+                }
+
+                $document = $auth->db->fetchOne("SELECT * FROM child_documents WHERE id = ? AND child_id = ?", [$documentId, $childId]);
+                if (!$document) {
+                    http_response_code(404);
+                    echo json_encode(['success' => false, 'error' => 'Document not found']);
+                    exit;
+                }
+
+                // Check if file exists
+                if (!file_exists($document['file_path'])) {
+                    http_response_code(404);
+                    echo json_encode(['success' => false, 'error' => 'File not found on disk']);
+                    exit;
+                }
+
+                // Set headers for download
+                header('Content-Type: ' . $document['mime_type']);
+                header('Content-Length: ' . filesize($document['file_path']));
+                header('Content-Disposition: attachment; filename="' . $document['original_name'] . '"');
+                header('Cache-Control: private, max-age=0, must-revalidate');
+                header('Pragma: public');
+
+                readfile($document['file_path']);
+                exit;
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                // Get document info
+                $document = $auth->db->fetchOne("SELECT * FROM child_documents WHERE id = ? AND child_id = ?", [$documentId, $childId]);
+                if ($document && file_exists($document['file_path'])) {
+                    unlink($document['file_path']);
+                }
+
+                $auth->db->delete('child_documents', 'id = ? AND child_id = ?', [$documentId, $childId]);
+                return ['message' => 'Document deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+}
+
+function handleChildNotesRequest(int $childId, ?string $noteId, string $method, array $body, array $user, Auth $auth): array {
+    if ($noteId === null) {
+        // Handle collection requests for child notes
+        switch ($method) {
+            case 'GET':
+                // Notes are already included in getChildDetails, but we can provide a separate endpoint
+                $child = $auth->getChildDetails($childId);
+                return ['notes' => $child['notes'] ?? []];
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $noteData = [
+                    'note_type' => $body['note_type'] ?? 'observation',
+                    'title' => $body['title'] ?? '',
+                    'content' => $body['content'] ?? '',
+                    'is_private' => (bool)($body['is_private'] ?? false)
+                ];
+
+                if (empty($noteData['title']) || empty($noteData['content'])) {
+                    throw new Exception('Title and content are required');
+                }
+
+                $noteId = $auth->addChildNote($childId, $noteData, $user['id']);
+                return [
+                    'note_id' => $noteId,
+                    'message' => 'Note added successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    } else {
+        // Handle individual note requests
+        $noteId = (int)$noteId;
+
+        switch ($method) {
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $updateData = [];
+                if (isset($body['title'])) $updateData['title'] = $body['title'];
+                if (isset($body['content'])) $updateData['content'] = $body['content'];
+                if (isset($body['is_private'])) $updateData['is_private'] = (bool)$body['is_private'];
+
+                if (!empty($updateData)) {
+                    $updateData['updated_at'] = date('Y-m-d H:i:s');
+                    $auth->db->update('child_notes', $updateData, 'id = ? AND child_id = ?', [$noteId, $childId]);
+                }
+
+                return ['message' => 'Note updated successfully'];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->db->delete('child_notes', 'id = ? AND child_id = ?', [$noteId, $childId]);
+                return ['message' => 'Note deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+}
+
+function handleTestRequest(?string $action, string $method, ?string $token, Auth $auth): array {
+    switch ($method) {
+        case 'GET':
+            return [
+                'message' => 'Test endpoint working',
+                'timestamp' => time(),
+                'php_version' => PHP_VERSION,
+                'memory_limit' => ini_get('memory_limit'),
+                'max_execution_time' => ini_get('max_execution_time')
+            ];
+
+        default:
+            throw new Exception('Method not allowed');
     }
 }
 
@@ -790,7 +1364,14 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                     throw new Exception('Insufficient permissions');
                 }
 
-                return ['contents' => $auth->getFolderContents($folderId)];
+                // Get folder details and contents
+                $folder = $auth->db->fetchOne("SELECT * FROM media_folders WHERE id = ?", [$folderId]);
+                if (!$folder) {
+                    throw new Exception('Folder not found');
+                }
+
+                $contents = $auth->getFolderContents($folderId);
+                return array_merge($folder, ['contents' => $contents]);
 
             case 'PUT':
                 if (!$auth->checkPermission($user['id'], 'media.upload')) {
@@ -805,8 +1386,9 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                     throw new Exception('Insufficient permissions');
                 }
 
-                // TODO: Implement folder deletion
-                throw new Exception('Folder deletion not implemented yet');
+                // Delete folder and all its contents
+                $auth->deleteMediaFolder($folderId);
+                return ['message' => 'Folder deleted successfully'];
 
             default:
                 throw new Exception('Method not allowed');
@@ -816,6 +1398,149 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
     // Check if this is a file operation: /api/media/files/{id}
     if ($resourceId === 'files' && isset($pathSegments[2])) {
         $fileId = (int)$pathSegments[2];
+
+        // Check if this is a download request: /api/media/files/{id}/download
+        if (isset($pathSegments[3]) && $pathSegments[3] === 'download') {
+            // Check for token in query parameter (for direct browser downloads)
+            $queryToken = $_GET['token'] ?? null;
+            if ($queryToken) {
+                try {
+                    $user = $auth->verifyToken($queryToken);
+                } catch (Exception $e) {
+                    http_response_code(401);
+                    echo json_encode(['success' => false, 'error' => 'Invalid token']);
+                    exit;
+                }
+            } elseif (!$user) {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'error' => 'Authentication required']);
+                exit;
+            }
+
+            if (!$auth->checkPermission($user['id'], 'media.view')) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'error' => 'Insufficient permissions']);
+                exit;
+            }
+
+            $file = $auth->getMediaFile($fileId);
+            if (!$file) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'File not found']);
+                exit;
+            }
+
+            // Check if file exists on disk
+            if (!file_exists($file['file_path'])) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'File not found on disk']);
+                exit;
+            }
+
+            // For text files requested via fetch (for preview), return content as JSON
+            $isTextFile = in_array($file['mime_type'], [
+                'text/plain', 'text/csv', 'text/markdown', 'text/html', 'text/css',
+                'text/javascript', 'application/json', 'application/xml', 'application/javascript'
+            ]) || strpos($file['mime_type'], 'text/') === 0;
+
+            if ($isTextFile && isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+                // Return file content as JSON for preview
+                $fileSize = filesize($file['file_path']);
+
+                // For very large files, show a preview message instead
+                if ($fileSize > 100 * 1024) { // 100KB limit
+                    http_response_code(200);
+                    echo json_encode([
+                        'success' => true,
+                        'content' => "File too large to preview ({$fileSize} bytes). Use download instead.",
+                        'mime_type' => $file['mime_type'],
+                        'file_name' => $file['original_name'],
+                        'truncated' => false,
+                        'file_size' => $fileSize
+                    ]);
+                    exit;
+                }
+
+                // Read file content with error handling
+                $content = @file_get_contents($file['file_path']);
+                if ($content === false) {
+                    http_response_code(500);
+                    echo json_encode([
+                        'success' => false,
+                        'error' => 'Failed to read file content',
+                        'debug' => [
+                            'file_path' => $file['file_path'],
+                            'file_exists' => file_exists($file['file_path']),
+                            'file_readable' => is_readable($file['file_path']),
+                            'file_size' => $fileSize
+                        ]
+                    ]);
+                    exit;
+                }
+
+                // Convert encoding if needed
+                if (!mb_check_encoding($content, 'UTF-8')) {
+                    $content = mb_convert_encoding($content, 'UTF-8', 'auto');
+                }
+
+                // Limit preview to 5KB for safety
+                $maxPreviewSize = 5 * 1024; // 5KB
+                $truncated = false;
+                if (strlen($content) > $maxPreviewSize) {
+                    $content = substr($content, 0, $maxPreviewSize) . "\n\n[Content truncated for preview]";
+                    $truncated = true;
+                }
+
+                // Test JSON encoding
+                $responseData = [
+                    'success' => true,
+                    'content' => $content,
+                    'mime_type' => $file['mime_type'],
+                    'file_name' => $file['original_name'],
+                    'truncated' => $truncated,
+                    'file_size' => $fileSize
+                ];
+
+                $jsonResult = json_encode($responseData);
+                if ($jsonResult === false) {
+                    http_response_code(500);
+                    echo json_encode([
+                        'success' => false,
+                        'error' => 'Failed to encode response: ' . json_last_error_msg(),
+                        'debug' => [
+                            'content_length' => strlen($content),
+                            'json_error' => json_last_error_msg()
+                        ]
+                    ]);
+                    exit;
+                }
+
+                // Increment download count
+                $auth->db->query("UPDATE media_files SET download_count = download_count + 1 WHERE id = ?", [$fileId]);
+
+                http_response_code(200);
+                echo $jsonResult;
+                exit;
+            }
+
+            // For direct downloads or non-text files, serve the file directly
+            // Increment download count
+            $auth->db->query("UPDATE media_files SET download_count = download_count + 1 WHERE id = ?", [$fileId]);
+
+            // Clear any previous output and headers
+            ob_clean();
+
+            // Remove the default JSON content-type header
+            header_remove('Content-Type');
+            header('Content-Type: ' . $file['mime_type']);
+            header('Content-Length: ' . filesize($file['file_path']));
+            header('Content-Disposition: inline; filename="' . $file['original_name'] . '"');
+            header('Cache-Control: private, max-age=0, must-revalidate');
+            header('Pragma: public');
+
+            readfile($file['file_path']);
+            exit;
+        }
 
         if (!$user) throw new Exception('Authentication required');
 
@@ -911,13 +1636,18 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                     throw new Exception('Authentication required or insufficient permissions');
                 }
 
-                // Handle file upload
+                // Handle file upload (FormData)
                 if (isset($_FILES['file'])) {
                     $file = $_FILES['file'];
 
                     // Validate file
                     if ($file['error'] !== UPLOAD_ERR_OK) {
-                        throw new Exception('File upload failed');
+                        throw new Exception('File upload failed: ' . $file['error']);
+                    }
+
+                    // Check file size (10MB limit)
+                    if ($file['size'] > 10 * 1024 * 1024) {
+                        throw new Exception('File size exceeds 10MB limit');
                     }
 
                     // Create uploads/media directory if it doesn't exist
@@ -939,11 +1669,16 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                     // Save file info to database
                     $fileData = [
                         'original_name' => $file['name'],
-                        'file_path' => $filePath,
+                        'file_path' => realpath($filePath),
                         'file_size' => $file['size'],
-                        'mime_type' => $file['type'],
-                        'folder_id' => (int)($body['folder_id'] ?? null)
+                        'mime_type' => $file['type']
                     ];
+
+                    // Only set folder_id if it's provided and not empty
+                    $folderId = $_POST['folder_id'] ?? null;
+                    if (!empty($folderId) && $folderId !== 'null') {
+                        $fileData['folder_id'] = (int)$folderId;
+                    }
 
                     $fileId = $auth->uploadMediaFile($fileData, $user['id']);
                     return [
@@ -952,13 +1687,17 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                     ];
                 }
 
-                // Handle folder creation
+                // Handle folder creation (JSON)
                 if (isset($body['name']) && isset($body['type']) && $body['type'] === 'folder') {
                     $folderData = [
                         'name' => $body['name'],
-                        'description' => $body['description'] ?? '',
-                        'parent_id' => (int)($body['parent_id'] ?? null)
+                        'description' => $body['description'] ?? ''
                     ];
+
+                    // Only set parent_id if it's provided and not null
+                    if (isset($body['parent_id']) && $body['parent_id'] !== null) {
+                        $folderData['parent_id'] = (int)$body['parent_id'];
+                    }
 
                     $folderId = $auth->createMediaFolder($folderData, $user['id']);
                     return [

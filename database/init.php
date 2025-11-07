@@ -545,6 +545,125 @@ function createTables(PDO $pdo) {
             FOREIGN KEY (uploaded_by) REFERENCES users(id)
         )
     ");
+
+    // Animators table (similar to children but for staff/animators)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS animators (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            first_name VARCHAR(100) NOT NULL,
+            last_name VARCHAR(100) NOT NULL,
+            birth_date DATE,
+            gender VARCHAR(20),
+            address TEXT,
+            phone VARCHAR(50),
+            email VARCHAR(255),
+            nationality VARCHAR(100),
+            language VARCHAR(100),
+            education VARCHAR(255),
+            specialization VARCHAR(255),
+            hire_date DATE,
+            status VARCHAR(20) DEFAULT 'active', -- active, inactive, suspended, terminated
+            animator_number VARCHAR(50) UNIQUE,
+            created_by INTEGER NOT NULL,
+            updated_by INTEGER,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (created_by) REFERENCES users(id),
+            FOREIGN KEY (updated_by) REFERENCES users(id)
+        )
+    ");
+
+    // Animator-User relationship table (many-to-many)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS animator_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            animator_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            relationship_type VARCHAR(50) DEFAULT 'primary', -- primary, secondary, backup
+            is_active BOOLEAN DEFAULT 1,
+            assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            assigned_by INTEGER NOT NULL,
+            notes TEXT,
+            FOREIGN KEY (animator_id) REFERENCES animators(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (assigned_by) REFERENCES users(id),
+            UNIQUE(animator_id, user_id)
+        )
+    ");
+
+    // Animator documents and files
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS animator_documents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            animator_id INTEGER NOT NULL,
+            document_type VARCHAR(50) NOT NULL, -- id_card, diploma, contract, photo, cv, etc.
+            file_name VARCHAR(255) NOT NULL,
+            original_name VARCHAR(255) NOT NULL,
+            file_path VARCHAR(500),
+            file_size INTEGER,
+            mime_type VARCHAR(100),
+            uploaded_by INTEGER NOT NULL,
+            expiry_date DATE,
+            is_verified BOOLEAN DEFAULT 0,
+            verified_by INTEGER,
+            verified_at DATETIME,
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (animator_id) REFERENCES animators(id) ON DELETE CASCADE,
+            FOREIGN KEY (uploaded_by) REFERENCES users(id),
+            FOREIGN KEY (verified_by) REFERENCES users(id)
+        )
+    ");
+
+    // Animator notes and observations
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS animator_notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            animator_id INTEGER NOT NULL,
+            note_type VARCHAR(50) NOT NULL, -- observation, performance, training, incident, feedback
+            title VARCHAR(255) NOT NULL,
+            content TEXT NOT NULL,
+            is_private BOOLEAN DEFAULT 0,
+            created_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (animator_id) REFERENCES animators(id) ON DELETE CASCADE,
+            FOREIGN KEY (created_by) REFERENCES users(id)
+        )
+    ");
+
+    // Animator activity history (linking to events)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS animator_activity_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            animator_id INTEGER NOT NULL,
+            event_id INTEGER,
+            activity_type VARCHAR(50) NOT NULL, -- event, workshop, training, meeting, etc.
+            activity_name VARCHAR(255) NOT NULL,
+            activity_date DATE NOT NULL,
+            duration_hours DECIMAL(4,2),
+            role VARCHAR(50) NOT NULL, -- lead, assistant, observer, trainer, etc.
+            notes TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (animator_id) REFERENCES animators(id) ON DELETE CASCADE,
+            FOREIGN KEY (event_id) REFERENCES calendar_events(id) ON DELETE SET NULL
+        )
+    ");
+
+    // Animator availability schedule
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS animator_availability (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            animator_id INTEGER NOT NULL,
+            day_of_week INTEGER NOT NULL, -- 1=Monday, 7=Sunday
+            start_time TIME,
+            end_time TIME,
+            is_available BOOLEAN DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (animator_id) REFERENCES animators(id) ON DELETE CASCADE
+        )
+    ");
 }
 
 function insertInitialData(PDO $pdo, array $config) {
