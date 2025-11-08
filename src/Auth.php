@@ -18,6 +18,13 @@ class Auth {
     }
 
     /**
+     * Get database instance
+     */
+    public function getDb() {
+        return $this->db;
+    }
+
+    /**
      * Authenticate user and return JWT token
      */
     public function login(string $username, string $password): array {
@@ -1101,7 +1108,7 @@ class Auth {
     /**
      * Get media files with pagination
      */
-    public function getMediaFiles(int $page = 1, int $limit = 20, int $folderId = null, string $search = ''): array {
+    public function getMediaFiles(int $page = 1, int $limit = 20, ?int $folderId = null, string $search = ''): array {
         $offset = ($page - 1) * $limit;
 
         $whereClause = '';
@@ -1110,6 +1117,9 @@ class Auth {
         if ($folderId !== null) {
             $whereClause .= ' AND mf.folder_id = ?';
             $params[] = $folderId;
+        } else {
+            // When no folder is specified, show only root-level files (folder_id IS NULL)
+            $whereClause .= ' AND mf.folder_id IS NULL';
         }
 
         if (!empty($search)) {
@@ -1179,13 +1189,15 @@ class Auth {
      * Get media file details
      */
     public function getMediaFile(int $fileId): ?array {
-        return $this->db->fetchOne("
+        $result = $this->db->fetchOne("
             SELECT mf.*, u.username as uploaded_by_name, f.name as folder_name
             FROM media_files mf
             LEFT JOIN users u ON mf.uploaded_by = u.id
             LEFT JOIN media_folders f ON mf.folder_id = f.id
             WHERE mf.id = ?
         ", [$fileId]);
+
+        return $result ?: null;
     }
 
     /**

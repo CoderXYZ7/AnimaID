@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnimaID - Media Manager</title>
+    <link rel="icon" href="assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="src/css/output.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.css" rel="stylesheet">
@@ -26,7 +27,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center py-4">
                     <div class="flex items-center space-x-2">
-                        <i class="fas fa-circle text-blue-600 text-2xl"></i>
+                        <img src="assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
                         <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                     </div>
 
@@ -336,6 +337,7 @@
         let currentViewMode = 'grid';
         let currentSortBy = 'name';
         let breadcrumbPath = [];
+        let currentPreviewFileId = null;
 
         // Initialize page
         async function initPage() {
@@ -421,8 +423,16 @@
 
             // Preview modal
             document.getElementById('close-preview-modal-btn').addEventListener('click', hidePreviewModal);
-            document.getElementById('download-btn').addEventListener('click', downloadFile);
-            document.getElementById('share-btn').addEventListener('click', showShareModal);
+            document.getElementById('download-btn').addEventListener('click', function() {
+                if (currentPreviewFileId) {
+                    downloadFile(currentPreviewFileId);
+                }
+            });
+            document.getElementById('share-btn').addEventListener('click', function() {
+                if (currentPreviewFileId) {
+                    showShareModal('file', currentPreviewFileId);
+                }
+            });
 
             // Share modal
             document.getElementById('close-share-modal-btn').addEventListener('click', hideShareModal);
@@ -779,6 +789,9 @@
         // Preview file
         async function previewFile(fileId) {
             try {
+                // Store the current file ID for download button
+                currentPreviewFileId = fileId;
+
                 const response = await fetch(`${API_BASE_URL}/media/files/${fileId}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
@@ -795,16 +808,13 @@
                 const previewContent = document.getElementById('preview-content');
 
                 if (file.file_type === 'image') {
-                    previewContent.innerHTML = `<img src="/api/media/files/${fileId}/download" class="max-w-full max-h-full object-contain mx-auto">`;
+                    previewContent.innerHTML = `<img src="/api/media/files/${fileId}/download?token=${encodeURIComponent(userToken)}" class="max-w-full max-h-full object-contain mx-auto">`;
                 } else if (file.file_type === 'video') {
-                    previewContent.innerHTML = `<video controls class="max-w-full max-h-full mx-auto"><source src="/api/media/files/${fileId}/download" type="${file.mime_type}"></video>`;
+                    previewContent.innerHTML = `<video controls class="max-w-full max-h-full mx-auto"><source src="/api/media/files/${fileId}/download?token=${encodeURIComponent(userToken)}" type="${file.mime_type}"></video>`;
                 } else if (file.file_type === 'audio') {
-                    previewContent.innerHTML = `<audio controls class="w-full"><source src="/api/media/files/${fileId}/download" type="${file.mime_type}"></audio>`;
+                    previewContent.innerHTML = `<audio controls class="w-full"><source src="/api/media/files/${fileId}/download?token=${encodeURIComponent(userToken)}" type="${file.mime_type}"></audio>`;
                 } else if (file.file_type === 'document' && file.mime_type === 'application/pdf') {
-                    previewContent.innerHTML = `<iframe src="/api/media/files/${fileId}/download" class="w-full h-full"></iframe>`;
-                } else if (isTextFile(file.mime_type)) {
-                    // Load and display text content
-                    await loadTextFileContent(fileId, file);
+                    previewContent.innerHTML = `<iframe src="/api/media/files/${fileId}/download?token=${encodeURIComponent(userToken)}" class="w-full" style="height: 600px; border: none;"></iframe>`;
                 } else {
                     previewContent.innerHTML = `
                         <div class="text-center">
@@ -858,7 +868,11 @@
                     throw new Error(data.error || 'Failed to load file content');
                 }
 
-                const content = data.content;
+                // Decode base64 content if encoded
+                let content = data.content;
+                if (data.encoding === 'base64') {
+                    content = atob(content);
+                }
                 const previewContent = document.getElementById('preview-content');
 
                 // Determine syntax highlighting class
@@ -1004,7 +1018,16 @@
 
         // Download file
         function downloadFile(fileId) {
-            window.open(`${API_BASE_URL}/media/files/${fileId}/download?token=${userToken}`, '_blank');
+            // Create a temporary link element to trigger download
+            const link = document.createElement('a');
+            link.href = `${API_BASE_URL}/media/files/${fileId}/download?token=${userToken}`;
+            link.download = ''; // Let the browser determine the filename from the response
+            link.style.display = 'none';
+
+            // Add to DOM, click, and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // Delete file

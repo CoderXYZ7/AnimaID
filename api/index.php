@@ -837,7 +837,7 @@ function handleChildGuardiansRequest(int $childId, ?string $guardianId, string $
                 }
 
                 // For deletion, we need to remove the guardian from the child_guardians table
-                $auth->db->delete('child_guardians', 'id = ? AND child_id = ?', [$guardianId, $childId]);
+                $auth->getDb()->delete('child_guardians', 'id = ? AND child_id = ?', [$guardianId, $childId]);
                 return ['message' => 'Guardian removed successfully'];
 
             default:
@@ -960,7 +960,14 @@ function handleChildDocumentsRequest(int $childId, ?string $documentId, string $
                     exit;
                 }
 
-                $document = $auth->db->fetchOne("SELECT * FROM child_documents WHERE id = ? AND child_id = ?", [$documentId, $childId]);
+                try {
+                    $document = $auth->getDb()->fetchOne("SELECT * FROM child_documents WHERE id = ? AND child_id = ?", [$documentId, $childId]);
+                } catch (Exception $e) {
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'error' => 'Database error']);
+                    exit;
+                }
+
                 if (!$document) {
                     http_response_code(404);
                     echo json_encode(['success' => false, 'error' => 'Document not found']);
@@ -974,14 +981,46 @@ function handleChildDocumentsRequest(int $childId, ?string $documentId, string $
                     exit;
                 }
 
-                // Set headers for download
+                // Check if file is readable
+                if (!is_readable($document['file_path'])) {
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'error' => 'File not readable']);
+                    exit;
+                }
+
+                // Get file size
+                $fileSize = filesize($document['file_path']);
+                if ($fileSize === false) {
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'error' => 'Could not get file size']);
+                    exit;
+                }
+
+                // Clear any previous output
+                if (ob_get_level()) {
+                    ob_clean();
+                }
+
+                // Remove the default JSON content-type header
+                header_remove('Content-Type');
                 header('Content-Type: ' . $document['mime_type']);
-                header('Content-Length: ' . filesize($document['file_path']));
-                header('Content-Disposition: attachment; filename="' . $document['original_name'] . '"');
+                header('Content-Length: ' . $fileSize);
+                header('Content-Disposition: inline; filename="' . $document['original_name'] . '"');
                 header('Cache-Control: private, max-age=0, must-revalidate');
                 header('Pragma: public');
 
-                readfile($document['file_path']);
+                // Read and output file
+                $fp = fopen($document['file_path'], 'rb');
+                if ($fp === false) {
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'error' => 'Could not open file']);
+                    exit;
+                }
+
+                while (!feof($fp)) {
+                    echo fread($fp, 8192);
+                }
+                fclose($fp);
                 exit;
 
             case 'DELETE':
@@ -990,12 +1029,12 @@ function handleChildDocumentsRequest(int $childId, ?string $documentId, string $
                 }
 
                 // Get document info
-                $document = $auth->db->fetchOne("SELECT * FROM child_documents WHERE id = ? AND child_id = ?", [$documentId, $childId]);
+                $document = $auth->getDb()->fetchOne("SELECT * FROM child_documents WHERE id = ? AND child_id = ?", [$documentId, $childId]);
                 if ($document && file_exists($document['file_path'])) {
                     unlink($document['file_path']);
                 }
 
-                $auth->db->delete('child_documents', 'id = ? AND child_id = ?', [$documentId, $childId]);
+                $auth->getDb()->delete('child_documents', 'id = ? AND child_id = ?', [$documentId, $childId]);
                 return ['message' => 'Document deleted successfully'];
 
             default:
@@ -1055,7 +1094,7 @@ function handleChildNotesRequest(int $childId, ?string $noteId, string $method, 
 
                 if (!empty($updateData)) {
                     $updateData['updated_at'] = date('Y-m-d H:i:s');
-                    $auth->db->update('child_notes', $updateData, 'id = ? AND child_id = ?', [$noteId, $childId]);
+                    $auth->getDb()->update('child_notes', $updateData, 'id = ? AND child_id = ?', [$noteId, $childId]);
                 }
 
                 return ['message' => 'Note updated successfully'];
@@ -1065,7 +1104,7 @@ function handleChildNotesRequest(int $childId, ?string $noteId, string $method, 
                     throw new Exception('Insufficient permissions');
                 }
 
-                $auth->db->delete('child_notes', 'id = ? AND child_id = ?', [$noteId, $childId]);
+                $auth->getDb()->delete('child_notes', 'id = ? AND child_id = ?', [$noteId, $childId]);
                 return ['message' => 'Note deleted successfully'];
 
             default:
@@ -1365,7 +1404,7 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                 }
 
                 // Get folder details and contents
-                $folder = $auth->db->fetchOne("SELECT * FROM media_folders WHERE id = ?", [$folderId]);
+                $folder = $auth->getDb()->fetchOne("SELECT * FROM media_folders WHERE id = ?", [$folderId]);
                 if (!$folder) {
                     throw new Exception('Folder not found');
                 }
@@ -1483,18 +1522,22 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                     $content = mb_convert_encoding($content, 'UTF-8', 'auto');
                 }
 
-                // Limit preview to 5KB for safety
-                $maxPreviewSize = 5 * 1024; // 5KB
+                // Limit preview to 512 bytes for safety
+                $maxPreviewSize = 512;
                 $truncated = false;
                 if (strlen($content) > $maxPreviewSize) {
-                    $content = substr($content, 0, $maxPreviewSize) . "\n\n[Content truncated for preview]";
+                    $content = mb_substr($content, 0, $maxPreviewSize, 'UTF-8') . "\n\n[Content truncated for preview]";
                     $truncated = true;
                 }
 
-                // Test JSON encoding
+                // Ensure content is valid UTF-8
+                $content = mb_convert_encoding($content, 'UTF-8', 'UTF-8');
+
+                // Base64 encode content to avoid JSON encoding issues
                 $responseData = [
                     'success' => true,
-                    'content' => $content,
+                    'content' => base64_encode($content),
+                    'encoding' => 'base64',
                     'mime_type' => $file['mime_type'],
                     'file_name' => $file['original_name'],
                     'truncated' => $truncated,
@@ -1506,17 +1549,13 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                     http_response_code(500);
                     echo json_encode([
                         'success' => false,
-                        'error' => 'Failed to encode response: ' . json_last_error_msg(),
-                        'debug' => [
-                            'content_length' => strlen($content),
-                            'json_error' => json_last_error_msg()
-                        ]
+                        'error' => 'Failed to encode response: ' . json_last_error_msg()
                     ]);
                     exit;
                 }
 
                 // Increment download count
-                $auth->db->query("UPDATE media_files SET download_count = download_count + 1 WHERE id = ?", [$fileId]);
+                $auth->getDb()->query("UPDATE media_files SET download_count = download_count + 1 WHERE id = ?", [$fileId]);
 
                 http_response_code(200);
                 echo $jsonResult;
@@ -1524,8 +1563,8 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
             }
 
             // For direct downloads or non-text files, serve the file directly
-            // Increment download count
-            $auth->db->query("UPDATE media_files SET download_count = download_count + 1 WHERE id = ?", [$fileId]);
+                // Increment download count
+                $auth->getDb()->query("UPDATE media_files SET download_count = download_count + 1 WHERE id = ?", [$fileId]);
 
             // Clear any previous output and headers
             ob_clean();
@@ -1669,7 +1708,7 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                     // Save file info to database
                     $fileData = [
                         'original_name' => $file['name'],
-                        'file_path' => realpath($filePath),
+                        'file_path' => $filePath,
                         'file_size' => $file['size'],
                         'mime_type' => $file['type']
                     ];

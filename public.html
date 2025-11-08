@@ -4,17 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnimaID - Public Communications</title>
+    <link rel="icon" href="assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="src/css/output.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 text-gray-900 min-h-screen">
     <!-- Header -->
-    <header class="bg-white shadow-sm">
+    <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-blue-600">AnimaID</h1>
-                    <span class="ml-3 text-sm text-gray-500">Animation Center</span>
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <img src="assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                    <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                 </div>
                 <nav class="flex space-x-6">
                     <a href="#news" class="text-gray-700 hover:text-blue-600 font-medium">News</a>
@@ -26,26 +30,28 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="bg-gradient-to-r from-blue-600 to-purple-700 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div class="text-center">
-                <h1 class="text-4xl md:text-6xl font-bold mb-4">Welcome to AnimaID</h1>
-                <p class="text-xl md:text-2xl mb-8 opacity-90">Your trusted partner in children's education and development</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="#news" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                        Latest News
-                    </a>
-                    <a href="#calendar" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-                        View Calendar
-                    </a>
-                </div>
+    <section class="bg-gradient-to-br from-blue-50 to-green-50 py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Welcome to AnimaID
+            </h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                Your trusted partner in children's education and development
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#news" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors">
+                    Latest News
+                </a>
+                <a href="#calendar" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-8 rounded-lg transition-colors">
+                    View Calendar
+                </a>
             </div>
         </div>
     </section>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <!-- News Section -->
-        <section id="news" class="mb-16">
+        <section id="news" class="py-20 bg-white mb-16">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Latest News & Announcements</h2>
                 <p class="text-lg text-gray-600">Stay informed about important updates, events, and announcements</p>
@@ -78,7 +84,7 @@
         </section>
 
         <!-- Calendar Preview Section -->
-        <section id="calendar" class="mb-16 bg-gray-50 rounded-lg p-8">
+        <section id="calendar" class="py-20 bg-gray-50 rounded-lg p-8 mb-16">
             <div class="text-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
                 <p class="text-lg text-gray-600">Discover our exciting activities and events</p>
@@ -96,7 +102,7 @@
         </section>
 
         <!-- Contact Section -->
-        <section id="contact" class="bg-white rounded-lg shadow-sm p-8">
+        <section id="contact" class="py-20 bg-white rounded-lg shadow-sm p-8">
             <div class="text-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
                 <p class="text-lg text-gray-600">We'd love to hear from you</p>
@@ -123,7 +129,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white mt-16">
+    <footer class="bg-gray-900 text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="text-center">
                 <p class="text-gray-400">&copy; 2025 AnimaID. All rights reserved.</p>
@@ -267,7 +273,7 @@
             document.getElementById('empty-state').classList.add('hidden');
 
             container.innerHTML = communications.map(comm => `
-                <div class="communication-card bg-white rounded-lg shadow-lg p-8 priority-${comm.priority}">
+                <div class="communication-card bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow priority-${comm.priority}">
                     <div class="flex justify-between items-start mb-6">
                         <div class="flex-1">
                             <div class="flex items-center space-x-3 mb-4">
@@ -349,7 +355,7 @@
             const container = document.getElementById('communications-list');
 
             const html = communications.map(comm => `
-                <div class="communication-card bg-white rounded-lg shadow-lg p-8 priority-${comm.priority}">
+                <div class="communication-card bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow priority-${comm.priority}">
                     <div class="flex justify-between items-start mb-6">
                         <div class="flex-1">
                             <div class="flex items-center space-x-3 mb-4">
@@ -423,7 +429,7 @@
             }
 
             container.innerHTML = events.map(event => `
-                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-md transition-shadow">
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
