@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - Shared Media</title>
+    <link rel="icon" href="assets/logo/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="src/css/output.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading shared content...</p>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="error-screen" class="hidden fixed inset-0 bg-gray-50 flex items-center justify-center">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Shared Content Not Available</h3>
+            <p class="text-gray-600 mb-6" id="error-message">This shared link is invalid or has expired.</p>
+            <a href="index.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                <i class="fas fa-home mr-2"></i>
+                Go to Homepage
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden">
+
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <img src="assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
+                        <span class="text-sm text-gray-500">Shared Content</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <!-- Shared Content Info -->
+            <div id="share-info" class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-share-alt text-blue-500 text-xl mt-1"></i>
+                    <div>
+                        <h3 class="text-lg font-medium text-blue-900">Shared Content</h3>
+                        <p class="text-blue-700 mt-1" id="share-description">This content has been shared with you.</p>
+                        <p class="text-sm text-blue-600 mt-2" id="share-details"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Content -->
+            <div id="file-content" class="bg-white rounded-lg shadow p-8 hidden">
+                <div class="text-center">
+                    <div id="file-icon" class="text-6xl text-gray-400 mb-4"></div>
+                    <h3 id="file-name" class="text-xl font-medium text-gray-900 mb-2"></h3>
+                    <p id="file-details" class="text-gray-600 mb-6"></p>
+
+                    <div class="flex justify-center space-x-4">
+                        <button id="download-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium">
+                            <i class="fas fa-download mr-2"></i>Download
+                        </button>
+                        <a href="index.html" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium">
+                            <i class="fas fa-home mr-2"></i>Go to Homepage
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Folder Content -->
+            <div id="folder-content" class="hidden">
+                <div class="bg-white rounded-lg shadow mb-6 p-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <i class="fas fa-folder text-yellow-500 text-2xl"></i>
+                        <div>
+                            <h2 id="folder-name" class="text-xl font-medium text-gray-900"></h2>
+                            <p id="folder-details" class="text-gray-600"></p>
+                        </div>
+                    </div>
+
+                    <!-- Folder Contents -->
+                    <div id="folder-items" class="space-y-4">
+                        <!-- Items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = window.location.origin + '/api';
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const errorScreen = document.getElementById('error-screen');
+        const fileContent = document.getElementById('file-content');
+        const folderContent = document.getElementById('folder-content');
+
+        let shareToken = null;
+        let sharedResource = null;
+
+        // Initialize page
+        async function initPage() {
+            try {
+                // Get share token from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                shareToken = urlParams.get('token');
+
+                if (!shareToken) {
+                    // Try getting from path: /media/shared/{token}
+                    const pathSegments = window.location.pathname.split('/');
+                    const sharedIndex = pathSegments.indexOf('shared');
+                    if (sharedIndex !== -1 && pathSegments.length > sharedIndex + 1) {
+                        shareToken = pathSegments[sharedIndex + 1];
+                    }
+                }
+
+                if (!shareToken) {
+                    showError('Invalid share link');
+                    return;
+                }
+
+                // Fetch shared resource
+                const response = await fetch(`${API_BASE_URL}/media/shared/${shareToken}`);
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showError('This shared link is invalid or has expired.');
+                    } else {
+                        showError('Unable to access shared content.');
+                    }
+                    return;
+                }
+
+                const data = await response.json();
+                sharedResource = data.resource;
+
+                // Update share info
+                updateShareInfo(data.resource.sharing);
+
+                // Display content
+                if (data.resource.file_path) {
+                    // It's a file
+                    displayFile(data.resource);
+                } else {
+                    // It's a folder
+                    await displayFolder(data.resource);
+                }
+
+                // Show main content
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Page initialization error:', error);
+                showError('An error occurred while loading the shared content.');
+            }
+        }
+
+        // Update share information display
+        function updateShareInfo(sharing) {
+            const shareDetails = document.getElementById('share-details');
+
+            let details = '';
+            if (sharing.expires_at) {
+                const expiryDate = new Date(sharing.expires_at);
+                details += `Expires: ${expiryDate.toLocaleString()}`;
+            }
+
+            if (sharing.permission === 'download') {
+                details += (details ? ' • ' : '') + 'Download allowed';
+            } else {
+                details += (details ? ' • ' : '') + 'View only';
+            }
+
+            shareDetails.textContent = details;
+        }
+
+        // Display shared file
+        function displayFile(file) {
+            document.getElementById('file-name').textContent = file.original_name || file.name;
+            document.getElementById('file-details').textContent = `Size: ${formatFileSize(file.file_size || 0)} • Type: ${file.mime_type || 'Folder'}`;
+
+            // Set file icon
+            const iconElement = document.getElementById('file-icon');
+            if (file.file_type === 'image') {
+                iconElement.className = 'fas fa-file-image text-blue-500 text-6xl';
+            } else if (file.file_type === 'video') {
+                iconElement.className = 'fas fa-file-video text-red-500 text-6xl';
+            } else if (file.file_type === 'audio') {
+                iconElement.className = 'fas fa-file-audio text-green-500 text-6xl';
+            } else if (file.file_type === 'document') {
+                iconElement.className = 'fas fa-file-alt text-orange-500 text-6xl';
+            } else {
+                iconElement.className = 'fas fa-file text-gray-400 text-6xl';
+            }
+
+            // Setup download button
+            const downloadBtn = document.getElementById('download-btn');
+            if (sharedResource.sharing.permission === 'download') {
+                downloadBtn.onclick = () => downloadFile(file.id);
+            } else {
+                downloadBtn.style.display = 'none';
+            }
+
+            fileContent.classList.remove('hidden');
+        }
+
+        // Display shared folder
+        async function displayFolder(folder) {
+            document.getElementById('folder-name').textContent = folder.name;
+            document.getElementById('folder-details').textContent = `Shared folder with ${folder.file_count || 0} items`;
+
+            // Load folder contents
+            try {
+                const response = await fetch(`${API_BASE_URL}/media/folders/${folder.id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    renderFolderContents(data.contents);
+                }
+            } catch (error) {
+                console.error('Error loading folder contents:', error);
+            }
+
+            folderContent.classList.remove('hidden');
+        }
+
+        // Render folder contents
+        function renderFolderContents(contents) {
+            const container = document.getElementById('folder-items');
+
+            let html = '';
+
+            // Add subfolders
+            if (contents.folders && contents.folders.length > 0) {
+                contents.folders.forEach(folder => {
+                    html += `
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-folder text-yellow-500"></i>
+                                <span class="font-medium text-gray-900">${escapeHtml(folder.name)}</span>
+                            </div>
+                            <span class="text-sm text-gray-500">${folder.file_count} items</span>
+                        </div>
+                    `;
+                });
+            }
+
+            // Add files
+            if (contents.files && contents.files.length > 0) {
+                contents.files.forEach(file => {
+                    const fileIcon = getFileIcon(file.file_type);
+                    const fileSize = formatFileSize(file.file_size);
+
+                    html += `
+                        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <i class="${fileIcon} text-blue-500"></i>
+                                <span class="font-medium text-gray-900">${escapeHtml(file.original_name)}</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-sm text-gray-500">${fileSize}</span>
+                                ${sharedResource.sharing.permission === 'download' ?
+                                    `<button onclick="downloadFile(${file.id})" class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (!html) {
+                html = '<p class="text-gray-500 text-center py-8">This folder is empty</p>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Download file
+        function downloadFile(fileId) {
+            const link = document.createElement('a');
+            link.href = `${API_BASE_URL}/media/files/${fileId}/download?token=${shareToken}`;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Show error screen
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            loadingScreen.classList.add('hidden');
+            errorScreen.classList.remove('hidden');
+        }
+
+        // Utility functions
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getFileIcon(fileType) {
+            switch (fileType) {
+                case 'image': return 'fas fa-file-image';
+                case 'video': return 'fas fa-file-video';
+                case 'audio': return 'fas fa-file-audio';
+                case 'document': return 'fas fa-file-alt';
+                default: return 'fas fa-file';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>

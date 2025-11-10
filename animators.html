@@ -154,7 +154,7 @@
                             Documents
                         </button>
                         <button id="tab-notes" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
-                            Notes & History
+                            Notes
                         </button>
                         <button id="tab-availability" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
                             Availability
@@ -358,17 +358,99 @@
                         </div>
                     </div>
 
-                    <!-- Availability Tab -->
+                        <!-- Availability Tab -->
                     <div id="availability-tab" class="tab-content hidden">
-                        <div class="space-y-4">
+                        <div class="space-y-6">
                             <div class="flex justify-between items-center">
-                                <h4 class="text-lg font-medium text-gray-900">Weekly Availability</h4>
-                                <button id="save-availability-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                    <i class="fas fa-save mr-2"></i>Save Availability
+                                <h4 class="text-lg font-medium text-gray-900">Week Types & Availability</h4>
+                                <button id="add-week-type-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Add Week Type
                                 </button>
                             </div>
-                            <div id="availability-list" class="space-y-4">
-                                <!-- Availability schedule will be loaded here -->
+
+                            <!-- Week Types List -->
+                            <div id="week-types-list" class="space-y-4">
+                                <!-- Week types will be loaded here -->
+                            </div>
+
+                            <!-- Week Type Modal -->
+                            <div id="week-type-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+                                <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+                                    <div class="mt-3">
+                                        <div class="flex items-center justify-between mb-6">
+                                            <h3 id="week-type-modal-title" class="text-2xl font-semibold text-gray-900">Add Week Type</h3>
+                                            <button id="close-week-type-modal" class="text-gray-400 hover:text-gray-600">
+                                                <i class="fas fa-times text-xl"></i>
+                                            </button>
+                                        </div>
+
+                                        <form id="week-type-form" class="space-y-6">
+                                            <div>
+                                                <label for="week-type-name" class="block text-sm font-medium text-gray-700 mb-1">Week Type Name *</label>
+                                                <input
+                                                    type="text"
+                                                    id="week-type-name"
+                                                    name="name"
+                                                    required
+                                                    placeholder="e.g., Week 1, Summer Schedule, Holiday Hours"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                >
+                                            </div>
+
+                                            <div>
+                                                <label for="week-type-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                                <textarea
+                                                    id="week-type-description"
+                                                    name="description"
+                                                    rows="3"
+                                                    placeholder="Optional description for this week type"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                ></textarea>
+                                            </div>
+                                        </form>
+
+                                        <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                                            <button id="cancel-week-type-btn" class="px-6 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+                                                Cancel
+                                            </button>
+                                            <button id="save-week-type-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
+                                                <i class="fas fa-save mr-2"></i>Save Week Type
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Availability Modal -->
+                            <div id="availability-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+                                <div class="relative top-4 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+                                    <div class="mt-3">
+                                        <div class="flex items-center justify-between mb-6">
+                                            <h3 id="availability-modal-title" class="text-2xl font-semibold text-gray-900">Set Availability</h3>
+                                            <button id="close-availability-modal" class="text-gray-400 hover:text-gray-600">
+                                                <i class="fas fa-times text-xl"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="mb-6">
+                                            <h4 id="availability-week-type-name" class="text-lg font-medium text-gray-900"></h4>
+                                            <p class="text-sm text-gray-600">Configure availability for each day of the week</p>
+                                        </div>
+
+                                        <div id="availability-schedule" class="space-y-4">
+                                            <!-- Availability schedule will be loaded here -->
+                                        </div>
+
+                                        <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                                            <button id="cancel-availability-btn" class="px-6 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+                                                Cancel
+                                            </button>
+                                            <button id="save-availability-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
+                                                <i class="fas fa-save mr-2"></i>Save Availability
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -380,6 +462,180 @@
                     </button>
                     <button id="save-animator-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
                         <i class="fas fa-save mr-2"></i>Save Animator
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Modal -->
+    <div id="document-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden" style="z-index: 9999;">
+        <div class="relative top-4 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-semibold text-gray-900">Upload Document</h3>
+                    <button id="close-document-modal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="document-form" class="space-y-6">
+                    <div>
+                        <label for="document-file" class="block text-sm font-medium text-gray-700 mb-1">Select File *</label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                            <div class="space-y-1 text-center">
+                                <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-4"></i>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="document-file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                        <span>Upload a file</span>
+                                        <input id="document-file" name="file" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt" class="sr-only" required>
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">
+                                    PDF, DOC, DOCX, JPG, PNG up to 10MB
+                                </p>
+                                <p id="file-name" class="text-sm text-gray-900 font-medium mt-2 hidden"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="document-type" class="block text-sm font-medium text-gray-700 mb-1">Document Type *</label>
+                        <select
+                            id="document-type"
+                            name="document_type"
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="">Select Document Type</option>
+                            <option value="birth_certificate">Birth Certificate</option>
+                            <option value="medical_form">Medical Form</option>
+                            <option value="vaccination_record">Vaccination Record</option>
+                            <option value="insurance_card">Insurance Card</option>
+                            <option value="photo">Photo</option>
+                            <option value="registration_form">Registration Form</option>
+                            <option value="consent_form">Consent Form</option>
+                            <option value="emergency_contact">Emergency Contact Info</option>
+                            <option value="cv">CV/Resume</option>
+                            <option value="certification">Certification</option>
+                            <option value="contract">Contract</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="document-expiry" class="block text-sm font-medium text-gray-700 mb-1">Expiry Date (optional)</label>
+                        <input
+                            type="date"
+                            id="document-expiry"
+                            name="expiry_date"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="document-notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <textarea
+                            id="document-notes"
+                            name="notes"
+                            rows="3"
+                            placeholder="Any additional notes about this document"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        ></textarea>
+                    </div>
+                </form>
+
+                <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                    <button id="cancel-document-btn" class="px-6 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="save-document-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-upload mr-2"></i>Upload Document
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div id="note-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden" style="z-index: 9999;">
+        <div class="relative top-4 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 id="note-modal-title" class="text-2xl font-semibold text-gray-900">Add Note</h3>
+                    <button id="close-note-modal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="note-form" class="space-y-6">
+                    <div>
+                        <label for="note-title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                        <input
+                            type="text"
+                            id="note-title"
+                            name="title"
+                            required
+                            placeholder="Brief title for this note"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="note-type" class="block text-sm font-medium text-gray-700 mb-1">Note Type *</label>
+                        <select
+                            id="note-type"
+                            name="note_type"
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="">Select Note Type</option>
+                            <option value="observation">Observation</option>
+                            <option value="incident">Incident</option>
+                            <option value="achievement">Achievement</option>
+                            <option value="medical">Medical</option>
+                            <option value="behavioral">Behavioral</option>
+                            <option value="developmental">Developmental</option>
+                            <option value="social">Social</option>
+                            <option value="academic">Academic</option>
+                            <option value="performance">Performance</option>
+                            <option value="training">Training</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="note-content" class="block text-sm font-medium text-gray-700 mb-1">Content *</label>
+                        <textarea
+                            id="note-content"
+                            name="content"
+                            rows="6"
+                            required
+                            placeholder="Detailed content of the note"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        ></textarea>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="note-is-private"
+                            name="is_private"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        >
+                        <label for="note-is-private" class="ml-2 block text-sm text-gray-900">
+                            Mark as private (only staff can view)
+                        </label>
+                    </div>
+                </form>
+
+                <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                    <button id="cancel-note-btn" class="px-6 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="save-note-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-save mr-2"></i>Save Note
                     </button>
                 </div>
             </div>
@@ -418,6 +674,9 @@
         let totalPages = 1;
         let currentFilters = {};
         let currentAnimatorId = null;
+        let tempDocuments = []; // Store documents temporarily during animator creation
+        let tempNotes = []; // Store notes temporarily during animator creation
+        let selectedTemplateId = null; // Store selected template ID
 
         // Initialize page
         async function initPage() {
@@ -694,6 +953,40 @@
                 const data = await response.json();
 
                 if (response.ok) {
+                    const animatorId = currentAnimatorId || data.animator_id;
+
+                    // If creating a new animator, upload temporary documents and notes
+                    if (!currentAnimatorId) {
+                        // Upload temporary documents
+                        for (const docFormData of tempDocuments) {
+                            try {
+                                await fetch(`${API_BASE_URL}/animators/${animatorId}/documents`, {
+                                    method: 'POST',
+                                    headers: { 'Authorization': `Bearer ${userToken}` },
+                                    body: docFormData
+                                });
+                            } catch (error) {
+                                console.error('Error uploading temporary document:', error);
+                            }
+                        }
+
+                        // Upload temporary notes
+                        for (const noteData of tempNotes) {
+                            try {
+                                await fetch(`${API_BASE_URL}/animators/${animatorId}/notes`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${userToken}`
+                                    },
+                                    body: JSON.stringify(noteData)
+                                });
+                            } catch (error) {
+                                console.error('Error uploading temporary note:', error);
+                            }
+                        }
+                    }
+
                     animatorModal.classList.add('hidden');
                     await loadAnimators(currentPage, currentFilters);
                     alert(`Animator ${currentAnimatorId ? 'updated' : 'created'} successfully!`);
@@ -977,9 +1270,70 @@
             }
         });
 
+        document.getElementById('tab-documents').addEventListener('click', () => {
+            if (currentAnimatorId) {
+                loadDocuments(currentAnimatorId);
+            } else {
+                displayTempDocuments();
+            }
+        });
+
+        document.getElementById('tab-notes').addEventListener('click', () => {
+            if (currentAnimatorId) {
+                loadNotes(currentAnimatorId);
+            } else {
+                displayTempNotes();
+            }
+        });
+
+        document.getElementById('tab-availability').addEventListener('click', () => {
+            if (currentAnimatorId) {
+                loadAvailability(currentAnimatorId);
+            } else {
+                displayDefaultAvailability();
+            }
+        });
+
+        // Add event listeners for sub-resource buttons
+        document.getElementById('add-document-btn').addEventListener('click', () => {
+            openDocumentModal();
+        });
+
+        document.getElementById('add-note-btn').addEventListener('click', () => {
+            openNoteModal();
+        });
+
+        document.getElementById('add-week-type-btn').addEventListener('click', () => {
+            openWeekTypeModal();
+        });
+
+        // Week type modal event listeners
+        document.getElementById('close-week-type-modal').addEventListener('click', closeWeekTypeModal);
+        document.getElementById('cancel-week-type-btn').addEventListener('click', closeWeekTypeModal);
+        document.getElementById('save-week-type-btn').addEventListener('click', saveWeekType);
+
+        // Availability modal event listeners
+        document.getElementById('close-availability-modal').addEventListener('click', closeAvailabilityModal);
+        document.getElementById('cancel-availability-btn').addEventListener('click', closeAvailabilityModal);
+        document.getElementById('save-availability-btn').addEventListener('click', saveAvailability);
+
+        // Document modal event listeners
+        document.getElementById('close-document-modal').addEventListener('click', closeDocumentModal);
+        document.getElementById('cancel-document-btn').addEventListener('click', closeDocumentModal);
+        document.getElementById('save-document-btn').addEventListener('click', saveDocument);
+        document.getElementById('document-file').addEventListener('change', handleFileSelection);
+
+        // Note modal event listeners
+        document.getElementById('close-note-modal').addEventListener('click', closeNoteModal);
+        document.getElementById('cancel-note-btn').addEventListener('click', closeNoteModal);
+        document.getElementById('save-note-btn').addEventListener('click', saveNote);
+
         // Utility functions
         function resetAnimatorForm() {
             document.getElementById('basic-form').reset();
+            // Reset temporary arrays
+            tempDocuments = [];
+            tempNotes = [];
             // Reset other tabs if needed
         }
 
@@ -1188,7 +1542,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="flex items-center space-x-2">
-                                                                <button onclick="downloadDocument(${doc.id})" class="text-green-600 hover:text-green-800 p-2" title="Download">
+                                                                <button onclick="downloadDocument(${doc.id}, ${animator.id})" class="text-green-600 hover:text-green-800 p-2" title="Download">
                                                                     <i class="fas fa-download"></i>
                                                                 </button>
                                                             </div>
@@ -1229,30 +1583,86 @@
 
                                     <!-- Availability Tab -->
                                     <div id="view-availability-tab" class="view-tab-content hidden">
-                                        <div class="space-y-4">
-                                            ${animator.availability && animator.availability.length > 0 ? `
-                                                ${animator.availability.map(avail => `
-                                                    <div class="bg-white border border-gray-200 rounded-lg p-4">
-                                                        <div class="flex justify-between items-center">
-                                                            <div>
-                                                                <h4 class="font-medium text-gray-900">${avail.day_of_week}</h4>
-                                                                <p class="text-sm text-gray-600">${avail.start_time} - ${avail.end_time}</p>
-                                                                <p class="text-xs text-gray-500">${avail.notes || 'No additional notes'}</p>
-                                                            </div>
-                                                            <div class="flex items-center space-x-2">
-                                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${avail.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                                                                    ${avail.is_available ? 'Available' : 'Unavailable'}
-                                                                </span>
-                                                            </div>
+                                        <div class="space-y-6">
+                                            <!-- Regular Weekly Schedule -->
+                                            <div>
+                                                <h5 class="text-md font-medium text-gray-900 mb-4">Regular Weekly Schedule</h5>
+                                                <div class="space-y-4">
+                                                    ${animator.availability && animator.availability.length > 0 ? `
+                                                        ${animator.availability.map(avail => {
+                                                            // Ensure day_of_week is properly converted to day name
+                                                            const dayNames = {
+                                                                1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday',
+                                                                5: 'Friday', 6: 'Saturday', 7: 'Sunday'
+                                                            };
+                                                            const dayName = dayNames[avail.day_of_week] || avail.day_of_week;
+                                                            return `
+                                                                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                                                    <div class="flex justify-between items-center">
+                                                                        <div>
+                                                                            <h4 class="font-medium text-gray-900">${dayName}</h4>
+                                                                            <p class="text-sm text-gray-600">${avail.start_time} - ${avail.end_time}</p>
+                                                                            <p class="text-xs text-gray-500">${avail.notes || 'No additional notes'}</p>
+                                                                        </div>
+                                                                        <div class="flex items-center space-x-2">
+                                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${avail.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                                                                ${avail.is_available ? 'Available' : 'Unavailable'}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            `;
+                                                        }).join('')}
+                                                    ` : `
+                                                        <div class="text-center py-8">
+                                                            <i class="fas fa-calendar text-gray-300 text-4xl mb-4"></i>
+                                                            <p class="text-gray-500">No regular availability set</p>
                                                         </div>
-                                                    </div>
-                                                `).join('')}
-                                            ` : `
-                                                <div class="text-center py-8">
-                                                    <i class="fas fa-calendar text-gray-300 text-4xl mb-4"></i>
-                                                    <p class="text-gray-500">No availability information set</p>
+                                                    `}
                                                 </div>
-                                            `}
+                                            </div>
+
+                                            <!-- Specific Date Exceptions -->
+                                            <div>
+                                                <h5 class="text-md font-medium text-gray-900 mb-4">Specific Date Exceptions</h5>
+                                                <div class="space-y-4">
+                                                    ${animator.availability_exceptions && animator.availability_exceptions.length > 0 ? `
+                                                        ${animator.availability_exceptions.map(exception => {
+                                                            const exceptionDate = new Date(exception.exception_date);
+                                                            const formattedDate = exceptionDate.toLocaleDateString('en-US', {
+                                                                weekday: 'long',
+                                                                year: 'numeric',
+                                                                month: 'long',
+                                                                day: 'numeric'
+                                                            });
+                                                            return `
+                                                                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                                                    <div class="flex justify-between items-center">
+                                                                        <div class="flex-1">
+                                                                            <h4 class="font-medium text-gray-900">${formattedDate}</h4>
+                                                                            <p class="text-sm text-gray-600">${exception.notes || 'No additional notes'}</p>
+                                                                        </div>
+                                                                        <div class="flex items-center space-x-2">
+                                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                                                exception.is_available
+                                                                                    ? 'bg-green-100 text-green-800'
+                                                                                    : 'bg-red-100 text-red-800'
+                                                                            }">
+                                                                                ${exception.is_available ? 'Available' : 'Unavailable'}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            `;
+                                                        }).join('')}
+                                                    ` : `
+                                                        <div class="text-center py-8">
+                                                            <i class="fas fa-calendar-times text-gray-300 text-4xl mb-4"></i>
+                                                            <p class="text-gray-500">No date exceptions set</p>
+                                                        </div>
+                                                    `}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1327,8 +1737,65 @@
         }
 
         // Download document
-        window.downloadDocument = function(documentId) {
-            window.open(`${API_BASE_URL}/documents/${documentId}/download?token=${userToken}`, '_blank');
+        window.downloadDocument = async function(documentId, animatorId) {
+            console.log('downloadDocument function called with:', { documentId, animatorId });
+
+            // Use currentAnimatorId if animatorId is not provided (for backwards compatibility)
+            const targetAnimatorId = animatorId || currentAnimatorId;
+            if (!targetAnimatorId) {
+                alert('Animator ID not available for document download');
+                return;
+            }
+
+            console.log('Downloading document:', { documentId, animatorId: targetAnimatorId, userToken: userToken ? 'present' : 'missing' });
+
+            const downloadUrl = `${API_BASE_URL}/animators/${targetAnimatorId}/documents/${documentId}`;
+            console.log('Download URL:', downloadUrl);
+
+            try {
+                const response = await fetch(downloadUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Accept': '*/*'
+                    },
+                    credentials: 'include'
+                });
+
+                console.log('Download response status:', response.status);
+                console.log('Download response headers:', Object.fromEntries(response.headers.entries()));
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Download failed with response:', errorText);
+                    throw new Error(`Failed to download document: ${response.status} ${errorText}`);
+                }
+
+                const blob = await response.blob();
+                console.log('Blob size:', blob.size, 'type:', blob.type);
+
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'document';
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename="(.+)"/);
+                    if (match) filename = match[1];
+                }
+                console.log('Filename:', filename);
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                console.log('Download completed successfully');
+            } catch (error) {
+                console.error('Error downloading document:', error);
+                alert('Failed to download document: ' + error.message);
+            }
         };
 
         window.editAnimator = async function(animatorId) {
@@ -1397,6 +1864,1314 @@
                 alert('Network error. Please try again.');
             }
         };
+
+        // Documents functionality
+        async function loadDocuments(animatorId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${animatorId}/documents`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load documents');
+
+                const data = await response.json();
+                displayDocuments(data.documents);
+
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                document.getElementById('documents-list').innerHTML = '<p class="text-gray-500">Error loading documents</p>';
+            }
+        }
+
+        function displayDocuments(documents) {
+            const container = document.getElementById('documents-list');
+
+            if (documents.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No documents uploaded</p>';
+                return;
+            }
+
+            container.innerHTML = documents.map(doc => `
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-file text-blue-500 text-xl"></i>
+                            <div>
+                                <h4 class="font-medium text-gray-900">${escapeHtml(doc.name)}</h4>
+                                <p class="text-sm text-gray-600">${doc.type || 'Document'} • ${formatFileSize(doc.size)}</p>
+                                <p class="text-xs text-gray-500">Uploaded: ${formatDate(doc.created_at)}</p>
+                            </div>
+                        </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="downloadDocument(${doc.id}, ${currentAnimatorId})" class="text-green-600 hover:text-green-800 p-2" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button onclick="deleteDocument(${currentAnimatorId}, ${doc.id})" class="text-red-600 hover:text-red-900 p-2" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Display temporary documents during animator creation
+        function displayTempDocuments() {
+            const container = document.getElementById('documents-list');
+
+            if (tempDocuments.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No documents added yet</p>';
+                return;
+            }
+
+            container.innerHTML = tempDocuments.map((docFormData, index) => {
+                const file = docFormData.get('file');
+                const docType = docFormData.get('document_type');
+                const notes = docFormData.get('notes');
+
+                return `
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-file text-blue-500 text-xl"></i>
+                                <div>
+                                    <h4 class="font-medium text-gray-900">${file ? file.name : 'Document'}</h4>
+                                    <p class="text-sm text-gray-600">${docType || 'Document'} • ${file ? formatFileSize(file.size) : 'Unknown size'}</p>
+                                    <p class="text-xs text-gray-500">Pending upload</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="removeTempDocument(${index})" class="text-red-600 hover:text-red-900 p-2" title="Remove">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Remove temporary document
+        window.removeTempDocument = function(index) {
+            tempDocuments.splice(index, 1);
+            displayTempDocuments();
+        };
+
+        // Notes functionality
+        async function loadNotes(animatorId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${animatorId}/notes`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load notes');
+
+                const data = await response.json();
+                displayNotes(data.notes);
+
+            } catch (error) {
+                console.error('Error loading notes:', error);
+                document.getElementById('notes-list').innerHTML = '<p class="text-gray-500">Error loading notes</p>';
+            }
+        }
+
+        function displayNotes(notes) {
+            const container = document.getElementById('notes-list');
+
+            if (notes.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No notes available</p>';
+                return;
+            }
+
+            container.innerHTML = notes.map(note => `
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-medium text-gray-900">${escapeHtml(note.title)}</h4>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs text-gray-500">${formatDate(note.created_at)}</span>
+                            <button onclick="editNote(${currentAnimatorId}, ${note.id})" class="text-blue-600 hover:text-blue-800 p-1" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteNote(${currentAnimatorId}, ${note.id})" class="text-red-600 hover:text-red-900 p-1" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-700">${escapeHtml(note.content)}</p>
+                    <div class="mt-2 flex items-center space-x-2">
+                        <span class="text-xs text-gray-500">By: ${escapeHtml(note.created_by_name)}</span>
+                        ${note.is_private ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Private</span>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Display temporary notes during animator creation
+        function displayTempNotes() {
+            const container = document.getElementById('notes-list');
+
+            if (tempNotes.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No notes added yet</p>';
+                return;
+            }
+
+            container.innerHTML = tempNotes.map((note, index) => `
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-medium text-gray-900">${escapeHtml(note.title)}</h4>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs text-gray-500">Pending save</span>
+                            <button onclick="removeTempNote(${index})" class="text-red-600 hover:text-red-900 p-1" title="Remove">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-700">${escapeHtml(note.content)}</p>
+                    <div class="mt-2 flex items-center space-x-2">
+                        <span class="text-xs text-gray-500">By: Current User</span>
+                        ${note.is_private ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Private</span>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Remove temporary note
+        window.removeTempNote = function(index) {
+            tempNotes.splice(index, 1);
+            displayTempNotes();
+        };
+
+        // Modal functions
+        function openDocumentModal() {
+            document.getElementById('document-form').reset();
+            document.getElementById('file-name').classList.add('hidden');
+            document.getElementById('document-modal').classList.remove('hidden');
+        }
+
+        function closeDocumentModal() {
+            document.getElementById('document-modal').classList.add('hidden');
+        }
+
+        function handleFileSelection(event) {
+            const file = event.target.files[0];
+            const fileNameElement = document.getElementById('file-name');
+
+            if (file) {
+                fileNameElement.textContent = `Selected: ${file.name}`;
+                fileNameElement.classList.remove('hidden');
+            } else {
+                fileNameElement.classList.add('hidden');
+            }
+        }
+
+        async function saveDocument() {
+            const form = document.getElementById('document-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const formData = new FormData(form);
+            formData.append('document_type', formData.get('document_type'));
+            formData.append('expiry_date', formData.get('expiry_date') || '');
+            formData.append('notes', formData.get('notes') || '');
+
+            // If creating a new animator, store document temporarily
+            if (!currentAnimatorId) {
+                tempDocuments.push(formData);
+                closeDocumentModal();
+                displayTempDocuments();
+                alert('Document added successfully!');
+                return;
+            }
+
+            // If editing existing animator, upload to API immediately
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${currentAnimatorId}/documents`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}` },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeDocumentModal();
+                    loadDocuments(currentAnimatorId);
+                    alert('Document uploaded successfully!');
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to upload document'));
+                }
+
+            } catch (error) {
+                console.error('Error uploading document:', error);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        function openNoteModal() {
+            document.getElementById('note-modal-title').textContent = 'Add Note';
+            document.getElementById('note-form').reset();
+            document.getElementById('note-modal').classList.remove('hidden');
+        }
+
+        function closeNoteModal() {
+            document.getElementById('note-modal').classList.add('hidden');
+        }
+
+        async function saveNote() {
+            const form = document.getElementById('note-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const formData = new FormData(form);
+            const noteData = {
+                title: formData.get('title'),
+                content: formData.get('content'),
+                note_type: formData.get('note_type'),
+                is_private: formData.get('is_private') === 'on'
+            };
+
+            // If creating a new animator, store note temporarily
+            if (!currentAnimatorId) {
+                tempNotes.push(noteData);
+                closeNoteModal();
+                displayTempNotes();
+                alert('Note added successfully!');
+                return;
+            }
+
+            // If editing existing animator, save to API immediately
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${currentAnimatorId}/notes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(noteData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeNoteModal();
+                    loadNotes(currentAnimatorId);
+                    alert('Note added successfully!');
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to add note'));
+                }
+
+            } catch (error) {
+                console.error('Error saving note:', error);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // Global functions for animator sub-resources
+        window.deleteDocument = async function(animatorId, documentId) {
+            if (!confirm('Are you sure you want to delete this document?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${animatorId}/documents/${documentId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (response.ok) {
+                    alert('Document deleted successfully!');
+                    loadDocuments(animatorId);
+                } else {
+                    alert('Failed to delete document');
+                }
+
+            } catch (error) {
+                console.error('Error deleting document:', error);
+                alert('Network error. Please try again.');
+            }
+        };
+
+        window.editNote = async function(animatorId, noteId) {
+            // For simplicity, we'll just show an alert. In a real app, you'd open a modal
+            alert('Edit note functionality would open a modal here');
+        };
+
+        window.deleteNote = async function(animatorId, noteId) {
+            if (!confirm('Are you sure you want to delete this note?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${animatorId}/notes/${noteId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (response.ok) {
+                    alert('Note deleted successfully!');
+                    loadNotes(animatorId);
+                } else {
+                    alert('Failed to delete note');
+                }
+
+            } catch (error) {
+                console.error('Error deleting note:', error);
+                alert('Network error. Please try again.');
+            }
+        };
+
+        // Week Types functionality
+        async function loadAvailability(animatorId) {
+            console.log('loadAvailability called with animatorId:', animatorId);
+            try {
+                // Load week types for this animator
+                const response = await fetch(`${API_BASE_URL}/animators/${animatorId}/week-types`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load week types');
+                }
+
+                const data = await response.json();
+                console.log('Week types data:', data);
+                displayWeekTypes(data.week_types || []);
+
+            } catch (error) {
+                console.error('Error loading week types:', error);
+                document.getElementById('week-types-list').innerHTML = '<p class="text-gray-500">Error loading week types</p>';
+            }
+        }
+
+        // Display week types
+        function displayWeekTypes(weekTypes) {
+            const container = document.getElementById('week-types-list');
+
+            if (weekTypes.length === 0) {
+                container.innerHTML = '<div class="text-center py-8"><i class="fas fa-calendar text-gray-300 text-4xl mb-4"></i><p class="text-gray-500">No week types configured yet</p><p class="text-sm text-gray-400">Add a week type to define availability patterns</p></div>';
+                return;
+            }
+
+            container.innerHTML = weekTypes.map(weekType => `
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <h4 class="text-lg font-medium text-gray-900">${escapeHtml(weekType.name)}</h4>
+                            ${weekType.description ? `<p class="text-sm text-gray-600 mt-1">${escapeHtml(weekType.description)}</p>` : ''}
+                            <div class="flex items-center space-x-4 mt-2">
+                                <span class="text-xs text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    ${weekType.availability_count || 0} days configured
+                                </span>
+                                <span class="text-xs text-gray-500">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    Created ${formatDate(weekType.created_at)}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="editWeekType(${weekType.id})" class="text-blue-600 hover:text-blue-800 p-2" title="Edit Week Type">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="setAvailability(${weekType.id}, '${escapeHtml(weekType.name)}')" class="text-green-600 hover:text-green-800 p-2" title="Set Availability">
+                                <i class="fas fa-clock"></i>
+                            </button>
+                            <button onclick="deleteWeekType(${weekType.id})" class="text-red-600 hover:text-red-900 p-2" title="Delete Week Type">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Show availability preview if available -->
+                    ${weekType.availability && weekType.availability.length > 0 ? `
+                        <div class="border-t border-gray-100 pt-4">
+                            <h5 class="text-sm font-medium text-gray-700 mb-3">Availability Preview</h5>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                ${weekType.availability.slice(0, 6).map(avail => {
+                                    const dayNames = {
+                                        1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu',
+                                        5: 'Fri', 6: 'Sat', 7: 'Sun'
+                                    };
+                                    const dayName = dayNames[avail.day_of_week] || avail.day_of_week;
+                                    return `
+                                        <div class="text-xs bg-gray-50 rounded px-2 py-1">
+                                            <span class="font-medium">${dayName}:</span>
+                                            ${avail.is_available ? `${avail.start_time}-${avail.end_time}` : 'Unavailable'}
+                                        </div>
+                                    `;
+                                }).join('')}
+                                ${weekType.availability.length > 6 ? `<div class="text-xs text-gray-500 px-2 py-1">+${weekType.availability.length - 6} more</div>` : ''}
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="border-t border-gray-100 pt-4">
+                            <p class="text-sm text-gray-500 italic">No availability set for this week type</p>
+                        </div>
+                    `}
+                </div>
+            `).join('');
+        }
+
+        // Modal functions for week types
+        async function openWeekTypeModal(weekTypeId = null) {
+            const modal = document.getElementById('week-type-modal');
+            const title = document.getElementById('week-type-modal-title');
+            const form = document.getElementById('week-type-form');
+
+            if (weekTypeId) {
+                title.textContent = 'Edit Week Type';
+
+                // Load existing week type data
+                try {
+                    const response = await fetch(`${API_BASE_URL}/animators/${currentAnimatorId}/week-types/${weekTypeId}`, {
+                        headers: { 'Authorization': `Bearer ${userToken}` }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to load week type');
+
+                    const data = await response.json();
+                    const weekType = data.week_type;
+
+                    // Populate form with existing data
+                    document.getElementById('week-type-name').value = weekType.name || '';
+                    document.getElementById('week-type-description').value = weekType.description || '';
+
+                    // Store the week type ID for updating
+                    modal.dataset.weekTypeId = weekTypeId;
+
+                } catch (error) {
+                    console.error('Error loading week type for edit:', error);
+                    alert('Failed to load week type data');
+                    return;
+                }
+
+            } else {
+                title.textContent = 'Add Week Type';
+                form.reset();
+                // Clear any stored week type ID
+                delete modal.dataset.weekTypeId;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeWeekTypeModal() {
+            document.getElementById('week-type-modal').classList.add('hidden');
+        }
+
+        async function saveWeekType() {
+            if (!currentAnimatorId) {
+                alert('Please save the animator first before adding week types');
+                return;
+            }
+
+            const form = document.getElementById('week-type-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const formData = new FormData(form);
+            const weekTypeData = {
+                name: formData.get('name'),
+                description: formData.get('description') || ''
+            };
+
+            // Check if we're editing an existing week type
+            const modal = document.getElementById('week-type-modal');
+            const weekTypeId = modal.dataset.weekTypeId;
+            const isEditing = !!weekTypeId;
+
+            try {
+                const url = isEditing
+                    ? `${API_BASE_URL}/animators/${currentAnimatorId}/week-types/${weekTypeId}`
+                    : `${API_BASE_URL}/animators/${currentAnimatorId}/week-types`;
+
+                const response = await fetch(url, {
+                    method: isEditing ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(weekTypeData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeWeekTypeModal();
+                    loadAvailability(currentAnimatorId);
+                    alert(`Week type ${isEditing ? 'updated' : 'created'} successfully!`);
+                } else {
+                    alert('Error: ' + (data.error || `Failed to ${isEditing ? 'update' : 'create'} week type`));
+                }
+
+            } catch (error) {
+                console.error('Error saving week type:', error);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // Availability modal functions
+        async function openAvailabilityModal(weekTypeId, weekTypeName) {
+            const modal = document.getElementById('availability-modal');
+            const title = document.getElementById('availability-modal-title');
+            const nameElement = document.getElementById('availability-week-type-name');
+
+            title.textContent = 'Set Availability';
+            nameElement.textContent = weekTypeName;
+
+            // Load existing availability for this week type
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${currentAnimatorId}/week-types/${weekTypeId}/availability`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                let availability = [];
+                if (response.ok) {
+                    const data = await response.json();
+                    availability = data.availability || [];
+                }
+
+                displayAvailabilitySchedule(availability);
+
+            } catch (error) {
+                console.error('Error loading availability:', error);
+                displayAvailabilitySchedule([]);
+            }
+
+            // Store current week type ID for saving
+            modal.dataset.weekTypeId = weekTypeId;
+            modal.classList.remove('hidden');
+        }
+
+        function closeAvailabilityModal() {
+            document.getElementById('availability-modal').classList.add('hidden');
+        }
+
+        function displayAvailabilitySchedule(availability) {
+            const container = document.getElementById('availability-schedule');
+
+            // Create availability data structure for all days
+            const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+            // Create a map of existing availability
+            const availabilityMap = {};
+            availability.forEach(item => {
+                availabilityMap[item.day_of_week.toLowerCase()] = item;
+            });
+
+            container.innerHTML = daysOfWeek.map((day, index) => {
+                const existing = availabilityMap[day];
+                const isAvailable = existing ? existing.is_available : false;
+                const startTime = existing ? existing.start_time : '09:00';
+                const endTime = existing ? existing.end_time : '17:00';
+                const notes = existing ? existing.notes : '';
+
+                return `
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-medium text-gray-900">${dayNames[index]}</h4>
+                            <label class="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    class="availability-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    data-day="${day}"
+                                    ${isAvailable ? 'checked' : ''}
+                                >
+                                <span class="ml-2 text-sm text-gray-700">Available</span>
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 availability-times" data-day="${day}" ${isAvailable ? '' : 'style="display: none;"'}>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                                <input
+                                    type="time"
+                                    class="start-time w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value="${startTime}"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                                <input
+                                    type="time"
+                                    class="end-time w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value="${endTime}"
+                                >
+                            </div>
+                        </div>
+                        <div class="mt-3 availability-notes" data-day="${day}" ${isAvailable ? '' : 'style="display: none;"'}>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                            <input
+                                type="text"
+                                class="notes w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Optional notes for this day"
+                                value="${notes || ''}"
+                            >
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add event listeners for checkboxes
+            document.querySelectorAll('.availability-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const day = this.dataset.day;
+                    const timesDiv = document.querySelector(`.availability-times[data-day="${day}"]`);
+                    const notesDiv = document.querySelector(`.availability-notes[data-day="${day}"]`);
+
+                    if (this.checked) {
+                        timesDiv.style.display = 'grid';
+                        notesDiv.style.display = 'block';
+                    } else {
+                        timesDiv.style.display = 'none';
+                        notesDiv.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        async function saveAvailability() {
+            const modal = document.getElementById('availability-modal');
+            const weekTypeId = modal.dataset.weekTypeId;
+
+            console.log('saveAvailability called with:', { currentAnimatorId, weekTypeId });
+
+            if (!weekTypeId) {
+                alert('Week type not selected');
+                return;
+            }
+
+            try {
+                const availabilityData = [];
+
+                // Collect data from all days
+                const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+                daysOfWeek.forEach(day => {
+                    const checkbox = document.querySelector(`.availability-checkbox[data-day="${day}"]`);
+                    console.log(`Day ${day}: checkbox checked =`, checkbox ? checkbox.checked : 'checkbox not found');
+
+                    if (checkbox && checkbox.checked) {
+                        const startTimeInput = document.querySelector(`.availability-times[data-day="${day}"] .start-time`);
+                        const endTimeInput = document.querySelector(`.availability-times[data-day="${day}"] .end-time`);
+                        const notesInput = document.querySelector(`.availability-notes[data-day="${day}"] .notes`);
+
+                        const dayData = {
+                            day_of_week: day.charAt(0).toUpperCase() + day.slice(1), // Capitalize first letter
+                            start_time: startTimeInput ? startTimeInput.value : '09:00',
+                            end_time: endTimeInput ? endTimeInput.value : '17:00',
+                            is_available: true,
+                            notes: notesInput ? notesInput.value : ''
+                        };
+
+                        console.log(`Adding availability data for ${day}:`, dayData);
+                        availabilityData.push(dayData);
+                    }
+                });
+
+                console.log('Final availabilityData to send:', availabilityData);
+                console.log('API URL:', `${API_BASE_URL}/animators/${currentAnimatorId}/week-types/${weekTypeId}/availability`);
+
+                const response = await fetch(`${API_BASE_URL}/animators/${currentAnimatorId}/week-types/${weekTypeId}/availability`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(availabilityData)
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+                let data;
+                try {
+                    data = await response.json();
+                    console.log('Response data:', data);
+                } catch (e) {
+                    console.error('Failed to parse response as JSON:', e);
+                    const text = await response.text();
+                    console.log('Response text:', text);
+                    data = { error: 'Invalid JSON response' };
+                }
+
+                if (response.ok) {
+                    closeAvailabilityModal();
+                    loadAvailability(currentAnimatorId);
+                    alert('Availability saved successfully!');
+                } else {
+                    console.error('API Error:', data);
+                    alert('Error: ' + (data.error || 'Failed to save availability'));
+                }
+
+            } catch (error) {
+                console.error('Error saving availability:', error);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // Global functions for week types
+        window.editWeekType = function(weekTypeId) {
+            openWeekTypeModal(weekTypeId);
+        };
+
+        window.setAvailability = function(weekTypeId, weekTypeName) {
+            openAvailabilityModal(weekTypeId, weekTypeName);
+        };
+
+        window.deleteWeekType = async function(weekTypeId) {
+            if (!confirm('Are you sure you want to delete this week type? This will also delete all associated availability data.')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${currentAnimatorId}/week-types/${weekTypeId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (response.ok) {
+                    alert('Week type deleted successfully!');
+                    loadAvailability(currentAnimatorId);
+                } else {
+                    alert('Failed to delete week type');
+                }
+
+            } catch (error) {
+                console.error('Error deleting week type:', error);
+                alert('Network error. Please try again.');
+            }
+        };
+
+        // Display template selection
+        function displayTemplateSelection(templates, currentTemplate) {
+            const container = document.getElementById('template-selection');
+
+            if (templates.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No availability templates available</p>';
+                return;
+            }
+
+            container.innerHTML = templates.map(template => {
+                const isSelected = currentTemplate && currentTemplate.id === template.id;
+                return `
+                    <div class="bg-white border ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200'} rounded-lg p-4 cursor-pointer hover:border-blue-300 transition-colors" onclick="selectTemplate(${template.id})">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900">${escapeHtml(template.name)}</h4>
+                                <p class="text-sm text-gray-600">${escapeHtml(template.description || 'No description')}</p>
+                                <div class="mt-2 flex items-center space-x-4">
+                                    <span class="text-xs text-gray-500">
+                                        <i class="fas fa-calendar mr-1"></i>
+                                        ${template.availability_count || 0} days configured
+                                    </span>
+                                    <span class="text-xs text-gray-500">
+                                        <i class="fas fa-users mr-1"></i>
+                                        Used by ${template.animator_count || 0} animators
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                ${isSelected ? '<i class="fas fa-check-circle text-blue-600 text-lg"></i>' : '<i class="fas fa-circle text-gray-300 text-lg"></i>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Display template schedule
+        function displayTemplateSchedule(template) {
+            const container = document.getElementById('template-schedule');
+            const displayDiv = document.getElementById('current-template-display');
+
+            if (!template || !template.availability || template.availability.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No schedule configured for this template</p>';
+                displayDiv.classList.add('hidden');
+                return;
+            }
+
+            displayDiv.classList.remove('hidden');
+
+            container.innerHTML = template.availability.map(avail => {
+                const dayNames = {
+                    1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday',
+                    5: 'Friday', 6: 'Saturday', 7: 'Sunday'
+                };
+                const dayName = dayNames[avail.day_of_week] || avail.day_of_week;
+
+                return `
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-medium text-gray-900">${dayName}</h4>
+                                <p class="text-sm text-gray-600">${avail.start_time} - ${avail.end_time}</p>
+                                <p class="text-xs text-gray-500">${avail.notes || 'No additional notes'}</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${avail.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${avail.is_available ? 'Available' : 'Unavailable'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Select template
+        window.selectTemplate = function(templateId) {
+            // Remove selection from all templates
+            document.querySelectorAll('#template-selection > div').forEach(div => {
+                div.classList.remove('border-blue-500', 'bg-blue-50');
+                const checkIcon = div.querySelector('.fa-check-circle');
+                const circleIcon = div.querySelector('.fa-circle');
+                if (checkIcon) checkIcon.classList.add('hidden');
+                if (circleIcon) circleIcon.classList.remove('hidden');
+            });
+
+            // Add selection to clicked template
+            const selectedDiv = event.currentTarget;
+            selectedDiv.classList.add('border-blue-500', 'bg-blue-50');
+            const checkIcon = selectedDiv.querySelector('.fa-circle');
+            const circleIcon = selectedDiv.querySelector('.fa-check-circle');
+            if (checkIcon) checkIcon.classList.add('hidden');
+            if (circleIcon) circleIcon.classList.remove('hidden');
+
+            // Store selected template ID
+            selectedTemplateId = templateId;
+
+            // Load and display template schedule
+            loadTemplateSchedule(templateId);
+        };
+
+        // Load template schedule
+        async function loadTemplateSchedule(templateId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/templates/${templateId}/availability`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load template schedule');
+                }
+
+                const data = await response.json();
+                const template = {
+                    id: templateId,
+                    availability: data.availability || []
+                };
+
+                displayTemplateSchedule(template);
+
+            } catch (error) {
+                console.error('Error loading template schedule:', error);
+                document.getElementById('template-schedule').innerHTML = '<p class="text-gray-500">Error loading template schedule</p>';
+            }
+        }
+
+        // Assign template to animator
+        async function assignTemplate() {
+            if (!currentAnimatorId) {
+                alert('Please save the animator first before assigning availability');
+                return;
+            }
+
+            if (!selectedTemplateId) {
+                alert('Please select an availability template first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${currentAnimatorId}/availability`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        template_id: selectedTemplateId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Availability template assigned successfully!');
+                    // Reload availability to show updated data
+                    loadAvailability(currentAnimatorId);
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to assign template'));
+                }
+
+            } catch (error) {
+                console.error('Error assigning template:', error);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        function displayAvailability(availability) {
+            const container = document.getElementById('availability-schedule');
+
+            // Create availability data structure for all days
+            const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+            // Create a map of existing availability
+            const availabilityMap = {};
+            availability.forEach(item => {
+                availabilityMap[item.day_of_week.toLowerCase()] = item;
+            });
+
+            container.innerHTML = daysOfWeek.map((day, index) => {
+                const existing = availabilityMap[day];
+                const isAvailable = existing ? existing.is_available : false;
+                const startTime = existing ? existing.start_time : '09:00';
+                const endTime = existing ? existing.end_time : '17:00';
+                const notes = existing ? existing.notes : '';
+
+                return `
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-medium text-gray-900">${dayNames[index]}</h4>
+                            <label class="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    class="availability-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    data-day="${day}"
+                                    ${isAvailable ? 'checked' : ''}
+                                >
+                                <span class="ml-2 text-sm text-gray-700">Available</span>
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 availability-times" data-day="${day}" ${isAvailable ? '' : 'style="display: none;"'}>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                                <input
+                                    type="time"
+                                    class="start-time w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value="${startTime}"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                                <input
+                                    type="time"
+                                    class="end-time w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value="${endTime}"
+                                >
+                            </div>
+                        </div>
+                        <div class="mt-3 availability-notes" data-day="${day}" ${isAvailable ? '' : 'style="display: none;"'}>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                            <input
+                                type="text"
+                                class="notes w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Optional notes for this day"
+                                value="${notes || ''}"
+                            >
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add event listeners for checkboxes
+            document.querySelectorAll('.availability-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const day = this.dataset.day;
+                    const timesDiv = document.querySelector(`.availability-times[data-day="${day}"]`);
+                    const notesDiv = document.querySelector(`.availability-notes[data-day="${day}"]`);
+
+                    if (this.checked) {
+                        timesDiv.style.display = 'grid';
+                        notesDiv.style.display = 'block';
+                    } else {
+                        timesDiv.style.display = 'none';
+                        notesDiv.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        function displayDefaultAvailability() {
+            const container = document.getElementById('availability-schedule');
+
+            // Create default availability for all days (weekdays available, weekends unavailable)
+            const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+            container.innerHTML = daysOfWeek.map((day, index) => {
+                // Default: weekdays are available, weekends are not
+                const isDefaultAvailable = index < 5; // Monday to Friday
+
+                return `
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-medium text-gray-900">${dayNames[index]}</h4>
+                            <label class="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    class="availability-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    data-day="${day}"
+                                    ${isDefaultAvailable ? 'checked' : ''}
+                                >
+                                <span class="ml-2 text-sm text-gray-700">Available</span>
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 availability-times" data-day="${day}" ${isDefaultAvailable ? '' : 'style="display: none;"'}>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                                <input
+                                    type="time"
+                                    class="start-time w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value="09:00"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                                <input
+                                    type="time"
+                                    class="end-time w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value="17:00"
+                                >
+                            </div>
+                        </div>
+                        <div class="mt-3 availability-notes" data-day="${day}" ${isDefaultAvailable ? '' : 'style="display: none;"'}>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                            <input
+                                type="text"
+                                class="notes w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Optional notes for this day"
+                            >
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add event listeners for checkboxes
+            document.querySelectorAll('.availability-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const day = this.dataset.day;
+                    const timesDiv = document.querySelector(`.availability-times[data-day="${day}"]`);
+                    const notesDiv = document.querySelector(`.availability-notes[data-day="${day}"]`);
+
+                    if (this.checked) {
+                        timesDiv.style.display = 'grid';
+                        notesDiv.style.display = 'block';
+                    } else {
+                        timesDiv.style.display = 'none';
+                        notesDiv.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+
+
+        // Availability exceptions functionality
+        function showExceptionModal(exceptionId = null) {
+            const modalHtml = `
+                <div id="exception-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">${exceptionId ? 'Edit Exception' : 'Add Exception'}</h3>
+                            <button onclick="hideExceptionModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <form id="exception-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Exception Date *</label>
+                                <input
+                                    type="date"
+                                    id="exception-date"
+                                    required
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Availability *</label>
+                                <select id="exception-availability" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="1">Available</option>
+                                    <option value="0">Unavailable</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                                <textarea id="exception-notes" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Reason for exception..."></textarea>
+                            </div>
+                            <div class="flex justify-end space-x-3 pt-4 border-t">
+                                <button type="button" onclick="hideExceptionModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-medium">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                                    <i class="fas fa-save mr-2"></i>${exceptionId ? 'Update' : 'Add'} Exception
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Handle form submission
+            document.getElementById('exception-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveException(exceptionId);
+            });
+        }
+
+        function hideExceptionModal() {
+            const modal = document.getElementById('exception-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        async function saveException(exceptionId = null) {
+            try {
+                const exceptionData = {
+                    exception_date: document.getElementById('exception-date').value,
+                    is_available: parseInt(document.getElementById('exception-availability').value),
+                    notes: document.getElementById('exception-notes').value || ''
+                };
+
+                if (!exceptionData.exception_date) {
+                    alert('Please select a date for the exception');
+                    return;
+                }
+
+                const method = exceptionId ? 'PUT' : 'POST';
+                const url = exceptionId
+                    ? `${API_BASE_URL}/animators/${currentAnimatorId}/availability/exceptions/${exceptionId}`
+                    : `${API_BASE_URL}/animators/${currentAnimatorId}/availability/exceptions`;
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(exceptionData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    hideExceptionModal();
+                    loadAvailabilityExceptions(currentAnimatorId);
+                    alert(`Exception ${exceptionId ? 'updated' : 'added'} successfully!`);
+                } else {
+                    alert('Error: ' + (data.error || `Failed to ${exceptionId ? 'update' : 'add'} exception`));
+                }
+
+            } catch (error) {
+                console.error('Error saving exception:', error);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        async function loadAvailabilityExceptions(animatorId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${animatorId}/availability`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load availability exceptions');
+
+                const data = await response.json();
+                displayAvailabilityExceptions(data.exceptions || []);
+
+            } catch (error) {
+                console.error('Error loading availability exceptions:', error);
+                document.getElementById('availability-exceptions').innerHTML = '<p class="text-gray-500">Error loading exceptions</p>';
+            }
+        }
+
+        function displayAvailabilityExceptions(exceptions) {
+            const container = document.getElementById('availability-exceptions');
+
+            if (exceptions.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No date exceptions set</p>';
+                return;
+            }
+
+            container.innerHTML = exceptions.map(exception => {
+                const date = new Date(exception.exception_date);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                return `
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900">${formattedDate}</h4>
+                                <p class="text-sm text-gray-600">${exception.notes || 'No additional notes'}</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    exception.is_available
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-red-100 text-red-800'
+                                }">
+                                    ${exception.is_available ? 'Available' : 'Unavailable'}
+                                </span>
+                                <button onclick="editException(${exception.id})" class="text-blue-600 hover:text-blue-800 p-2" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteException(${exception.id})" class="text-red-600 hover:text-red-900 p-2" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.editException = function(exceptionId) {
+            // For simplicity, we'll just show an alert. In a real app, you'd load the exception data and show the modal
+            alert('Edit exception functionality would load the exception data and show the modal here');
+        };
+
+        window.deleteException = async function(exceptionId) {
+            if (!confirm('Are you sure you want to delete this availability exception?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/animators/${currentAnimatorId}/availability/exceptions/${exceptionId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (response.ok) {
+                    alert('Exception deleted successfully!');
+                    loadAvailabilityExceptions(currentAnimatorId);
+                } else {
+                    alert('Failed to delete exception');
+                }
+
+            } catch (error) {
+                console.error('Error deleting exception:', error);
+                alert('Network error. Please try again.');
+            }
+        };
+
+
+
+        // Update tab switching to load exceptions when availability tab is clicked
+        document.getElementById('tab-availability').addEventListener('click', () => {
+            if (currentAnimatorId) {
+                loadAvailability(currentAnimatorId);
+            } else {
+                displayDefaultAvailability();
+                document.getElementById('availability-exceptions').innerHTML = '<p class="text-gray-500 text-center py-4">No date exceptions set</p>';
+            }
+        });
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', initPage);

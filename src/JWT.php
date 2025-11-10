@@ -28,38 +28,47 @@ class JWT {
      * Decode JWT token and return payload
      */
     public static function decode(string $token, string $secret): stdClass {
-        $parts = explode('.', $token);
+        try {
+            $parts = explode('.', $token);
 
-        if (count($parts) !== 3) {
-            throw new Exception('Invalid token format');
+            if (count($parts) !== 3) {
+                throw new Exception('Invalid token format');
+            }
+
+            $header = $parts[0];
+            $payload = $parts[1];
+            $signature = $parts[2];
+
+            // Verify signature
+            $expectedSignature = hash_hmac('sha256', $header . "." . $payload, $secret, true);
+            $expectedSignatureEncoded = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($expectedSignature));
+
+            if (!hash_equals($signature, $expectedSignatureEncoded)) {
+                throw new Exception('Invalid signature');
+            }
+
+            // Decode payload
+            $payloadJson = base64_decode(str_replace(['-', '_'], ['+', '/'], $payload), true);
+            if ($payloadJson === false) {
+                throw new Exception('Invalid base64 payload');
+            }
+
+            $payloadData = json_decode($payloadJson, false);
+
+            if (json_last_error() !== JSON_ERROR_NONE || $payloadData === null) {
+                throw new Exception('Invalid payload JSON: ' . json_last_error_msg());
+            }
+
+            // Check expiration
+            if (isset($payloadData->exp) && $payloadData->exp < time()) {
+                throw new Exception('Token expired');
+            }
+
+            return $payloadData;
+        } catch (Exception $e) {
+            // Re-throw with more context
+            throw new Exception('JWT decode failed: ' . $e->getMessage());
         }
-
-        $header = $parts[0];
-        $payload = $parts[1];
-        $signature = $parts[2];
-
-        // Verify signature
-        $expectedSignature = hash_hmac('sha256', $header . "." . $payload, $secret, true);
-        $expectedSignatureEncoded = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($expectedSignature));
-
-        if (!hash_equals($signature, $expectedSignatureEncoded)) {
-            throw new Exception('Invalid signature');
-        }
-
-        // Decode payload
-        $payloadJson = base64_decode(str_replace(['-', '_'], ['+', '/'], $payload));
-        $payloadData = json_decode($payloadJson, false);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('Invalid payload JSON');
-        }
-
-        // Check expiration
-        if (isset($payloadData->exp) && $payloadData->exp < time()) {
-            throw new Exception('Token expired');
-        }
-
-        return $payloadData;
     }
 }
 

@@ -35,7 +35,15 @@ $endpoint = $pathSegments[0] ?? '';
 $resourceId = $pathSegments[1] ?? null;
 
 // Get request body for POST/PUT requests
-$requestBody = json_decode(file_get_contents('php://input'), true) ?? [];
+$rawInput = file_get_contents('php://input');
+$requestBody = json_decode($rawInput, true);
+if ($requestBody === null) {
+    if (!empty($rawInput)) {
+        // JSON parsing failed
+        error_log("JSON parsing failed. Raw input: " . substr($rawInput, 0, 500));
+    }
+    $requestBody = [];
+}
 
 // Get authorization header
 $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
@@ -95,6 +103,14 @@ try {
     error_log("API Error GET Token: " . ($_GET['token'] ?? 'null'));
     error_log("API Error All Headers: " . json_encode(getallheaders()));
 
+    // Get recent error logs for debugging
+    $recentLogs = [];
+    $logFile = __DIR__ . '/../logs/animaid.log';
+    if (file_exists($logFile)) {
+        $lines = array_slice(file($logFile), -10); // Get last 10 lines
+        $recentLogs = array_map('trim', $lines);
+    }
+
     http_response_code($statusCode);
     echo json_encode([
         'success' => false,
@@ -105,7 +121,11 @@ try {
             'error_message' => $errorMsg,
             'endpoint' => $endpoint,
             'method' => $requestMethod,
-            'user_id' => $resourceId
+            'user_id' => $resourceId,
+            'path_segments' => $pathSegments,
+            'request_body_length' => strlen($rawInput ?? ''),
+            'request_body_preview' => substr($rawInput ?? '', 0, 200),
+            'recent_logs' => $recentLogs
         ]
     ]);
 }
@@ -261,6 +281,9 @@ function handleUsersRequest(?string $userId, string $method, array $body, ?strin
 function handleAnimatorsRequest(?string $animatorId, string $method, array $body, ?string $token, Auth $auth): array {
     global $pathSegments;
 
+    error_log("handleAnimatorsRequest called with animatorId: {$animatorId}, method: {$method}");
+    error_log("pathSegments: " . json_encode($pathSegments));
+
     if (!$token) throw new Exception('Authentication required');
 
     $user = $auth->verifyToken($token);
@@ -318,65 +341,201 @@ function handleAnimatorsRequest(?string $animatorId, string $method, array $body
     // Check if this is a documents operation: /api/animators/{id}/documents
     if ($animatorId && isset($pathSegments[2]) && $pathSegments[2] === 'documents') {
         $animatorId = (int)$animatorId;
+        $documentId = $pathSegments[3] ?? null;
 
-        switch ($method) {
-            case 'POST':
-                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
-                    throw new Exception('Insufficient permissions');
-                }
+        if ($documentId === null) {
+            // Handle collection requests for animator documents
+            switch ($method) {
+                case 'GET':
+                    // Documents are already included in getAnimatorDetails, but we can provide a separate endpoint
+                    $animator = $auth->getAnimatorDetails($animatorId);
+                    return ['documents' => $animator['documents'] ?? []];
 
-                // Handle file upload
-                if (isset($_FILES['file'])) {
-                    $file = $_FILES['file'];
-
-                    // Validate file
-                    if ($file['error'] !== UPLOAD_ERR_OK) {
-                        throw new Exception('File upload failed: ' . $file['error']);
+                case 'POST':
+                    if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                        throw new Exception('Insufficient permissions');
                     }
 
-                    // Check file size (10MB limit)
-                    if ($file['size'] > 10 * 1024 * 1024) {
-                        throw new Exception('File size exceeds 10MB limit');
+                    // Handle file upload
+                    if (isset($_FILES['file'])) {
+                        $file = $_FILES['file'];
+
+                        // Validate file
+                        if ($file['error'] !== UPLOAD_ERR_OK) {
+                            throw new Exception('File upload failed: ' . $file['error']);
+                        }
+
+                        // Check file size (10MB limit)
+                        if ($file['size'] > 10 * 1024 * 1024) {
+                            throw new Exception('File size exceeds 10MB limit');
+                        }
+
+                        // Create uploads/animators directory if it doesn't exist
+                        $uploadDir = __DIR__ . '/../uploads/animators/';
+                        if (!is_dir($uploadDir)) {
+                            if (!mkdir($uploadDir, 0755, true)) {
+                                throw new Exception('Failed to create upload directory');
+                            }
+                        }
+
+                        // Generate unique filename
+                        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                        $filename = uniqid('animator_doc_', true) . '.' . $extension;
+                        $filePath = $uploadDir . $filename;
+
+                        // Move uploaded file
+                        if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+                            throw new Exception('Failed to save uploaded file');
+                        }
+
+                        // Verify file was saved
+                        if (!file_exists($filePath)) {
+                            throw new Exception('File was not saved correctly');
+                        }
+
+                        // Get real path (but limit length to prevent database issues)
+                        $realPath = realpath($filePath);
+                        if ($realPath === false) {
+                            $realPath = $filePath; // Fallback to relative path
+                        }
+
+                        // Truncate path if too long for database
+                        if (strlen($realPath) > 500) {
+                            $realPath = substr($realPath, -500); // Keep last 500 chars
+                        }
+
+                        // Save document info to database
+                        $documentData = [
+                            'document_type' => $_POST['document_type'] ?? 'other',
+                            'original_name' => $file['name'],
+                            'file_name' => $filename,
+                            'file_path' => $realPath,
+                            'file_size' => $file['size'],
+                            'mime_type' => $file['type'],
+                            'expiry_date' => !empty($_POST['expiry_date']) ? $_POST['expiry_date'] : null,
+                            'notes' => $_POST['notes'] ?? ''
+                        ];
+
+                        $documentId = $auth->addAnimatorDocument($animatorId, $documentData, $user['id']);
+                        return [
+                            'document_id' => $documentId,
+                            'message' => 'Document uploaded successfully'
+                        ];
+                    }
+                    throw new Exception('No file uploaded');
+
+                default:
+                    throw new Exception('Method not allowed');
+            }
+        } else {
+            // Handle individual document requests
+            $documentId = (int)$documentId;
+
+            switch ($method) {
+                case 'GET':
+                    // For downloading documents
+                    // Check for token in query parameter (for direct browser downloads)
+                    $queryToken = $_GET['token'] ?? null;
+                    if ($queryToken) {
+                        try {
+                            $user = $auth->verifyToken($queryToken);
+                        } catch (Exception $e) {
+                            http_response_code(401);
+                            echo json_encode(['success' => false, 'error' => 'Invalid token']);
+                            exit;
+                        }
+                    } elseif (!$user) {
+                        http_response_code(401);
+                        echo json_encode(['success' => false, 'error' => 'Authentication required']);
+                        exit;
                     }
 
-                    // Create uploads/animators directory if it doesn't exist
-                    $uploadDir = __DIR__ . '/../uploads/animators/';
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0755, true);
+                    if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+                        http_response_code(403);
+                        echo json_encode(['success' => false, 'error' => 'Insufficient permissions']);
+                        exit;
                     }
 
-                    // Generate unique filename
-                    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-                    $filename = uniqid('animator_doc_', true) . '.' . $extension;
-                    $filePath = $uploadDir . $filename;
-
-                    // Move uploaded file
-                    if (!move_uploaded_file($file['tmp_name'], $filePath)) {
-                        throw new Exception('Failed to save uploaded file');
+                    try {
+                        $document = $auth->getDb()->fetchOne("SELECT * FROM animator_documents WHERE id = ? AND animator_id = ?", [$documentId, $animatorId]);
+                    } catch (Exception $e) {
+                        http_response_code(500);
+                        echo json_encode(['success' => false, 'error' => 'Database error']);
+                        exit;
                     }
 
-                    // Save document info to database
-                    $documentData = [
-                        'document_type' => $_POST['document_type'] ?? 'other',
-                        'original_name' => $file['name'],
-                        'file_name' => $filename,
-                        'file_path' => realpath($filePath),
-                        'file_size' => $file['size'],
-                        'mime_type' => $file['type'],
-                        'expiry_date' => $_POST['expiry_date'] ?? null,
-                        'notes' => $_POST['notes'] ?? ''
-                    ];
+                    if (!$document) {
+                        http_response_code(404);
+                        echo json_encode(['success' => false, 'error' => 'Document not found']);
+                        exit;
+                    }
 
-                    $documentId = $auth->addAnimatorDocument($animatorId, $documentData, $user['id']);
-                    return [
-                        'document_id' => $documentId,
-                        'message' => 'Document uploaded successfully'
-                    ];
-                }
-                throw new Exception('No file uploaded');
+                    // Check if file exists
+                    if (!file_exists($document['file_path'])) {
+                        http_response_code(404);
+                        echo json_encode(['success' => false, 'error' => 'File not found on disk']);
+                        exit;
+                    }
 
-            default:
-                throw new Exception('Method not allowed');
+                    // Check if file is readable
+                    if (!is_readable($document['file_path'])) {
+                        http_response_code(500);
+                        echo json_encode(['success' => false, 'error' => 'File not readable']);
+                        exit;
+                    }
+
+                    // Get file size
+                    $fileSize = filesize($document['file_path']);
+                    if ($fileSize === false) {
+                        http_response_code(500);
+                        echo json_encode(['success' => false, 'error' => 'Could not get file size']);
+                        exit;
+                    }
+
+                    // Clear any previous output
+                    if (ob_get_level()) {
+                        ob_clean();
+                    }
+
+                    // Remove the default JSON content-type header
+                    header_remove('Content-Type');
+                    header('Content-Type: ' . $document['mime_type']);
+                    header('Content-Length: ' . $fileSize);
+                    header('Content-Disposition: inline; filename="' . $document['original_name'] . '"');
+                    header('Cache-Control: private, max-age=0, must-revalidate');
+                    header('Pragma: public');
+
+                    // Read and output file
+                    $fp = fopen($document['file_path'], 'rb');
+                    if ($fp === false) {
+                        http_response_code(500);
+                        echo json_encode(['success' => false, 'error' => 'Could not open file']);
+                        exit;
+                    }
+
+                    while (!feof($fp)) {
+                        echo fread($fp, 8192);
+                    }
+                    fclose($fp);
+                    exit;
+
+                case 'DELETE':
+                    if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                        throw new Exception('Insufficient permissions');
+                    }
+
+                    // Get document info
+                    $document = $auth->getDb()->fetchOne("SELECT * FROM animator_documents WHERE id = ? AND animator_id = ?", [$documentId, $animatorId]);
+                    if ($document && file_exists($document['file_path'])) {
+                        unlink($document['file_path']);
+                    }
+
+                    $auth->getDb()->delete('animator_documents', 'id = ? AND animator_id = ?', [$documentId, $animatorId]);
+                    return ['message' => 'Document deleted successfully'];
+
+                default:
+                    throw new Exception('Method not allowed');
+            }
         }
     }
 
@@ -385,6 +544,22 @@ function handleAnimatorsRequest(?string $animatorId, string $method, array $body
         $animatorId = (int)$animatorId;
 
         switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                // Get notes for animator
+                $notes = $auth->getDb()->fetchAll("
+                    SELECT an.*, u.username as created_by_name
+                    FROM animator_notes an
+                    JOIN users u ON an.created_by = u.id
+                    WHERE an.animator_id = ?
+                    ORDER BY an.created_at DESC
+                ", [$animatorId]);
+
+                return ['notes' => $notes];
+
             case 'POST':
                 if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
                     throw new Exception('Insufficient permissions');
@@ -417,25 +592,270 @@ function handleAnimatorsRequest(?string $animatorId, string $method, array $body
         }
     }
 
-    // Check if this is an availability operation: /api/animators/{id}/availability
-    if ($animatorId && isset($pathSegments[2]) && $pathSegments[2] === 'availability') {
+    // Check if this is a week type availability operation: /api/animators/{id}/week-types/{weekTypeId}/availability
+    if ($animatorId && isset($pathSegments[2]) && $pathSegments[2] === 'week-types' && isset($pathSegments[3]) && isset($pathSegments[4]) && $pathSegments[4] === 'availability') {
         $animatorId = (int)$animatorId;
+        $weekTypeId = (int)$pathSegments[3];
 
         switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $availability = $auth->getAnimatorWeekAvailability($weekTypeId);
+                return ['availability' => $availability];
+
             case 'POST':
                 if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
                     throw new Exception('Insufficient permissions');
                 }
 
-                $availabilityData = $body['availability'] ?? [];
+                // Log incoming data for debugging
+                error_log("API POST Availability - Animator: {$animatorId}, WeekType: {$weekTypeId}");
+                error_log("API POST Availability - Request Body: " . json_encode($body));
+                error_log("API POST Availability - Request Body type: " . gettype($body));
+                error_log("API POST Availability - Request Body is_array: " . (is_array($body) ? 'yes' : 'no'));
+
+                // Verify that the week type belongs to the animator
+                try {
+                    $weekType = $auth->getDb()->fetchOne("SELECT id FROM animator_week_types WHERE id = ? AND animator_id = ?", [$weekTypeId, $animatorId]);
+                    error_log("API POST Availability - Week type query result: " . json_encode($weekType));
+                } catch (Exception $e) {
+                    error_log("API POST Availability - Database error checking week type: " . $e->getMessage());
+                    throw $e;
+                }
+
+                if (!$weekType) {
+                    error_log("API POST Availability - Week type not found or doesn't belong to animator");
+                    throw new Exception('Week type not found or does not belong to this animator');
+                }
+
+                $availabilityData = $body;
+                if (empty($availabilityData)) {
+                    error_log("API POST Availability - Empty availability data");
+                    throw new Exception('Availability data is required');
+                }
+
+                error_log("API POST Availability - Calling setAnimatorWeekAvailability with " . count($availabilityData) . " items");
+
+                try {
+                    $count = $auth->setAnimatorWeekAvailability($weekTypeId, $availabilityData);
+                    error_log("API POST Availability - Successfully updated {$count} availability records");
+                } catch (Exception $e) {
+                    error_log("API POST Availability - Error in setAnimatorWeekAvailability: " . $e->getMessage());
+                    error_log("API POST Availability - Error stack trace: " . $e->getTraceAsString());
+                    throw $e;
+                }
+
+                return [
+                    'count' => $count,
+                    'message' => 'Week type availability updated successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is an availability operation: /api/animators/{id}/availability
+    if ($animatorId && isset($pathSegments[2]) && $pathSegments[2] === 'availability') {
+        $animatorId = (int)$animatorId;
+
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $availability = $auth->getAnimatorAvailability($animatorId);
+
+                // Debug logging
+                error_log("API GET Availability for animator {$animatorId}: " . json_encode($availability));
+
+                return $availability;
+
+            case 'POST':
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                // Get the animator's default week type (first one created)
+                $weekTypes = $auth->getAnimatorWeekTypes($animatorId);
+                if (empty($weekTypes)) {
+                    throw new Exception('No week types found for animator');
+                }
+
+                $defaultWeekType = $weekTypes[0]; // Use first week type as default
+
+                // Update the availability for this week type
+                $count = $auth->setAnimatorWeekAvailability($defaultWeekType['id'], $body);
+
+                return [
+                    'count' => $count,
+                    'message' => 'Availability updated successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is a week types operation: /api/animators/{id}/week-types
+    if ($animatorId && isset($pathSegments[2]) && $pathSegments[2] === 'week-types' && !isset($pathSegments[4])) {
+        $animatorId = (int)$animatorId;
+        $weekTypeId = isset($pathSegments[3]) ? (int)$pathSegments[3] : null;
+
+        if ($weekTypeId === null) {
+            // Handle collection requests for week types
+            switch ($method) {
+                case 'GET':
+                    if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+                        throw new Exception('Insufficient permissions');
+                    }
+
+                    $weekTypes = $auth->getAnimatorWeekTypes($animatorId);
+                    return ['week_types' => $weekTypes];
+
+                case 'POST':
+                    if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                        throw new Exception('Insufficient permissions');
+                    }
+
+                    $weekTypeId = $auth->createAnimatorWeekType($animatorId, $body, $user['id']);
+                    return [
+                        'week_type_id' => $weekTypeId,
+                        'message' => 'Week type created successfully'
+                    ];
+
+                default:
+                    throw new Exception('Method not allowed');
+            }
+        } else {
+            // Handle individual week type requests
+            switch ($method) {
+                case 'GET':
+                    if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+                        throw new Exception('Insufficient permissions');
+                    }
+
+                    $weekType = $auth->getAnimatorWeekTypes($animatorId);
+                    $weekType = array_filter($weekType, fn($wt) => $wt['id'] == $weekTypeId);
+                    if (empty($weekType)) {
+                        throw new Exception('Week type not found');
+                    }
+
+                    $weekType = array_values($weekType)[0];
+                    $weekType['availability'] = $auth->getAnimatorWeekAvailability($weekTypeId);
+                    return ['week_type' => $weekType];
+
+                case 'PUT':
+                    if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                        throw new Exception('Insufficient permissions');
+                    }
+
+                    $auth->updateAnimatorWeekType($weekTypeId, $body);
+                    return ['message' => 'Week type updated successfully'];
+
+                case 'DELETE':
+                    if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                        throw new Exception('Insufficient permissions');
+                    }
+
+                    $auth->deleteAnimatorWeekType($weekTypeId);
+                    return ['message' => 'Week type deleted successfully'];
+
+                default:
+                    throw new Exception('Method not allowed');
+            }
+        }
+    }
+
+    // Check if this is a template operation: /api/animators/templates
+    if ($animatorId === 'templates') {
+        $templateId = isset($pathSegments[2]) ? (int)$pathSegments[2] : null;
+
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                if ($templateId) {
+                    // Get specific template
+                    $templates = $auth->getAvailabilityTemplates();
+                    $template = array_filter($templates, fn($t) => $t['id'] == $templateId);
+                    if (empty($template)) {
+                        throw new Exception('Template not found');
+                    }
+                    return ['template' => array_values($template)[0]];
+                } else {
+                    // Get all templates
+                    return ['templates' => $auth->getAvailabilityTemplates()];
+                }
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'admin.system')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $templateId = $auth->createAvailabilityTemplate($body, $user['id']);
+                return [
+                    'template_id' => $templateId,
+                    'message' => 'Availability template created successfully'
+                ];
+
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'admin.system')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->updateAvailabilityTemplate($templateId, $body);
+                return ['message' => 'Availability template updated successfully'];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'admin.system')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->deleteAvailabilityTemplate($templateId);
+                return ['message' => 'Availability template deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+
+
+    // Check if this is a template availability operation: /api/animators/templates/{id}/availability
+    if ($animatorId === 'templates' && isset($pathSegments[2]) && isset($pathSegments[3]) && $pathSegments[3] === 'availability') {
+        $templateId = (int)$pathSegments[2];
+
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'registrations.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $availability = $auth->getTemplateAvailability($templateId);
+                return ['availability' => $availability];
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'admin.system')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $availabilityData = $body;
                 if (empty($availabilityData)) {
                     throw new Exception('Availability data is required');
                 }
 
-                $count = $auth->setAnimatorAvailability($animatorId, $availabilityData);
+                $count = $auth->setTemplateAvailability($templateId, $availabilityData);
                 return [
                     'count' => $count,
-                    'message' => 'Availability updated successfully'
+                    'message' => 'Template availability updated successfully'
                 ];
 
             default:
@@ -1395,14 +1815,31 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
     if ($resourceId === 'folders' && isset($pathSegments[2])) {
         $folderId = (int)$pathSegments[2];
 
-        if (!$user) throw new Exception('Authentication required');
+        // Check if this is a shared folder access
+        $shareToken = $_GET['token'] ?? null;
+        $isSharedAccess = false;
+
+        if ($shareToken) {
+            $sharing = $auth->getDb()->fetchOne("
+                SELECT * FROM media_sharing
+                WHERE share_token = ? AND resource_type = 'folder' AND resource_id = ? AND (expires_at IS NULL OR expires_at > datetime('now'))
+            ", [$shareToken, $folderId]);
+
+            if ($sharing) {
+                $isSharedAccess = true;
+            }
+        }
+
+        if (!$isSharedAccess && !$user) {
+            throw new Exception('Authentication required');
+        }
+
+        if (!$isSharedAccess && !$auth->checkPermission($user['id'], 'media.view')) {
+            throw new Exception('Insufficient permissions');
+        }
 
         switch ($method) {
             case 'GET':
-                if (!$auth->checkPermission($user['id'], 'media.view')) {
-                    throw new Exception('Insufficient permissions');
-                }
-
                 // Get folder details and contents
                 $folder = $auth->getDb()->fetchOne("SELECT * FROM media_folders WHERE id = ?", [$folderId]);
                 if (!$folder) {
@@ -1413,6 +1850,10 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                 return array_merge($folder, ['contents' => $contents]);
 
             case 'PUT':
+                if ($isSharedAccess) {
+                    throw new Exception('Operation not allowed for shared content');
+                }
+
                 if (!$auth->checkPermission($user['id'], 'media.upload')) {
                     throw new Exception('Insufficient permissions');
                 }
@@ -1421,6 +1862,10 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                 return ['message' => 'Folder moved successfully'];
 
             case 'DELETE':
+                if ($isSharedAccess) {
+                    throw new Exception('Operation not allowed for shared content');
+                }
+
                 if (!$auth->checkPermission($user['id'], 'media.delete')) {
                     throw new Exception('Insufficient permissions');
                 }
@@ -1638,7 +2083,7 @@ function handleMediaRequest(?string $resourceId, string $method, array $body, ?s
                 $shareToken = $auth->createShareLink($resourceType, $resourceId, $user['id'], $permission, $expiresHours);
                 return [
                     'share_token' => $shareToken,
-                    'share_url' => "/media/shared/{$shareToken}",
+                    'share_url' => "/shared.html?token={$shareToken}",
                     'message' => 'Share link created successfully'
                 ];
 
