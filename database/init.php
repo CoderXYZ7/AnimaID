@@ -650,102 +650,19 @@ function createTables(PDO $pdo) {
         )
     ");
 
-    // Availability schedule templates (Standard Week, Summer Week, etc.)
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS availability_templates (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name VARCHAR(100) NOT NULL UNIQUE,
-            description TEXT,
-            is_default BOOLEAN DEFAULT 0, -- Only one default template
-            is_active BOOLEAN DEFAULT 1,
-            created_by INTEGER NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (created_by) REFERENCES users(id)
-        )
-    ");
 
-    // Template availability schedule (weekly schedule for each template)
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS template_availability (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            template_id INTEGER NOT NULL,
-            day_of_week INTEGER NOT NULL, -- 1=Monday, 7=Sunday
-            start_time TIME,
-            end_time TIME,
-            is_available BOOLEAN DEFAULT 1,
-            notes TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (template_id) REFERENCES availability_templates(id) ON DELETE CASCADE,
-            UNIQUE(template_id, day_of_week)
-        )
-    ");
 
-    // Animator week types (custom week types per animator)
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS animator_week_types (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            animator_id INTEGER NOT NULL,
-            name VARCHAR(100) NOT NULL,
-            description TEXT,
-            is_active BOOLEAN DEFAULT 1,
-            created_by INTEGER NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (animator_id) REFERENCES animators(id) ON DELETE CASCADE,
-            FOREIGN KEY (created_by) REFERENCES users(id),
-            UNIQUE(animator_id, name) -- Each animator can have unique week type names
-        )
-    ");
 
-    // Animator week availability (availability slots for each week type)
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS animator_week_availability (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            week_type_id INTEGER NOT NULL,
-            day_of_week INTEGER NOT NULL, -- 1=Monday, 7=Sunday
-            start_time TIME,
-            end_time TIME,
-            is_available BOOLEAN DEFAULT 1,
-            notes TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (week_type_id) REFERENCES animator_week_types(id) ON DELETE CASCADE,
-            UNIQUE(week_type_id, day_of_week)
-        )
-    ");
 
-    // Animator week type exceptions (date-specific overrides)
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS animator_week_type_exceptions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            week_type_id INTEGER NOT NULL,
-            exception_date DATE NOT NULL,
-            is_available BOOLEAN DEFAULT 1,
-            notes TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (week_type_id) REFERENCES animator_week_types(id) ON DELETE CASCADE,
-            UNIQUE(week_type_id, exception_date)
-        )
-    ");
 
-    // Legacy table for backward compatibility (will be deprecated)
-    // Animator schedule assignments (which template each animator uses)
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS animator_schedule_assignments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            animator_id INTEGER NOT NULL,
-            template_id INTEGER NOT NULL,
-            assigned_by INTEGER NOT NULL,
-            assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (animator_id) REFERENCES animators(id) ON DELETE CASCADE,
-            FOREIGN KEY (template_id) REFERENCES availability_templates(id) ON DELETE CASCADE,
-            FOREIGN KEY (assigned_by) REFERENCES users(id),
-            UNIQUE(animator_id) -- Each animator can only have one active schedule
-        )
-    ");
+
+
+
+
+
+
+
+
 }
 
 function insertInitialData(PDO $pdo, array $config) {
@@ -848,8 +765,7 @@ function insertInitialData(PDO $pdo, array $config) {
     // Insert sample communications
     insertSampleCommunications($pdo);
 
-    // Insert default availability templates
-    insertDefaultAvailabilityTemplates($pdo, $adminId ?? 1);
+
 }
 
 function assignPermissionsToRoles(PDO $pdo) {
@@ -861,7 +777,7 @@ function assignPermissionsToRoles(PDO $pdo) {
 
     // Define role-permission mappings
     $rolePermissions = [
-        'technical_admin' => array_keys($permissions), // All permissions
+        'technical_admin' => array_keys($permissions), // All permissions - explicitly assign all permissions to admin
 
         'organizzatore' => [
             // Registrations
@@ -936,8 +852,13 @@ function assignPermissionsToRoles(PDO $pdo) {
         ],
     ];
 
+    // Clear existing role permissions to ensure clean assignment
+    foreach ($roles as $roleId) {
+        $pdo->exec("DELETE FROM role_permissions WHERE role_id = " . $roleId);
+    }
+
     $stmt = $pdo->prepare("
-        INSERT OR IGNORE INTO role_permissions (role_id, permission_id)
+        INSERT INTO role_permissions (role_id, permission_id)
         VALUES (?, ?)
     ");
 
@@ -955,103 +876,7 @@ function assignPermissionsToRoles(PDO $pdo) {
     }
 }
 
-function insertDefaultAvailabilityTemplates(PDO $pdo, int $adminId) {
-    // Insert default availability templates
-    $templates = [
-        [
-            'Standard Week',
-            'Standard working week schedule for animators',
-            1, // is_default
-            1, // is_active
-            $adminId
-        ],
-        [
-            'Summer Week',
-            'Extended hours during summer season',
-            0, // is_default
-            1, // is_active
-            $adminId
-        ],
-        [
-            'Holiday Week',
-            'Reduced hours during holiday periods',
-            0, // is_default
-            1, // is_active
-            $adminId
-        ]
-    ];
 
-    $stmt = $pdo->prepare("
-        INSERT OR IGNORE INTO availability_templates (name, description, is_default, is_active, created_by)
-        VALUES (?, ?, ?, ?, ?)
-    ");
-
-    foreach ($templates as $template) {
-        $stmt->execute($template);
-    }
-
-    // Insert availability data for each template
-    $templateData = [
-        'Standard Week' => [
-            ['Monday', '09:00', '17:00', 1, ''],
-            ['Tuesday', '09:00', '17:00', 1, ''],
-            ['Wednesday', '09:00', '17:00', 1, ''],
-            ['Thursday', '09:00', '17:00', 1, ''],
-            ['Friday', '09:00', '17:00', 1, ''],
-            ['Saturday', '09:00', '13:00', 1, 'Half day'],
-            ['Sunday', '00:00', '00:00', 0, 'Closed']
-        ],
-        'Summer Week' => [
-            ['Monday', '08:00', '18:00', 1, 'Extended hours'],
-            ['Tuesday', '08:00', '18:00', 1, 'Extended hours'],
-            ['Wednesday', '08:00', '18:00', 1, 'Extended hours'],
-            ['Thursday', '08:00', '18:00', 1, 'Extended hours'],
-            ['Friday', '08:00', '18:00', 1, 'Extended hours'],
-            ['Saturday', '09:00', '16:00', 1, 'Summer activities'],
-            ['Sunday', '10:00', '14:00', 1, 'Weekend activities']
-        ],
-        'Holiday Week' => [
-            ['Monday', '09:00', '16:00', 1, 'Reduced hours'],
-            ['Tuesday', '09:00', '16:00', 1, 'Reduced hours'],
-            ['Wednesday', '09:00', '16:00', 1, 'Reduced hours'],
-            ['Thursday', '09:00', '16:00', 1, 'Reduced hours'],
-            ['Friday', '09:00', '16:00', 1, 'Reduced hours'],
-            ['Saturday', '00:00', '00:00', 0, 'Closed for holidays'],
-            ['Sunday', '00:00', '00:00', 0, 'Closed for holidays']
-        ]
-    ];
-
-    // Map day names to integers
-    $dayMap = [
-        'Monday' => 1,
-        'Tuesday' => 2,
-        'Wednesday' => 3,
-        'Thursday' => 4,
-        'Friday' => 5,
-        'Saturday' => 6,
-        'Sunday' => 7
-    ];
-
-    $stmt = $pdo->prepare("
-        INSERT OR IGNORE INTO template_availability (template_id, day_of_week, start_time, end_time, is_available, notes)
-        SELECT t.id, ?, ?, ?, ?, ? FROM availability_templates t WHERE t.name = ?
-    ");
-
-    foreach ($templateData as $templateName => $days) {
-        foreach ($days as $day) {
-            $stmt->execute([
-                $dayMap[$day[0]], // day_of_week
-                $day[1], // start_time
-                $day[2], // end_time
-                $day[3], // is_available
-                $day[4], // notes
-                $templateName // template name for lookup
-            ]);
-        }
-    }
-
-    echo "Default availability templates created.\n";
-}
 
 function insertSampleCommunications(PDO $pdo) {
     // Get admin user ID (assuming admin user exists)

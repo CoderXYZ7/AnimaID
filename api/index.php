@@ -171,10 +171,14 @@ function handleRequest(string $endpoint, ?string $resourceId, string $method, ar
         case 'animators':
             return handleAnimatorsRequest($resourceId, $method, $body, $token, $auth);
 
+
+
         default:
             throw new Exception('Endpoint not found');
     }
 }
+
+
 
 function handleAuthRequest(?string $action, string $method, array $body, ?string $token, Auth $auth): array {
     switch ($action) {

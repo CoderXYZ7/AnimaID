@@ -2213,4 +2213,219 @@ class Auth {
 
         return $availability;
     }
+
+    /**
+     * Get all schedules
+     */
+    public function getSchedules(): array {
+        return $this->db->fetchAll("
+            SELECT s.*,
+                   COUNT(DISTINCT asa.id) as animator_count,
+                   u.username as created_by_name
+            FROM schedules s
+            LEFT JOIN animator_schedule_availability asa ON s.id = asa.schedule_id
+            LEFT JOIN users u ON s.created_by = u.id
+            WHERE s.is_active = 1
+            GROUP BY s.id
+            ORDER BY s.name
+        ");
+    }
+
+    /**
+     * Create a new schedule
+     */
+    public function createSchedule(array $scheduleData, int $createdBy): int {
+        return $this->db->insert('schedules', array_merge($scheduleData, [
+            'created_by' => $createdBy
+        ]));
+    }
+
+    /**
+     * Update schedule
+     */
+    public function updateSchedule(int $scheduleId, array $scheduleData): void {
+        $allowedFields = ['name', 'description', 'is_active'];
+        $updateData = array_intersect_key($scheduleData, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $updateData['updated_at'] = date('Y-m-d H:i:s');
+            $this->db->update('schedules', $updateData, 'id = ?', [$scheduleId]);
+        }
+    }
+
+    /**
+     * Delete schedule
+     */
+    public function deleteSchedule(int $scheduleId): void {
+        // Check if schedule is in use
+        $usageCount = $this->db->fetchOne("SELECT COUNT(*) as count FROM animator_schedule_availability WHERE schedule_id = ?", [$scheduleId])['count'];
+
+        if ($usageCount > 0) {
+            throw new Exception('Cannot delete schedule that is assigned to animators');
+        }
+
+        $this->db->delete('schedules', 'id = ?', [$scheduleId]);
+    }
+
+    /**
+     * Get animator availability for a specific schedule
+     */
+    public function getAnimatorScheduleAvailability(int $scheduleId): array {
+        // Map integers back to day names
+        $dayNames = [
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday',
+            7 => 'Sunday'
+        ];
+
+        $availability = $this->db->fetchAll("
+            SELECT asa.*, a.first_name, a.last_name, a.animator_number
+            FROM animator_schedule_availability asa
+            JOIN animators a ON asa.animator_id = a.id
+            WHERE asa.schedule_id = ?
+            ORDER BY a.last_name, a.first_name, asa.day_of_week
+        ", [$scheduleId]);
+
+        // Group by animator
+        $grouped = [];
+        foreach ($availability as $item) {
+            $animatorId = $item['animator_id'];
+            if (!isset($grouped[$animatorId])) {
+                $grouped[$animatorId] = [
+                    'animator_id' => $animatorId,
+                    'first_name' => $item['first_name'],
+                    'last_name' => $item['last_name'],
+                    'animator_number' => $item['animator_number'],
+                    'availability' => []
+                ];
+            }
+
+            // Convert day_of_week to string
+            $dayName = isset($dayNames[$item['day_of_week']]) ? $dayNames[$item['day_of_week']] : $item['day_of_week'];
+            $grouped[$animatorId]['availability'][] = [
+                'day_of_week' => $dayName,
+                'start_time' => $item['start_time'],
+                'end_time' => $item['end_time'],
+                'is_available' => (bool)$item['is_available'],
+                'notes' => $item['notes']
+            ];
+        }
+
+        return array_values($grouped);
+    }
+
+    /**
+     * Set animator availability for a specific schedule
+     */
+    public function setAnimatorScheduleAvailability(int $animatorId, int $scheduleId, array $availabilityData): int {
+        // Map day names to integers
+        $dayMap = [
+            'monday' => 1,
+            'tuesday' => 2,
+            'wednesday' => 3,
+            'thursday' => 4,
+            'friday' => 5,
+            'saturday' => 6,
+            'sunday' => 7,
+            'Monday' => 1,
+            'Tuesday' => 2,
+            'Wednesday' => 3,
+            'Thursday' => 4,
+            'Friday' => 5,
+            'Saturday' => 6,
+            'Sunday' => 7
+        ];
+
+        // Clear existing availability for this animator and schedule
+        $this->db->delete('animator_schedule_availability', 'animator_id = ? AND schedule_id = ?', [$animatorId, $scheduleId]);
+
+        $count = 0;
+        foreach ($availabilityData as $dayData) {
+            if (isset($dayData['day_of_week']) && is_string($dayData['day_of_week'])) {
+                $dayName = trim($dayData['day_of_week']);
+                if (isset($dayMap[$dayName])) {
+                    $insertData = [
+                        'animator_id' => $animatorId,
+                        'schedule_id' => $scheduleId,
+                        'day_of_week' => $dayMap[$dayName],
+                        'is_available' => isset($dayData['is_available']) ? ($dayData['is_available'] ? 1 : 0) : 1,
+                        'notes' => isset($dayData['notes']) ? trim($dayData['notes']) : null
+                    ];
+
+                    // Handle time fields
+                    if (isset($dayData['start_time']) && !empty(trim($dayData['start_time']))) {
+                        $startTime = trim($dayData['start_time']);
+                        if (preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $startTime)) {
+                            $insertData['start_time'] = $startTime;
+                        }
+                    }
+
+                    if (isset($dayData['end_time']) && !empty(trim($dayData['end_time']))) {
+                        $endTime = trim($dayData['end_time']);
+                        if (preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $endTime)) {
+                            $insertData['end_time'] = $endTime;
+                        }
+                    }
+
+                    $this->db->insert('animator_schedule_availability', $insertData);
+                    $count++;
+                }
+            }
+        }
+
+        return $count;
+    }
+
+    /**
+     * Get all animators with their availability for a specific schedule
+     */
+    public function getAnimatorsWithScheduleAvailability(int $scheduleId): array {
+        // Get all animators
+        $animators = $this->db->fetchAll("
+            SELECT a.id, a.first_name, a.last_name, a.animator_number, a.status
+            FROM animators a
+            WHERE a.status = 'active'
+            ORDER BY a.last_name, a.first_name
+        ");
+
+        // Get availability for each animator
+        foreach ($animators as &$animator) {
+            $availability = $this->db->fetchAll("
+                SELECT * FROM animator_schedule_availability
+                WHERE animator_id = ? AND schedule_id = ?
+                ORDER BY day_of_week
+            ", [$animator['id'], $scheduleId]);
+
+            // Map integers back to day names
+            $dayNames = [
+                1 => 'Monday',
+                2 => 'Tuesday',
+                3 => 'Wednesday',
+                4 => 'Thursday',
+                5 => 'Friday',
+                6 => 'Saturday',
+                7 => 'Sunday'
+            ];
+
+            $animatorAvailability = [];
+            foreach ($availability as $item) {
+                $dayName = isset($dayNames[$item['day_of_week']]) ? $dayNames[$item['day_of_week']] : $item['day_of_week'];
+                $animatorAvailability[] = [
+                    'day_of_week' => $dayName,
+                    'start_time' => $item['start_time'],
+                    'end_time' => $item['end_time'],
+                    'is_available' => (bool)$item['is_available'],
+                    'notes' => $item['notes']
+                ];
+            }
+
+            $animator['availability'] = $animatorAvailability;
+        }
+
+        return $animators;
+    }
 }

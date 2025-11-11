@@ -1,0 +1,55 @@
+=== AnimaID Authentication System Test ===
+
+Test 1: Admin Login
+✓ Login successful
+  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJBbmltYUlEIiwiYXVkIjoiQW5pbWFJRCIsImlhdCI6MTc2Mjc5NjU4MiwiZXhwIjoxNzYyODAzNzgyLCJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZXMiOlsidGVjaG5pY2FsX2FkbWluIl19.MJ-bdT0z8-U4xzBLBs1spMZ_-XUiHgaBii0SLKw85jU
+  User: admin
+  Roles: Technical Admin
+
+Test 2: Token Verification
+✓ Token verified
+  User ID: 1
+  Username: admin
+
+Test 3: Permission Checking
+  admin.users: ✓
+  admin.system: ✓
+  registrations.view: ✓
+  invalid.permission: ✗
+
+Test 4: Get Users List
+✓ Retrieved 4 users
+  - testuser4 (test4@example.com) - Roles: SUPER, organizzatore
+  - testuser2 (test2@example.com) - Roles: organizzatore
+  - testuser (test@example.com) - Roles: aiutoanimatore, technical_admin, organizzatore, responsabile, animatore
+  - admin (admin@animaid.local) - Roles: technical_admin
+
+Test 5: Get Roles
+✓ Retrieved 6 roles
+  - SUPER (SUPER) - Permissions: 37
+  - Aiutoanimatore (aiutoanimatore) - Permissions: 8
+  - Animatore (animatore) - Permissions: 14
+  - Organizzatore (organizzatore) - Permissions: 25
+  - Responsabile (responsabile) - Permissions: 20
+  - Technical Admin (technical_admin) - Permissions: 37
+
+Test 6: Get Permissions
+  admin: 4 permissions
+  attendance: 4 permissions
+  calendar: 5 permissions
+  communications: 4 permissions
+  media: 4 permissions
+  registrations: 5 permissions
+  reports: 3 permissions
+  spaces: 4 permissions
+  wiki: 4 permissions
+✓ Total permissions: 37
+
+Test 7: Create Test User
+✗ Test failed: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: users.email
+Stack trace:
+#0 /home/maintainer/Dev/AnimaID/src/Database.php(53): PDOStatement->execute()
+#1 /home/maintainer/Dev/AnimaID/src/Database.php(72): Database->query()
+#2 /home/maintainer/Dev/AnimaID/src/Auth.php(165): Database->insert()
+#3 /home/maintainer/Dev/AnimaID/test_auth.php(80): Auth->createUser()
+#4 {main}

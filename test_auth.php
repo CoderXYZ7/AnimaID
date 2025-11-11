@@ -19,7 +19,7 @@ try {
     echo "Test 1: Admin Login\n";
     $loginResult = $auth->login($config['default_admin']['username'], $config['default_admin']['password']);
     echo "✓ Login successful\n";
-    echo "  Token: " . substr($loginResult['token'], 0, 50) . "...\n";
+    echo "  Token: " . $loginResult['token'] . "\n";
     echo "  User: " . $loginResult['user']['username'] . "\n";
     echo "  Roles: " . implode(', ', array_column($loginResult['user']['roles'], 'display_name')) . "\n\n";
 
