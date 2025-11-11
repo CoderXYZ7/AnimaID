@@ -12,17 +12,21 @@ $path = ltrim($path, '/');
 
 // Define public files that can be served
 $publicFiles = [
-    '' => 'index.html', // Root path
-    'index.html' => 'index.html',
-    'login.html' => 'login.html',
-    'dashboard.html' => 'dashboard.html',
-    'calendar.html' => 'calendar.html',
-    'attendance.html' => 'attendance.html',
-    'children.html' => 'children.html',
-    'admin/users.html' => 'admin/users.html',
-    'admin/roles.html' => 'admin/roles.html',
-    'admin/status.html' => 'admin/status.html',
-    'styleguide.html' => 'StyleGuide.md', // For demo purposes
+    '' => 'public/index.html', // Root path
+    'index.html' => 'public/index.html',
+    'login.html' => 'public/login.html',
+    'dashboard.html' => 'public/dashboard.html',
+    'calendar.html' => 'public/pages/calendar.html',
+    'attendance.html' => 'public/pages/attendance.html',
+    'children.html' => 'public/pages/children.html',
+    'animators.html' => 'public/pages/animators.html',
+    'communications.html' => 'public/pages/communications.html',
+    'media.html' => 'public/pages/media.html',
+    'shared.html' => 'public/pages/shared.html',
+    'admin/users.html' => 'public/admin/users.html',
+    'admin/roles.html' => 'public/admin/roles.html',
+    'admin/status.html' => 'public/admin/status.html',
+    'styleguide.html' => 'docs/StyleGuide.md', // For demo purposes
 ];
 
 // Check if requesting a public file

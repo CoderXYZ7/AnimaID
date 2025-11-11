@@ -14,7 +14,7 @@ class Auth {
 
     public function __construct() {
         $this->db = Database::getInstance();
-        $this->config = require __DIR__ . '/../config.php';
+        $this->config = require __DIR__ . '/../config/config.php';
     }
 
     /**

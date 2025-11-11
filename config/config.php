@@ -7,7 +7,7 @@ return [
     // Database Configuration
     'database' => [
         'type' => 'sqlite',
-        'file' => __DIR__ . '/database/animaid.db',
+        'file' => __DIR__ . '/../database/animaid.db',
         'charset' => 'utf8mb4',
     ],
 
@@ -64,7 +64,7 @@ return [
     'uploads' => [
         'max_file_size' => 10 * 1024 * 1024, // 10MB
         'allowed_extensions' => ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx'],
-        'upload_path' => __DIR__ . '/uploads/',
+        'upload_path' => __DIR__ . '/../uploads/',
     ],
 
     // Email Configuration (for future use)
@@ -83,7 +83,7 @@ return [
     'logging' => [
         'enabled' => true,
         'level' => 'debug', // emergency, alert, critical, error, warning, notice, info, debug
-        'file' => __DIR__ . '/logs/animaid.log',
+        'file' => __DIR__ . '/../logs/animaid.log',
         'max_files' => 30,
         'max_file_size' => 10 * 1024 * 1024, // 10MB
     ],
@@ -91,7 +91,7 @@ return [
     // Backup Configuration
     'backup' => [
         'enabled' => true,
-        'path' => __DIR__ . '/backups/',
+        'path' => __DIR__ . '/../backups/',
         'schedule' => 'daily', // daily, weekly, monthly
         'retention_days' => 30,
         'compress' => true,

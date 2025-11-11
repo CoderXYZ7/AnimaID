@@ -10,7 +10,7 @@ class Database {
     private $pdo;
 
     private function __construct() {
-        $config = require __DIR__ . '/../config.php';
+        $config = require __DIR__ . '/../config/config.php';
 
         try {
             $this->pdo = new PDO('sqlite:' . $config['database']['file']);
