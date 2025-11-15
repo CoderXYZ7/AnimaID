@@ -20,6 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+// Early error logging
+error_log("API Request started: " . $_SERVER['REQUEST_METHOD'] . " " . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
+error_log("PHP version: " . PHP_VERSION);
+error_log("Current dir: " . __DIR__);
+
 // Get the request path and method
 $requestUri = $_SERVER['REQUEST_URI'];
 $requestMethod = $_SERVER['REQUEST_METHOD'];
@@ -58,13 +63,16 @@ if (!$token && $_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 try {
+    // Log the request for debugging
+    error_log("API Request: {$requestMethod} {$endpoint}/{$resourceId}");
+
     $auth = new Auth();
 
     // Route the request
     $response = handleRequest($endpoint, $resourceId, $requestMethod, $requestBody, $token, $auth);
 
     // Send successful response
-    http_response_code($response['status'] ?? 200);
+    http_response_code(200);
     echo json_encode([
         'success' => true,
         ...$response
@@ -159,6 +167,9 @@ function handleRequest(string $endpoint, ?string $resourceId, string $method, ar
         case 'system':
             return handleSystemRequest($resourceId, $method, $token, $auth);
 
+        case 'reports':
+            return handleReportsRequest($resourceId, $method, $token, $auth);
+
         case 'test':
             return handleTestRequest($resourceId, $method, $token, $auth);
 
@@ -171,10 +182,456 @@ function handleRequest(string $endpoint, ?string $resourceId, string $method, ar
         case 'animators':
             return handleAnimatorsRequest($resourceId, $method, $body, $token, $auth);
 
+        case 'wiki':
+            return handleWikiRequest($resourceId, $method, $body, $token, $auth);
+
+        case 'public':
+            return handlePublicRequest($resourceId, $method, $body, $token, $auth);
+
 
 
         default:
             throw new Exception('Endpoint not found');
+    }
+}
+
+function handleReportsRequest(?string $reportType, string $method, ?string $token, Auth $auth): array {
+    if (!$token) throw new Exception('Authentication required');
+
+    $user = $auth->verifyToken($token);
+    if (!$auth->checkPermission($user['id'], 'reports.view')) {
+        throw new Exception('Insufficient permissions');
+    }
+
+    switch ($reportType) {
+        case null:
+            // Get available reports
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+
+            return [
+                'reports' => [
+                    [
+                        'id' => 'attendance',
+                        'name' => 'Attendance Report',
+                        'description' => 'Report on child attendance for events',
+                        'endpoint' => '/api/reports/attendance'
+                    ],
+                    [
+                        'id' => 'children',
+                        'name' => 'Children Report',
+                        'description' => 'Report on registered children',
+                        'endpoint' => '/api/reports/children'
+                    ],
+                    [
+                        'id' => 'animators',
+                        'name' => 'Animators Report',
+                        'description' => 'Report on registered animators',
+                        'endpoint' => '/api/reports/animators'
+                    ]
+                ]
+            ];
+
+        case 'attendance':
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+
+            // Get attendance statistics
+            $db = Database::getInstance();
+
+            $startDate = $_GET['start_date'] ?? date('Y-m-01');
+            $endDate = $_GET['end_date'] ?? date('Y-m-t');
+
+            $stats = $db->fetchAll("
+                SELECT
+                    e.title as event_title,
+                    e.event_date,
+                    COUNT(CASE WHEN a.checkin_time IS NOT NULL THEN 1 END) as checked_in,
+                    COUNT(CASE WHEN a.checkout_time IS NOT NULL THEN 1 END) as checked_out,
+                    COUNT(a.id) as total_registered
+                FROM calendar_events e
+                LEFT JOIN attendance a ON e.id = a.event_id
+                WHERE e.event_date BETWEEN ? AND ?
+                GROUP BY e.id, e.title, e.event_date
+                ORDER BY e.event_date DESC
+            ", [$startDate, $endDate]);
+
+            return [
+                'report_type' => 'attendance',
+                'period' => ['start' => $startDate, 'end' => $endDate],
+                'data' => $stats
+            ];
+
+        case 'children':
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+
+            $db = Database::getInstance();
+
+            $stats = $db->fetchAll("
+                SELECT
+                    COUNT(*) as total_children,
+                    COUNT(CASE WHEN status = 'active' THEN 1 END) as active_children,
+                    AVG(DATE('now') - DATE(birth_date)) as avg_age_years,
+                    COUNT(CASE WHEN DATE('now', '-3 years') > DATE(birth_date) THEN 1 END) as under_3,
+                    COUNT(CASE WHEN DATE('now', '-6 years') > DATE(birth_date) AND DATE('now', '-3 years') <= DATE(birth_date) THEN 1 END) as age_3_6,
+                    COUNT(CASE WHEN DATE('now', '-12 years') > DATE(birth_date) AND DATE('now', '-6 years') <= DATE(birth_date) THEN 1 END) as age_6_12
+                FROM children
+            ");
+
+            return [
+                'report_type' => 'children',
+                'data' => $stats[0] ?? []
+            ];
+
+        case 'animators':
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+
+            $db = Database::getInstance();
+
+            $stats = $db->fetchAll("
+                SELECT
+                    COUNT(*) as total_animators,
+                    COUNT(CASE WHEN status = 'active' THEN 1 END) as active_animators,
+                    AVG(CASE WHEN experience_years IS NOT NULL THEN experience_years END) as avg_experience,
+                    COUNT(CASE WHEN availability_status = 'available' THEN 1 END) as available_now
+                FROM animators
+            ");
+
+            return [
+                'report_type' => 'animators',
+                'data' => $stats[0] ?? []
+            ];
+
+        default:
+            throw new Exception('Report type not found');
+    }
+}
+
+function handlePublicRequest(?string $resourceId, string $method, array $body, ?string $token, Auth $auth): array {
+    // Public endpoints that don't require authentication
+    switch ($resourceId) {
+        case 'communications':
+            // Public communications endpoint
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+
+            $page = (int)($_GET['page'] ?? 1);
+            $limit = (int)($_GET['limit'] ?? 10);
+            return $auth->getCommunications($page, $limit, ['is_public' => 1, 'status' => 'published']);
+
+        case 'calendar':
+            // Public calendar events
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+
+            $limit = (int)($_GET['limit'] ?? 6);
+            $filters = ['is_public' => 1, 'status' => 'published'];
+            return $auth->getCalendarEvents(1, $limit, $filters);
+
+        default:
+            throw new Exception('Public endpoint not found');
+    }
+}
+
+function handleWikiRequest(?string $resourceId, string $method, array $body, ?string $token, Auth $auth): array {
+    global $pathSegments;
+
+    if (!$token) throw new Exception('Authentication required');
+
+    $user = $auth->verifyToken($token);
+
+    // Check if this is a search operation: /api/wiki/search
+    if ($resourceId === 'search') {
+        if ($method !== 'GET') throw new Exception('Method not allowed');
+        if (!$auth->checkPermission($user['id'], 'wiki.view')) {
+            throw new Exception('Insufficient permissions');
+        }
+
+        $query = $_GET['q'] ?? '';
+        if (empty($query)) {
+            throw new Exception('Search query is required');
+        }
+
+        $limit = (int)($_GET['limit'] ?? 20);
+        return ['results' => $auth->searchWikiPages($query, $limit)];
+    }
+
+    // Check if this is a categories operation: /api/wiki/categories
+    if ($resourceId === 'categories') {
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'wiki.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                return ['categories' => $auth->getWikiCategories()];
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'wiki.moderate')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $categoryId = $auth->createWikiCategory($body, $user['id']);
+                return [
+                    'category_id' => $categoryId,
+                    'message' => 'Category created successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is a category operation: /api/wiki/categories/{id}
+    if ($resourceId === 'categories' && isset($pathSegments[2])) {
+        $categoryId = (int)$pathSegments[2];
+
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'wiki.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $category = $auth->getWikiCategory($categoryId);
+                if (!$category) {
+                    throw new Exception('Category not found');
+                }
+                return ['category' => $category];
+
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'wiki.moderate')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->updateWikiCategory($categoryId, $body);
+                return ['message' => 'Category updated successfully'];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'wiki.moderate')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->deleteWikiCategory($categoryId);
+                return ['message' => 'Category deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is a tags operation: /api/wiki/tags
+    if ($resourceId === 'tags') {
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'wiki.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                return ['tags' => $auth->getWikiTags()];
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'wiki.moderate')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $tagId = $auth->createWikiTag($body);
+                return [
+                    'tag_id' => $tagId,
+                    'message' => 'Tag created successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is a revisions operation: /api/wiki/{id}/revisions
+    if ($resourceId && isset($pathSegments[2]) && $pathSegments[2] === 'revisions') {
+        $pageId = (int)$resourceId;
+
+        if ($method !== 'GET') throw new Exception('Method not allowed');
+        if (!$auth->checkPermission($user['id'], 'wiki.view')) {
+            throw new Exception('Insufficient permissions');
+        }
+
+        return ['revisions' => $auth->getWikiPageRevisions($pageId)];
+    }
+
+    // Check if this is an attachments operation: /api/wiki/{id}/attachments
+    if ($resourceId && isset($pathSegments[2]) && $pathSegments[2] === 'attachments') {
+        $pageId = (int)$resourceId;
+
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'wiki.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                return ['attachments' => $auth->getWikiPageAttachments($pageId)];
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'wiki.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                // Handle file upload
+                if (isset($_FILES['file'])) {
+                    $file = $_FILES['file'];
+
+                    // Validate file
+                    if ($file['error'] !== UPLOAD_ERR_OK) {
+                        throw new Exception('File upload failed: ' . $file['error']);
+                    }
+
+                    // Check file size (10MB limit)
+                    if ($file['size'] > 10 * 1024 * 1024) {
+                        throw new Exception('File size exceeds 10MB limit');
+                    }
+
+                    // Create uploads/wiki directory if it doesn't exist
+                    $uploadDir = __DIR__ . '/../uploads/wiki/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+
+                    // Generate unique filename
+                    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                    $filename = uniqid('wiki_attachment_', true) . '.' . $extension;
+                    $filePath = $uploadDir . $filename;
+
+                    // Move uploaded file
+                    if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+                        throw new Exception('Failed to save uploaded file');
+                    }
+
+                    // Save attachment info to database
+                    $attachmentData = [
+                        'original_name' => $file['name'],
+                        'file_name' => $filename,
+                        'file_path' => $filePath,
+                        'file_size' => $file['size'],
+                        'mime_type' => $file['type']
+                    ];
+
+                    $attachmentId = $auth->addWikiPageAttachment($pageId, $attachmentData, $user['id']);
+                    return [
+                        'attachment_id' => $attachmentId,
+                        'message' => 'Attachment uploaded successfully'
+                    ];
+                }
+                throw new Exception('No file uploaded');
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    }
+
+    // Check if this is an attachment download: /api/wiki/{id}/attachments/{attachmentId}/download
+    if ($resourceId && isset($pathSegments[2]) && $pathSegments[2] === 'attachments' && isset($pathSegments[3]) && isset($pathSegments[4]) && $pathSegments[4] === 'download') {
+        $pageId = (int)$resourceId;
+        $attachmentId = (int)$pathSegments[3];
+
+        if ($method !== 'GET') throw new Exception('Method not allowed');
+        if (!$auth->checkPermission($user['id'], 'wiki.view')) {
+            throw new Exception('Insufficient permissions');
+        }
+
+        $attachment = $auth->getWikiPageAttachment($attachmentId);
+        if (!$attachment || $attachment['page_id'] != $pageId) {
+            throw new Exception('Attachment not found');
+        }
+
+        // Check if file exists
+        if (!file_exists($attachment['file_path'])) {
+            throw new Exception('File not found on disk');
+        }
+
+        // Clear any previous output
+        if (ob_get_level()) {
+            ob_clean();
+        }
+
+        // Remove the default JSON content-type header
+        header_remove('Content-Type');
+        header('Content-Type: ' . $attachment['mime_type']);
+        header('Content-Length: ' . filesize($attachment['file_path']));
+        header('Content-Disposition: inline; filename="' . $attachment['original_name'] . '"');
+        header('Cache-Control: private, max-age=0, must-revalidate');
+        header('Pragma: public');
+
+        readfile($attachment['file_path']);
+        exit;
+    }
+
+    // Main wiki page operations
+    if ($resourceId === null) {
+        // Handle collection requests
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'wiki.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $page = (int)($_GET['page'] ?? 1);
+                $limit = (int)($_GET['limit'] ?? 20);
+
+                $filters = [];
+                if (isset($_GET['category_id'])) $filters['category_id'] = (int)$_GET['category_id'];
+                if (isset($_GET['tag_id'])) $filters['tag_id'] = (int)$_GET['tag_id'];
+                if (isset($_GET['search'])) $filters['search'] = $_GET['search'];
+                if (isset($_GET['featured'])) $filters['featured'] = (int)$_GET['featured'];
+
+                return $auth->getWikiPages($page, $limit, $filters);
+
+            case 'POST':
+                if (!$auth->checkPermission($user['id'], 'wiki.create')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $pageId = $auth->createWikiPage($body, $user['id']);
+                return [
+                    'page_id' => $pageId,
+                    'message' => 'Wiki page created successfully'
+                ];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
+    } else {
+        // Handle individual page requests
+        $pageId = (int)$resourceId;
+
+        switch ($method) {
+            case 'GET':
+                if (!$auth->checkPermission($user['id'], 'wiki.view')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $page = $auth->getWikiPage($pageId);
+                if (!$page) {
+                    throw new Exception('Wiki page not found');
+                }
+
+                // Increment view count
+                $auth->incrementWikiPageViewCount($pageId);
+
+                return ['page' => $page];
+
+            case 'PUT':
+                if (!$auth->checkPermission($user['id'], 'wiki.edit')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->updateWikiPage($pageId, $body, $user['id']);
+                return ['message' => 'Wiki page updated successfully'];
+
+            case 'DELETE':
+                if (!$auth->checkPermission($user['id'], 'wiki.moderate')) {
+                    throw new Exception('Insufficient permissions');
+                }
+
+                $auth->deleteWikiPage($pageId);
+                return ['message' => 'Wiki page deleted successfully'];
+
+            default:
+                throw new Exception('Method not allowed');
+        }
     }
 }
 
@@ -218,7 +675,7 @@ function handleUsersRequest(?string $userId, string $method, array $body, ?strin
 
     // Verify user has admin permissions
     $user = $auth->verifyToken($token);
-    if (!$auth->checkPermission($user['id'], 'admin.users')) {
+    if (!$auth->isAdmin($user['id'])) {
         throw new Exception('Insufficient permissions');
     }
 
@@ -1557,7 +2014,7 @@ function handleSystemRequest(?string $action, string $method, ?string $token, Au
     if (!$token) throw new Exception('Authentication required');
 
     $user = $auth->verifyToken($token);
-    if (!$auth->checkPermission($user['id'], 'admin.system')) {
+    if (!$auth->checkPermission($user['id'], 'admin.system.view')) {
         throw new Exception('Insufficient permissions');
     }
 
@@ -1566,7 +2023,7 @@ function handleSystemRequest(?string $action, string $method, ?string $token, Au
             if ($method !== 'GET') throw new Exception('Method not allowed');
 
             try {
-                $config = require __DIR__ . '/../config.php';
+                $config = require __DIR__ . '/../config/config.php';
 
                 // Get some basic database stats
                 $db = Database::getInstance();

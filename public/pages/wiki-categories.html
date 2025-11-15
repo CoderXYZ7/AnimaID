@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki Categories - AnimaID</title>
+    <link href="../src/css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        .category-card {
+            transition: all 0.2s ease;
+        }
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+        }
+        .icon-picker {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .icon-option {
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .icon-option:hover {
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        .icon-option.selected {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="../dashboard.html" class="text-xl font-bold text-gray-900">
+                        <i class="fas fa-brain text-blue-600 mr-2"></i>
+                        AnimaID
+                    </a>
+                    <div class="ml-8 flex space-x-4">
+                        <a href="../dashboard.html" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
+                        </a>
+                        <a href="wiki.html" class="text-blue-600 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-book mr-1"></i>Wiki
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="user-info" class="text-sm text-gray-600"></span>
+                    <button id="logout-btn" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">
+                        <i class="fas fa-tags text-blue-600 mr-3"></i>
+                        Wiki Categories
+                    </h1>
+                    <p class="mt-2 text-gray-600">Manage wiki categories and organize your knowledge base</p>
+                </div>
+                <button id="create-category-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                    <i class="fas fa-plus mr-2"></i>Create Category
+                </button>
+            </div>
+        </div>
+
+        <!-- Categories Grid -->
+        <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Categories will be loaded here -->
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="text-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="mt-4 text-gray-600">Loading categories...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="text-center py-12 hidden">
+            <i class="fas fa-tags text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">No categories found</h3>
+            <p class="text-gray-600 mb-6">Get started by creating your first wiki category.</p>
+            <button id="create-first-category-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+                <i class="fas fa-plus mr-2"></i>Create First Category
+            </button>
+        </div>
+    </div>
+
+    <!-- Create/Edit Category Modal -->
+    <div id="category-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 id="modal-title" class="text-lg font-medium text-gray-900">Create Category</h3>
+                    <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="category-form" class="space-y-6">
+                    <input type="hidden" id="category-id" name="category_id">
+
+                    <div>
+                        <label for="category-name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Category Name *
+                        </label>
+                        <input type="text" id="category-name" name="name" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label for="category-slug" class="block text-sm font-medium text-gray-700 mb-2">
+                            Slug *
+                        </label>
+                        <input type="text" id="category-slug" name="slug" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="mt-1 text-sm text-gray-500">URL-friendly identifier (auto-generated from name)</p>
+                    </div>
+
+                    <div>
+                        <label for="category-description" class="block text-sm font-medium text-gray-700 mb-2">
+                            Description
+                        </label>
+                        <textarea id="category-description" name="description" rows="3"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Color *
+                            </label>
+                            <div class="flex items-center space-x-3">
+                                <input type="color" id="category-color" name="color" value="#3B82F6"
+                                       class="color-picker">
+                                <span id="color-hex" class="text-sm text-gray-600">#3B82F6</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Icon *
+                            </label>
+                            <div class="flex items-center space-x-3">
+                                <button type="button" id="icon-picker-btn"
+                                        class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <i id="selected-icon" class="fas fa-book"></i>
+                                    <span class="ml-2">Choose Icon</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="category-icon" name="icon" value="book">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="category-parent" class="block text-sm font-medium text-gray-700 mb-2">
+                            Parent Category
+                        </label>
+                        <select id="category-parent" name="parent_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">No Parent (Top Level)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="category-sort-order" class="block text-sm font-medium text-gray-700 mb-2">
+                            Sort Order
+                        </label>
+                        <input type="number" id="category-sort-order" name="sort_order" value="0" min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="category-active" name="is_active" checked
+                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="category-active" class="ml-2 block text-sm text-gray-900">
+                            Active (visible in wiki)
+                        </label>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-4 border-t">
+                        <button type="button" id="cancel-btn"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            <span id="submit-text">Create Category</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Icon Picker Modal -->
+    <div id="icon-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Choose Icon</h3>
+                    <button id="close-icon-modal-btn" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="icon-picker" id="icon-picker">
+                    <!-- Icons will be loaded here -->
+                </div>
+
+                <div class="flex justify-end mt-4">
+                    <button id="select-icon-btn"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Select
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium text-gray-900">Delete Category</h3>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <p class="text-sm text-gray-600">
+                        Are you sure you want to delete "<span id="delete-category-name"></span>"?
+                        This action cannot be undone and will affect all pages in this category.
+                    </p>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button id="cancel-delete-btn"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Cancel
+                    </button>
+                    <button id="confirm-delete-btn"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let categories = [];
+        let currentUser = null;
+        let selectedIcon = 'book';
+        let categoryToDelete = null;
+
+        // Available icons for categories
+        const availableIcons = [
+            'book', 'rocket', 'gamepad', 'shield-alt', 'brain', 'clipboard-list',
+            'home', 'sun', 'heart', 'star', 'cog', 'users', 'calendar', 'camera',
+            'music', 'paint-brush', 'puzzle-piece', 'trophy', 'lightbulb', 'graduation-cap',
+            'tree', 'leaf', 'cloud', 'snowflake', 'fire', 'water', 'mountain', 'beach'
+        ];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            setupEventListeners();
+            loadCategories();
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const userToken = localStorage.getItem('animaid_token');
+                const userData = localStorage.getItem('animaid_user');
+
+                if (!userToken || !userData) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                currentUser = JSON.parse(userData);
+
+                // Verify token and check permissions
+                const response = await fetch('../api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    localStorage.removeItem('animaid_token');
+                    localStorage.removeItem('animaid_user');
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                document.getElementById('user-info').textContent = `Welcome, ${currentUser.username}`;
+
+                // Check permissions
+                if (!hasPermission('wiki.categories.view')) {
+                    showError('You do not have permission to view wiki categories.');
+                    return;
+                }
+
+                if (!hasPermission('wiki.categories.create')) {
+                    document.getElementById('create-category-btn').style.display = 'none';
+                    document.getElementById('create-first-category-btn').style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = '../login.html';
+            }
+        }
+
+        // Check permissions
+        function hasPermission(permission) {
+            if (!currentUser || !currentUser.roles) return false;
+
+            // Technical admin has all permissions
+            if (currentUser.roles.includes('technical_admin')) return true;
+
+            // Check specific permissions
+            return currentUser.permissions && currentUser.permissions.includes(permission);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Modal controls
+            document.getElementById('create-category-btn').addEventListener('click', () => openCategoryModal());
+            document.getElementById('create-first-category-btn').addEventListener('click', () => openCategoryModal());
+            document.getElementById('close-modal-btn').addEventListener('click', () => closeCategoryModal());
+            document.getElementById('cancel-btn').addEventListener('click', () => closeCategoryModal());
+            document.getElementById('close-icon-modal-btn').addEventListener('click', () => closeIconModal());
+            document.getElementById('cancel-delete-btn').addEventListener('click', () => closeDeleteModal());
+
+            // Form handling
+            document.getElementById('category-form').addEventListener('submit', handleCategorySubmit);
+            document.getElementById('category-name').addEventListener('input', generateSlug);
+            document.getElementById('category-color').addEventListener('input', updateColorHex);
+            document.getElementById('icon-picker-btn').addEventListener('click', openIconModal);
+            document.getElementById('select-icon-btn').addEventListener('click', selectIcon);
+            document.getElementById('confirm-delete-btn').addEventListener('click', confirmDelete);
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', logout);
+        }
+
+        // Load categories
+        async function loadCategories() {
+            try {
+                document.getElementById('loading-state').classList.remove('hidden');
+                const userToken = localStorage.getItem('animaid_token');
+
+                const response = await fetch('../api/wiki/categories', {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load categories');
+                }
+
+                const data = await response.json();
+                categories = data.categories || [];
+
+                renderCategories();
+                updateParentSelect();
+
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                showError('Failed to load categories');
+            } finally {
+                document.getElementById('loading-state').classList.add('hidden');
+            }
+        }
+
+        // Render categories
+        function renderCategories() {
+            const grid = document.getElementById('categories-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            if (categories.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = categories.map(category => `
+                <div class="category-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4"
+                                 style="background-color: ${category.color}20; color: ${category.color}">
+                                <i class="fas fa-${category.icon} text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">${category.name}</h3>
+                                <p class="text-sm text-gray-500">/${category.slug}</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            ${hasPermission('wiki.categories.edit') ? `
+                                <button onclick="editCategory(${category.id})"
+                                        class="text-blue-600 hover:text-blue-800 p-1">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            ` : ''}
+                            ${hasPermission('wiki.categories.delete') ? `
+                                <button onclick="deleteCategory(${category.id})"
+                                        class="text-red-600 hover:text-red-800 p-1">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    ${category.description ? `
+                        <p class="text-gray-600 text-sm mb-4">${category.description}</p>
+                    ` : ''}
+
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <div class="flex items-center space-x-4">
+                            <span><i class="fas fa-file-alt mr-1"></i>${category.page_count} pages</span>
+                            ${category.parent_id ? '<span class="text-xs bg-gray-100 px-2 py-1 rounded">Subcategory</span>' : ''}
+                        </div>
+                        <span class="text-xs">
+                            ${category.is_active ? '<span class="text-green-600">Active</span>' : '<span class="text-red-600">Inactive</span>'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update parent select options
+        function updateParentSelect() {
+            const select = document.getElementById('category-parent');
+            const currentCategoryId = document.getElementById('category-id').value;
+
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">No Parent (Top Level)</option>';
+
+            // Add parent options
+            categories.forEach(category => {
+                // Don't allow self-referencing or circular references
+                if (category.id != currentCategoryId) {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        // Open category modal
+        function openCategoryModal(category = null) {
+            const modal = document.getElementById('category-modal');
+            const form = document.getElementById('category-form');
+            const title = document.getElementById('modal-title');
+            const submitText = document.getElementById('submit-text');
+
+            if (category) {
+                title.textContent = 'Edit Category';
+                submitText.textContent = 'Update Category';
+
+                // Populate form
+                document.getElementById('category-id').value = category.id;
+                document.getElementById('category-name').value = category.name;
+                document.getElementById('category-slug').value = category.slug;
+                document.getElementById('category-description').value = category.description || '';
+                document.getElementById('category-color').value = category.color;
+                document.getElementById('category-icon').value = category.icon;
+                document.getElementById('category-parent').value = category.parent_id || '';
+                document.getElementById('category-sort-order').value = category.sort_order;
+                document.getElementById('category-active').checked = category.is_active;
+
+                selectedIcon = category.icon;
+                updateSelectedIcon();
+                updateColorHex();
+
+            } else {
+                title.textContent = 'Create Category';
+                submitText.textContent = 'Create Category';
+
+                // Reset form
+                form.reset();
+                document.getElementById('category-id').value = '';
+                document.getElementById('category-color').value = '#3B82F6';
+                document.getElementById('category-icon').value = 'book';
+                selectedIcon = 'book';
+                updateSelectedIcon();
+                updateColorHex();
+            }
+
+            updateParentSelect();
+            modal.classList.remove('hidden');
+        }
+
+        // Close category modal
+        function closeCategoryModal() {
+            document.getElementById('category-modal').classList.add('hidden');
+        }
+
+        // Open icon modal
+        function openIconModal() {
+            const modal = document.getElementById('icon-modal');
+            const picker = document.getElementById('icon-picker');
+
+            picker.innerHTML = availableIcons.map(icon => `
+                <div class="icon-option ${icon === selectedIcon ? 'selected' : ''}"
+                     onclick="selectIconOption('${icon}')">
+                    <i class="fas fa-${icon} text-xl"></i>
+                </div>
+            `).join('');
+
+            modal.classList.remove('hidden');
+        }
+
+        // Close icon modal
+        function closeIconModal() {
+            document.getElementById('icon-modal').classList.add('hidden');
+        }
+
+        // Select icon option
+        function selectIconOption(icon) {
+            selectedIcon = icon;
+            document.querySelectorAll('.icon-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.closest('.icon-option').classList.add('selected');
+        }
+
+        // Select icon
+        function selectIcon() {
+            document.getElementById('category-icon').value = selectedIcon;
+            updateSelectedIcon();
+            closeIconModal();
+        }
+
+        // Update selected icon display
+        function updateSelectedIcon() {
+            document.getElementById('selected-icon').className = `fas fa-${selectedIcon}`;
+        }
+
+        // Update color hex display
+        function updateColorHex() {
+            const color = document.getElementById('category-color').value;
+            document.getElementById('color-hex').textContent = color.toUpperCase();
+        }
+
+        // Generate slug from name
+        function generateSlug() {
+            const name = document.getElementById('category-name').value;
+            const slug = name.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim();
+            document.getElementById('category-slug').value = slug;
+        }
+
+        // Handle category form submit
+        async function handleCategorySubmit(event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const categoryData = {
+                name: formData.get('name'),
+                slug: formData.get('slug'),
+                description: formData.get('description'),
+                color: formData.get('color'),
+                icon: formData.get('icon'),
+                parent_id: formData.get('parent_id') || null,
+                sort_order: parseInt(formData.get('sort_order')) || 0,
+                is_active: formData.get('is_active') ? 1 : 0
+            };
+
+            const categoryId = formData.get('category_id');
+            const isEdit = !!categoryId;
+            const userToken = localStorage.getItem('animaid_token');
+
+            try {
+                const response = await fetch(`../api/wiki/categories${isEdit ? `/${categoryId}` : ''}`, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(categoryData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to save category');
+                }
+
+                const result = await response.json();
+                showSuccess(result.message || `Category ${isEdit ? 'updated' : 'created'} successfully`);
+
+                closeCategoryModal();
+                loadCategories();
+
+            } catch (error) {
+                console.error('Error saving category:', error);
+                showError(error.message);
+            }
+        }
+
+        // Edit category
+        function editCategory(categoryId) {
+            const category = categories.find(c => c.id == categoryId);
+            if (category) {
+                openCategoryModal(category);
+            }
+        }
+
+        // Delete category
+        function deleteCategory(categoryId) {
+            const category = categories.find(c => c.id == categoryId);
+            if (category) {
+                categoryToDelete = category;
+                document.getElementById('delete-category-name').textContent = category.name;
+                document.getElementById('delete-modal').classList.remove('hidden');
+            }
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            categoryToDelete = null;
+        }
+
+        // Confirm delete
+        async function confirmDelete() {
+            if (!categoryToDelete) return;
+
+            try {
+                const userToken = localStorage.getItem('animaid_token');
+                const response = await fetch(`../api/wiki/categories/${categoryToDelete.id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to delete category');
+                }
+
+                const result = await response.json();
+                showSuccess(result.message || 'Category deleted successfully');
+
+                closeDeleteModal();
+                loadCategories();
+
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                showError(error.message);
+            }
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                const userToken = localStorage.getItem('animaid_token');
+                await fetch('../api/auth/logout', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+            localStorage.removeItem('animaid_token');
+            localStorage.removeItem('animaid_user');
+            window.location.href = '../login.html';
+        }
+
+        // Utility functions
+        function showSuccess(message) {
+            // Simple success message - you could enhance this with a toast notification
+            alert(message);
+        }
+
+        function showError(message) {
+            alert('Error: ' + message);
+        }
+
+        // Make functions global for onclick handlers
+        window.editCategory = editCategory;
+        window.deleteCategory = deleteCategory;
+    </script>
+</body>
+</html>

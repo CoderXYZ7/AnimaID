@@ -143,6 +143,11 @@
                         <span class="text-sm font-medium">Media Manager</span>
                     </a>
 
+                    <a href="pages/wiki.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-book text-indigo-600 mr-3"></i>
+                        <span class="text-sm font-medium">Wiki</span>
+                    </a>
+
                     <a href="admin/users.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-users text-purple-600 mr-3"></i>
                         <span class="text-sm font-medium">Manage Users</span>
@@ -158,10 +163,10 @@
                         <span class="text-sm font-medium">System Status</span>
                     </a>
 
-                    <button class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" id="view-reports">
+                    <a href="admin/reports.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-chart-bar text-red-600 mr-3"></i>
                         <span class="text-sm font-medium">Reports</span>
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -334,17 +339,10 @@
 
         // Quick actions - Note: view-users and system-status are now links, not buttons
         const viewCalendarBtn = document.getElementById('view-calendar');
-        const viewReportsBtn = document.getElementById('view-reports');
 
         if (viewCalendarBtn) {
             viewCalendarBtn.addEventListener('click', function() {
                 alert('Calendar feature coming soon!');
-            });
-        }
-
-        if (viewReportsBtn) {
-            viewReportsBtn.addEventListener('click', function() {
-                alert('Reports feature coming soon!');
             });
         }
 

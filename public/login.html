@@ -218,9 +218,13 @@
 
                     showSuccess('Login successful! Redirecting...');
 
-                    // Redirect to dashboard after a short delay
+                    // Get return URL from query parameters or default to dashboard
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnUrl = urlParams.get('return') || 'dashboard.html';
+
+                    // Redirect after a short delay
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        window.location.href = decodeURIComponent(returnUrl);
                     }, 1500);
                 } else {
                     showError(data.error || 'Login failed');
@@ -246,8 +250,10 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // User is still logged in, redirect to dashboard
-                        window.location.href = 'dashboard.html';
+                        // User is still logged in, redirect to return URL or dashboard
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const returnUrl = urlParams.get('return') || 'dashboard.html';
+                        window.location.href = decodeURIComponent(returnUrl);
                     } else {
                         // Token is invalid, remove it
                         localStorage.removeItem('animaid_token');

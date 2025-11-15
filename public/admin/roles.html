@@ -106,7 +106,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-gray-700">Permissions</label>
+                            <span id="permissions-counter" class="text-sm text-gray-500">0 / 0 selected</span>
+                        </div>
                         <div id="permissions-list" class="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-md p-3">
                             <!-- Permissions will be loaded here -->
                         </div>
@@ -321,13 +324,29 @@
                     <div class="space-y-1 ml-2">
                         ${groupedPermissions[category].map(perm => `
                             <label class="flex items-center">
-                                <input type="checkbox" name="permissions" value="${perm.id}" ${selectedPermissionIds.includes(perm.id) ? 'checked' : ''} class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <input type="checkbox" name="permissions" value="${perm.id}" ${selectedPermissionIds.includes(perm.id) ? 'checked' : ''} class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded permission-checkbox">
                                 <span class="ml-2 text-sm text-gray-700">${perm.display_name}</span>
                             </label>
                         `).join('')}
                     </div>
                 </div>
             `).join('');
+
+            // Update counter after loading permissions
+            updatePermissionsCounter();
+
+            // Add event listeners to checkboxes
+            document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', updatePermissionsCounter);
+            });
+        }
+
+        // Update permissions counter
+        function updatePermissionsCounter() {
+            const totalPermissions = allPermissions.length;
+            const checkedPermissions = document.querySelectorAll('.permission-checkbox:checked').length;
+            const counter = document.getElementById('permissions-counter');
+            counter.textContent = `${checkedPermissions} / ${totalPermissions} selected`;
         }
 
         // Show add role modal

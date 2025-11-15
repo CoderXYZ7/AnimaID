@@ -5,9 +5,9 @@
  * This script creates the SQLite database and populates it with initial data
  */
 
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../config/config.php';
 
-$config = require __DIR__ . '/../config.php';
+$config = require __DIR__ . '/../config/config.php';
 
 // Create database directory if it doesn't exist
 $dbDir = dirname($config['database']['file']);
@@ -650,6 +650,135 @@ function createTables(PDO $pdo) {
         )
     ");
 
+    // Wiki pages table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS wiki_pages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) UNIQUE NOT NULL,
+            content TEXT,
+            summary TEXT,
+            category_id INTEGER,
+            is_published BOOLEAN DEFAULT 1,
+            is_featured BOOLEAN DEFAULT 0,
+            view_count INTEGER DEFAULT 0,
+            created_by INTEGER NOT NULL,
+            updated_by INTEGER,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (category_id) REFERENCES wiki_categories(id) ON DELETE SET NULL,
+            FOREIGN KEY (created_by) REFERENCES users(id),
+            FOREIGN KEY (updated_by) REFERENCES users(id)
+        )
+    ");
+
+    // Wiki categories table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS wiki_categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(100) NOT NULL,
+            slug VARCHAR(100) UNIQUE NOT NULL,
+            description TEXT,
+            color VARCHAR(7) DEFAULT '#3B82F6', -- Hex color code
+            icon VARCHAR(50) DEFAULT 'book', -- FontAwesome icon name
+            parent_id INTEGER,
+            sort_order INTEGER DEFAULT 0,
+            is_active BOOLEAN DEFAULT 1,
+            created_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (parent_id) REFERENCES wiki_categories(id) ON DELETE CASCADE,
+            FOREIGN KEY (created_by) REFERENCES users(id)
+        )
+    ");
+
+    // Wiki page tags table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS wiki_tags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(50) UNIQUE NOT NULL,
+            slug VARCHAR(50) UNIQUE NOT NULL,
+            color VARCHAR(7) DEFAULT '#6B7280',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+
+    // Wiki page-tag relationships
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS wiki_page_tags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            page_id INTEGER NOT NULL,
+            tag_id INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (page_id) REFERENCES wiki_pages(id) ON DELETE CASCADE,
+            FOREIGN KEY (tag_id) REFERENCES wiki_tags(id) ON DELETE CASCADE,
+            UNIQUE(page_id, tag_id)
+        )
+    ");
+
+    // Wiki page revisions table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS wiki_page_revisions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            page_id INTEGER NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            content TEXT,
+            summary TEXT,
+            change_description TEXT,
+            edited_by INTEGER NOT NULL,
+            edited_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            revision_number INTEGER NOT NULL,
+            word_count INTEGER DEFAULT 0,
+            char_count INTEGER DEFAULT 0,
+            FOREIGN KEY (page_id) REFERENCES wiki_pages(id) ON DELETE CASCADE,
+            FOREIGN KEY (edited_by) REFERENCES users(id)
+        )
+    ");
+
+    // Wiki page links table (for tracking internal links)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS wiki_page_links (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            from_page_id INTEGER NOT NULL,
+            to_page_id INTEGER,
+            link_text VARCHAR(255) NOT NULL,
+            link_url VARCHAR(500), -- For external links or manual URLs
+            link_type VARCHAR(20) DEFAULT 'internal', -- internal, external, file
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (from_page_id) REFERENCES wiki_pages(id) ON DELETE CASCADE,
+            FOREIGN KEY (to_page_id) REFERENCES wiki_pages(id) ON DELETE SET NULL
+        )
+    ");
+
+    // Wiki page attachments table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS wiki_page_attachments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            page_id INTEGER NOT NULL,
+            file_name VARCHAR(255) NOT NULL,
+            original_name VARCHAR(255) NOT NULL,
+            file_path VARCHAR(500) NOT NULL,
+            file_size INTEGER NOT NULL,
+            mime_type VARCHAR(100) NOT NULL,
+            uploaded_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (page_id) REFERENCES wiki_pages(id) ON DELETE CASCADE,
+            FOREIGN KEY (uploaded_by) REFERENCES users(id)
+        )
+    ");
+
+    // Wiki search index table (for full-text search)
+    $pdo->exec("
+        CREATE VIRTUAL TABLE IF NOT EXISTS wiki_search_index USING fts5(
+            page_id UNINDEXED,
+            title,
+            content,
+            summary,
+            tags,
+            tokenize = 'porter unicode61'
+        )
+    ");
+
 
 
 
@@ -686,46 +815,121 @@ function insertInitialData(PDO $pdo, array $config) {
 
     // Insert permissions
     $permissions = [
-        // Registrations
-        ['registrations.view', 'View Registrations', 'Can view child registrations', 'registrations'],
-        ['registrations.create', 'Create Registrations', 'Can create new registrations', 'registrations'],
-        ['registrations.edit', 'Edit Registrations', 'Can edit existing registrations', 'registrations'],
-        ['registrations.delete', 'Delete Registrations', 'Can delete registrations', 'registrations'],
-        ['registrations.approve', 'Approve Registrations', 'Can approve pending registrations', 'registrations'],
+        // Admin - Users
+        ['admin.users.view', 'View Users', 'Can view user list and details', 'admin'],
+        ['admin.users.create', 'Create Users', 'Can create new users', 'admin'],
+        ['admin.users.edit', 'Edit Users', 'Can edit existing users', 'admin'],
+        ['admin.users.delete', 'Delete Users', 'Can delete/deactivate users', 'admin'],
+
+        // Admin - Roles
+        ['admin.roles.view', 'View Roles', 'Can view roles and their permissions', 'admin'],
+        ['admin.roles.create', 'Create Roles', 'Can create new roles', 'admin'],
+        ['admin.roles.edit', 'Edit Roles', 'Can edit existing roles and their permissions', 'admin'],
+        ['admin.roles.delete', 'Delete Roles', 'Can delete roles', 'admin'],
+
+        // Admin - System
+        ['admin.system.view', 'View System Status', 'Can view system status and configuration', 'admin'],
+        ['admin.system.edit', 'Edit System Settings', 'Can edit system settings', 'admin'],
+        ['admin.system.backup', 'Perform System Backups', 'Can perform system backups', 'admin'],
+
+        // Registrations - Children
+        ['registrations.view', 'View Children', 'Can view children list and details', 'registrations'],
+        ['registrations.create', 'Register Children', 'Can register new children', 'registrations'],
+        ['registrations.edit', 'Edit Children', 'Can edit child information', 'registrations'],
+        ['registrations.delete', 'Delete Children', 'Can delete child records', 'registrations'],
+
+        // Registrations - Child Guardians
+        ['registrations.guardians.view', 'View Child Guardians', 'Can view child guardians', 'registrations'],
+        ['registrations.guardians.create', 'Add Guardians', 'Can add guardians to children', 'registrations'],
+        ['registrations.guardians.edit', 'Edit Guardians', 'Can edit guardian information', 'registrations'],
+        ['registrations.guardians.delete', 'Remove Guardians', 'Can remove guardians from children', 'registrations'],
+
+        // Registrations - Child Documents
+        ['registrations.documents.view', 'View Child Documents', 'Can view child documents', 'registrations'],
+        ['registrations.documents.create', 'Upload Child Documents', 'Can upload documents for children', 'registrations'],
+        ['registrations.documents.edit', 'Edit Child Documents', 'Can edit document metadata', 'registrations'],
+        ['registrations.documents.delete', 'Delete Child Documents', 'Can delete child documents', 'registrations'],
+
+        // Registrations - Child Notes
+        ['registrations.notes.view', 'View Child Notes', 'Can view child notes and observations', 'registrations'],
+        ['registrations.notes.create', 'Add Child Notes', 'Can add notes to child records', 'registrations'],
+        ['registrations.notes.edit', 'Edit Child Notes', 'Can edit existing notes', 'registrations'],
+        ['registrations.notes.delete', 'Delete Child Notes', 'Can delete child notes', 'registrations'],
+
+        // Registrations - Animators
+        ['registrations.animators.view', 'View Animators', 'Can view animators list and details', 'registrations'],
+        ['registrations.animators.create', 'Register Animators', 'Can register new animators', 'registrations'],
+        ['registrations.animators.edit', 'Edit Animators', 'Can edit animator information', 'registrations'],
+        ['registrations.animators.delete', 'Delete Animators', 'Can delete animator records', 'registrations'],
+
+        // Registrations - Animator User Linking
+        ['registrations.animators.users.view', 'View Animator-User Links', 'Can view animator-user relationships', 'registrations'],
+        ['registrations.animators.users.create', 'Link Users to Animators', 'Can link users to animators', 'registrations'],
+        ['registrations.animators.users.edit', 'Edit Animator-User Links', 'Can edit animator-user relationships', 'registrations'],
+        ['registrations.animators.users.delete', 'Unlink Users from Animators', 'Can unlink users from animators', 'registrations'],
+
+        // Registrations - Animator Documents
+        ['registrations.animators.documents.view', 'View Animator Documents', 'Can view animator documents', 'registrations'],
+        ['registrations.animators.documents.create', 'Upload Animator Documents', 'Can upload documents for animators', 'registrations'],
+        ['registrations.animators.documents.edit', 'Edit Animator Documents', 'Can edit document metadata', 'registrations'],
+        ['registrations.animators.documents.delete', 'Delete Animator Documents', 'Can delete animator documents', 'registrations'],
+
+        // Registrations - Animator Notes
+        ['registrations.animators.notes.view', 'View Animator Notes', 'Can view animator notes', 'registrations'],
+        ['registrations.animators.notes.create', 'Add Animator Notes', 'Can add notes to animator records', 'registrations'],
+        ['registrations.animators.notes.edit', 'Edit Animator Notes', 'Can edit existing notes', 'registrations'],
+        ['registrations.animators.notes.delete', 'Delete Animator Notes', 'Can delete animator notes', 'registrations'],
+
+        // Registrations - Animator Availability
+        ['registrations.animators.availability.view', 'View Animator Availability', 'Can view animator availability', 'registrations'],
+        ['registrations.animators.availability.edit', 'Edit Animator Availability', 'Can edit animator availability schedules', 'registrations'],
+
+        // Registrations - Animator Week Types
+        ['registrations.animators.weektypes.view', 'View Animator Week Types', 'Can view animator week types', 'registrations'],
+        ['registrations.animators.weektypes.create', 'Create Week Types', 'Can create week types for animators', 'registrations'],
+        ['registrations.animators.weektypes.edit', 'Edit Week Types', 'Can edit week types', 'registrations'],
+        ['registrations.animators.weektypes.delete', 'Delete Week Types', 'Can delete week types', 'registrations'],
+
+        // Registrations - Availability Templates
+        ['registrations.templates.view', 'View Availability Templates', 'Can view availability templates', 'registrations'],
+        ['registrations.templates.create', 'Create Availability Templates', 'Can create availability templates', 'registrations'],
+        ['registrations.templates.edit', 'Edit Availability Templates', 'Can edit availability templates', 'registrations'],
+        ['registrations.templates.delete', 'Delete Availability Templates', 'Can delete availability templates', 'registrations'],
 
         // Calendar
         ['calendar.view', 'View Calendar', 'Can view calendar events', 'calendar'],
-        ['calendar.create', 'Create Calendar Events', 'Can create calendar events', 'calendar'],
-        ['calendar.edit', 'Edit Calendar Events', 'Can edit calendar events', 'calendar'],
-        ['calendar.delete', 'Delete Calendar Events', 'Can delete calendar events', 'calendar'],
-        ['calendar.publish', 'Publish Calendar Events', 'Can publish events to public calendar', 'calendar'],
+        ['calendar.create', 'Create Events', 'Can create new events', 'calendar'],
+        ['calendar.edit', 'Edit Events', 'Can edit existing events', 'calendar'],
+        ['calendar.delete', 'Delete Events', 'Can delete events', 'calendar'],
+        ['calendar.publish', 'Publish Events', 'Can publish events to public calendar', 'calendar'],
+        ['calendar.participants.view', 'View Event Participants', 'Can view event participants', 'calendar'],
+        ['calendar.participants.manage', 'Manage Event Participants', 'Can manage event registrations', 'calendar'],
 
         // Attendance
         ['attendance.view', 'View Attendance', 'Can view attendance records', 'attendance'],
-        ['attendance.checkin', 'Check-in/Check-out', 'Can perform check-in/check-out', 'attendance'],
+        ['attendance.checkin', 'Perform Check-in/Check-out', 'Can perform check-in/check-out operations', 'attendance'],
         ['attendance.edit', 'Edit Attendance', 'Can edit attendance records', 'attendance'],
-        ['attendance.report', 'Generate Reports', 'Can generate attendance reports', 'attendance'],
+        ['attendance.delete', 'Delete Attendance', 'Can delete attendance records', 'attendance'],
+        ['attendance.report', 'Generate Attendance Reports', 'Can generate attendance reports', 'attendance'],
 
         // Communications
         ['communications.view', 'View Communications', 'Can view internal communications', 'communications'],
         ['communications.send', 'Send Messages', 'Can send internal messages', 'communications'],
-        ['communications.broadcast', 'Broadcast Messages', 'Can send broadcast messages', 'communications'],
+        ['communications.broadcast', 'Send Broadcast Messages', 'Can send broadcast messages', 'communications'],
         ['communications.manage', 'Manage Communications', 'Can manage communication settings', 'communications'],
+        ['communications.comments.view', 'View Communication Comments', 'Can view communication comments', 'communications'],
+        ['communications.comments.create', 'Add Comments', 'Can add comments to communications', 'communications'],
+        ['communications.comments.moderate', 'Moderate Comments', 'Can moderate user comments', 'communications'],
 
         // Media
-        ['media.view', 'View Media', 'Can view media files', 'media'],
+        ['media.view', 'View Media', 'Can view media files and folders', 'media'],
         ['media.upload', 'Upload Media', 'Can upload media files', 'media'],
-        ['media.approve', 'Approve Media', 'Can approve media for publication', 'media'],
-        ['media.delete', 'Delete Media', 'Can delete media files', 'media'],
-
-        // Wiki
-        ['wiki.view', 'View Wiki', 'Can view wiki content', 'wiki'],
-        ['wiki.edit', 'Edit Wiki', 'Can edit wiki content', 'wiki'],
-        ['wiki.create', 'Create Wiki Entries', 'Can create new wiki entries', 'wiki'],
-        ['wiki.moderate', 'Moderate Wiki', 'Can moderate user feedback', 'wiki'],
+        ['media.edit', 'Edit Media', 'Can edit media metadata and organization', 'media'],
+        ['media.delete', 'Delete Media', 'Can delete media files and folders', 'media'],
+        ['media.share', 'Share Media', 'Can create share links for media resources', 'media'],
 
         // Spaces
-        ['spaces.view', 'View Spaces', 'Can view space bookings', 'spaces'],
+        ['spaces.view', 'View Spaces', 'Can view spaces and bookings', 'spaces'],
         ['spaces.book', 'Book Spaces', 'Can create space bookings', 'spaces'],
         ['spaces.edit', 'Edit Space Bookings', 'Can edit space bookings', 'spaces'],
         ['spaces.manage', 'Manage Spaces', 'Can manage space configurations', 'spaces'],
@@ -735,11 +939,19 @@ function insertInitialData(PDO $pdo, array $config) {
         ['reports.generate', 'Generate Reports', 'Can generate custom reports', 'reports'],
         ['reports.export', 'Export Reports', 'Can export report data', 'reports'],
 
-        // Admin
-        ['admin.users', 'Manage Users', 'Can manage users', 'admin'],
-        ['admin.roles', 'Manage Roles', 'Can manage roles and permissions', 'admin'],
-        ['admin.system', 'System Administration', 'Can manage system settings', 'admin'],
-        ['admin.backup', 'Backup System', 'Can perform system backups', 'admin'],
+        // Wiki
+        ['wiki.view', 'View Wiki', 'Can view wiki content', 'wiki'],
+        ['wiki.create', 'Create Wiki Pages', 'Can create new wiki pages', 'wiki'],
+        ['wiki.edit', 'Edit Wiki Pages', 'Can edit existing wiki pages', 'wiki'],
+        ['wiki.moderate', 'Moderate Wiki', 'Can moderate user contributions and manage categories', 'wiki'],
+        ['wiki.categories.view', 'View Wiki Categories', 'Can view wiki categories', 'wiki'],
+        ['wiki.categories.create', 'Create Wiki Categories', 'Can create new wiki categories', 'wiki'],
+        ['wiki.categories.edit', 'Edit Wiki Categories', 'Can edit existing wiki categories', 'wiki'],
+        ['wiki.categories.delete', 'Delete Wiki Categories', 'Can delete wiki categories', 'wiki'],
+        ['wiki.tags.view', 'View Wiki Tags', 'Can view wiki tags', 'wiki'],
+        ['wiki.tags.create', 'Create Wiki Tags', 'Can create new wiki tags', 'wiki'],
+        ['wiki.tags.edit', 'Edit Wiki Tags', 'Can edit existing wiki tags', 'wiki'],
+        ['wiki.tags.delete', 'Delete Wiki Tags', 'Can delete wiki tags', 'wiki'],
     ];
 
     $stmt = $pdo->prepare("
@@ -765,89 +977,140 @@ function insertInitialData(PDO $pdo, array $config) {
     // Insert sample communications
     insertSampleCommunications($pdo);
 
+    // Insert sample wiki data
+    insertSampleWikiData($pdo);
+
 
 }
 
 function assignPermissionsToRoles(PDO $pdo) {
-    // Get role IDs
-    $roles = $pdo->query("SELECT id, name FROM roles")->fetchAll(PDO::FETCH_KEY_PAIR);
+    // Get role IDs (name => id mapping)
+    $roles = $pdo->query("SELECT name, id FROM roles")->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    // Get permission IDs
-    $permissions = $pdo->query("SELECT id, name FROM permissions")->fetchAll(PDO::FETCH_KEY_PAIR);
+    // Get permission IDs (name => id mapping)
+    $permissions = $pdo->query("SELECT name, id FROM permissions")->fetchAll(PDO::FETCH_KEY_PAIR);
 
     // Define role-permission mappings
     $rolePermissions = [
         'technical_admin' => array_keys($permissions), // All permissions - explicitly assign all permissions to admin
 
         'organizzatore' => [
-            // Registrations
-            'registrations.view', 'registrations.create', 'registrations.edit', 'registrations.approve',
-            // Calendar
-            'calendar.view', 'calendar.create', 'calendar.edit', 'calendar.publish',
-            // Attendance
-            'attendance.view', 'attendance.report',
-            // Communications
-            'communications.view', 'communications.send', 'communications.broadcast',
-            // Media
-            'media.view', 'media.upload', 'media.approve',
-            // Wiki
-            'wiki.view', 'wiki.edit', 'wiki.create',
-            // Spaces
-            'spaces.view', 'spaces.book', 'spaces.edit',
-            // Reports
+            // Admin - System (limited)
+            'admin.system.view',
+            // Registrations - Full access
+            'registrations.view', 'registrations.create', 'registrations.edit', 'registrations.delete',
+            'registrations.guardians.view', 'registrations.guardians.create', 'registrations.guardians.edit', 'registrations.guardians.delete',
+            'registrations.documents.view', 'registrations.documents.create', 'registrations.documents.edit', 'registrations.documents.delete',
+            'registrations.notes.view', 'registrations.notes.create', 'registrations.notes.edit', 'registrations.notes.delete',
+            'registrations.animators.view', 'registrations.animators.create', 'registrations.animators.edit', 'registrations.animators.delete',
+            'registrations.animators.users.view', 'registrations.animators.users.create', 'registrations.animators.users.edit', 'registrations.animators.users.delete',
+            'registrations.animators.documents.view', 'registrations.animators.documents.create', 'registrations.animators.documents.edit', 'registrations.animators.documents.delete',
+            'registrations.animators.notes.view', 'registrations.animators.notes.create', 'registrations.animators.notes.edit', 'registrations.animators.notes.delete',
+            'registrations.animators.availability.view', 'registrations.animators.availability.edit',
+            'registrations.animators.weektypes.view', 'registrations.animators.weektypes.create', 'registrations.animators.weektypes.edit', 'registrations.animators.weektypes.delete',
+            'registrations.templates.view', 'registrations.templates.create', 'registrations.templates.edit', 'registrations.templates.delete',
+            // Calendar - Full access
+            'calendar.view', 'calendar.create', 'calendar.edit', 'calendar.delete', 'calendar.publish', 'calendar.participants.view', 'calendar.participants.manage',
+            // Attendance - Full access
+            'attendance.view', 'attendance.checkin', 'attendance.edit', 'attendance.delete', 'attendance.report',
+            // Communications - Full access
+            'communications.view', 'communications.send', 'communications.broadcast', 'communications.manage',
+            'communications.comments.view', 'communications.comments.create', 'communications.comments.moderate',
+            // Media - Full access
+            'media.view', 'media.upload', 'media.edit', 'media.delete', 'media.share',
+            // Wiki - Full access
+            'wiki.view', 'wiki.edit', 'wiki.create', 'wiki.moderate',
+            'wiki.categories.view', 'wiki.categories.create', 'wiki.categories.edit', 'wiki.categories.delete',
+            'wiki.tags.view', 'wiki.tags.create', 'wiki.tags.edit', 'wiki.tags.delete',
+            // Spaces - Full access
+            'spaces.view', 'spaces.book', 'spaces.edit', 'spaces.manage',
+            // Reports - Full access
             'reports.view', 'reports.generate', 'reports.export',
         ],
 
         'responsabile' => [
-            // Registrations
+            // Registrations - View and edit
             'registrations.view', 'registrations.edit',
-            // Calendar
-            'calendar.view', 'calendar.create', 'calendar.edit',
-            // Attendance
-            'attendance.view', 'attendance.checkin', 'attendance.edit', 'attendance.report',
-            // Communications
+            'registrations.guardians.view', 'registrations.guardians.edit',
+            'registrations.documents.view', 'registrations.documents.edit',
+            'registrations.notes.view', 'registrations.notes.create', 'registrations.notes.edit',
+            'registrations.animators.view', 'registrations.animators.edit',
+            'registrations.animators.users.view', 'registrations.animators.users.edit',
+            'registrations.animators.documents.view', 'registrations.animators.documents.edit',
+            'registrations.animators.notes.view', 'registrations.animators.notes.create', 'registrations.animators.notes.edit',
+            'registrations.animators.availability.view', 'registrations.animators.availability.edit',
+            'registrations.animators.weektypes.view', 'registrations.animators.weektypes.edit',
+            'registrations.templates.view',
+            // Calendar - Create and edit
+            'calendar.view', 'calendar.create', 'calendar.edit', 'calendar.participants.view', 'calendar.participants.manage',
+            // Attendance - Full access
+            'attendance.view', 'attendance.checkin', 'attendance.edit', 'attendance.delete', 'attendance.report',
+            // Communications - Send and view
             'communications.view', 'communications.send',
-            // Media
-            'media.view', 'media.upload',
-            // Wiki
+            'communications.comments.view', 'communications.comments.create',
+            // Media - Upload and view
+            'media.view', 'media.upload', 'media.edit',
+            // Wiki - Edit and view
             'wiki.view', 'wiki.edit',
-            // Spaces
+            // Spaces - Book and view
             'spaces.view', 'spaces.book', 'spaces.edit',
-            // Reports
+            // Reports - View and generate
             'reports.view', 'reports.generate',
         ],
 
         'animatore' => [
-            // Registrations
+            // Registrations - View only
             'registrations.view',
-            // Calendar
-            'calendar.view', 'calendar.edit',
-            // Attendance
+            'registrations.guardians.view',
+            'registrations.documents.view',
+            'registrations.notes.view',
+            'registrations.animators.view',
+            'registrations.animators.users.view',
+            'registrations.animators.documents.view',
+            'registrations.animators.notes.view',
+            'registrations.animators.availability.view',
+            'registrations.animators.weektypes.view',
+            'registrations.templates.view',
+            // Calendar - View and limited edit
+            'calendar.view', 'calendar.edit', 'calendar.participants.view',
+            // Attendance - Check-in/out and view
             'attendance.view', 'attendance.checkin', 'attendance.edit',
-            // Communications
+            // Communications - Send and view
             'communications.view', 'communications.send',
-            // Media
+            'communications.comments.view', 'communications.comments.create',
+            // Media - Upload and view
             'media.view', 'media.upload',
-            // Wiki
+            // Wiki - Edit and view
             'wiki.view', 'wiki.edit',
-            // Spaces
+            // Spaces - Book and view
             'spaces.view', 'spaces.book',
         ],
 
         'aiutoanimatore' => [
-            // Registrations
+            // Registrations - View only
             'registrations.view',
-            // Calendar
-            'calendar.view',
-            // Attendance
+            'registrations.guardians.view',
+            'registrations.documents.view',
+            'registrations.notes.view',
+            'registrations.animators.view',
+            'registrations.animators.users.view',
+            'registrations.animators.documents.view',
+            'registrations.animators.notes.view',
+            'registrations.animators.availability.view',
+            'registrations.animators.weektypes.view',
+            'registrations.templates.view',
+            // Calendar - View only
+            'calendar.view', 'calendar.participants.view',
+            // Attendance - Check-in and view
             'attendance.view', 'attendance.checkin',
-            // Communications
+            // Communications - View only
             'communications.view',
-            // Media
+            'communications.comments.view',
+            // Media - View only
             'media.view',
-            // Wiki
+            // Wiki - View only
             'wiki.view',
-            // Spaces
+            // Spaces - View only
             'spaces.view',
         ],
     ];
@@ -873,6 +1136,360 @@ function assignPermissionsToRoles(PDO $pdo) {
             $permissionId = $permissions[$permissionName];
             $stmt->execute([$roleId, $permissionId]);
         }
+    }
+}
+
+function insertSampleWikiData(PDO $pdo) {
+    // Get admin user ID (assuming admin user exists)
+    $adminId = $pdo->query("SELECT id FROM users WHERE username = 'admin' LIMIT 1")->fetchColumn();
+
+    if (!$adminId) {
+        // If no admin user, skip sample wiki data
+        return;
+    }
+
+    // Insert sample wiki categories
+    $categories = [
+        ['Getting Started', 'getting-started', 'Basic information for new staff members', '#10B981', 'rocket', null, 1, $adminId],
+        ['Activities & Games', 'activities-games', 'Activity planning and game ideas', '#3B82F6', 'gamepad', null, 2, $adminId],
+        ['Safety & Procedures', 'safety-procedures', 'Safety protocols and emergency procedures', '#EF4444', 'shield-alt', null, 3, $adminId],
+        ['Child Development', 'child-development', 'Child development and educational approaches', '#8B5CF6', 'brain', null, 4, $adminId],
+        ['Administrative', 'administrative', 'Administrative procedures and policies', '#F59E0B', 'clipboard-list', null, 5, $adminId],
+        ['Indoor Activities', 'indoor-activities', 'Indoor activity ideas and planning', '#06B6D4', 'home', 2, 6, $adminId],
+        ['Outdoor Activities', 'outdoor-activities', 'Outdoor activity ideas and planning', '#10B981', 'sun', 2, 7, $adminId],
+    ];
+
+    $stmt = $pdo->prepare("
+        INSERT OR IGNORE INTO wiki_categories
+        (name, slug, description, color, icon, parent_id, sort_order, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    foreach ($categories as $category) {
+        $stmt->execute($category);
+    }
+
+    // Insert sample wiki tags
+    $tags = [
+        ['beginner', 'beginner', '#10B981'],
+        ['advanced', 'advanced', '#EF4444'],
+        ['safety', 'safety', '#F59E0B'],
+        ['emergency', 'emergency', '#DC2626'],
+        ['activity', 'activity', '#3B82F6'],
+        ['game', 'game', '#8B5CF6'],
+        ['planning', 'planning', '#06B6D4'],
+        ['development', 'development', '#10B981'],
+    ];
+
+    $stmt = $pdo->prepare("
+        INSERT OR IGNORE INTO wiki_tags (name, slug, color)
+        VALUES (?, ?, ?)
+    ");
+
+    foreach ($tags as $tag) {
+        $stmt->execute($tag);
+    }
+
+    // Insert sample wiki pages
+    $pages = [
+        [
+            'Welcome to the Wiki',
+            'welcome',
+            '# Welcome to the AnimaID Wiki
+
+This wiki serves as a comprehensive knowledge base for our animation center. Here you\'ll find information about activities, procedures, safety protocols, and best practices.
+
+## Getting Started
+
+If you\'re new to our center, start by reading the [Getting Started](getting-started) section.
+
+## Quick Links
+
+- [Safety Procedures](safety-procedures)
+- [Activity Planning](activities-games)
+- [Emergency Protocols](emergency-protocols)
+
+## How to Use This Wiki
+
+- Use the search function to find specific information
+- Browse by categories using the sidebar
+- Click on links to navigate between related topics
+- Edit pages to add new information or update existing content
+
+## Contributing
+
+All staff members can contribute to this wiki. Please ensure information is accurate and follows our center\'s guidelines.',
+            'Introduction to the wiki system and navigation guide',
+            null, // category_id will be set after categories are inserted
+            1, // is_published
+            1, // is_featured
+            0, // view_count
+            $adminId,
+            null // updated_by
+        ],
+        [
+            'Daily Routine Overview',
+            'daily-routine',
+            '# Daily Routine Overview
+
+## Morning Schedule (8:00 AM - 12:00 PM)
+
+- **8:00-8:30**: Staff arrival and preparation
+- **8:30-9:00**: Welcome and free play
+- **9:00-9:30**: Morning circle time
+- **9:30-10:30**: Planned activities
+- **10:30-11:00**: Snack time
+- **11:00-11:45**: Outdoor play (weather permitting)
+- **11:45-12:00**: Story time and wind down
+
+## Afternoon Schedule (12:00 PM - 4:00 PM)
+
+- **12:00-12:30**: Lunch
+- **12:30-1:00**: Quiet time/rest
+- **1:00-2:00**: Afternoon activities
+- **2:00-2:30**: Snack time
+- **2:30-3:30**: Free choice activities
+- **3:30-4:00**: Departure preparations
+
+## Key Considerations
+
+- Always maintain child-to-staff ratios
+- Adapt activities based on children\'s energy levels
+- Weather conditions may affect outdoor activities
+- Special needs children may require modified schedules',
+            'Complete overview of daily activities and schedule',
+            null, // category_id
+            1,
+            0,
+            0,
+            $adminId,
+            null
+        ],
+        [
+            'Emergency Procedures',
+            'emergency-procedures',
+            '# Emergency Procedures
+
+## Medical Emergencies
+
+### Immediate Response
+1. Ensure child safety first
+2. Call for medical assistance (112)
+3. Notify parents immediately
+4. Document incident in child\'s file
+
+### Common Medical Issues
+- **Allergic Reactions**: Use EpiPen if available, call emergency services
+- **Asthma Attacks**: Use inhaler, monitor breathing, seek medical help if severe
+- **Fever**: Monitor temperature, contact parents, administer medication if authorized
+- **Minor Injuries**: Clean wound, apply bandage, document incident
+
+## Fire Emergency
+
+### Evacuation Procedure
+1. Sound fire alarm
+2. Evacuate all children to designated assembly point
+3. Take attendance using emergency roll
+4. Do not re-enter building until declared safe
+5. Contact emergency services
+
+### Fire Prevention
+- Check electrical equipment regularly
+- Keep flammable materials stored safely
+- Teach children about fire safety
+- Maintain clear exit routes
+
+## Weather Emergencies
+
+### Severe Weather
+- Monitor weather alerts
+- Move children to interior rooms if needed
+- Cancel outdoor activities if conditions are dangerous
+- Keep parents informed of schedule changes
+
+## Missing Child
+
+### Immediate Actions
+1. Alert all staff immediately
+2. Search facility thoroughly
+3. Check perimeter and nearby areas
+4. Contact parents and authorities if not found within 5 minutes
+5. Document all actions taken
+
+## Contact Information
+
+- Emergency Services: 112
+- Local Hospital: [Hospital Name] - [Phone Number]
+- Poison Control: [Poison Control Number]
+- Center Director: [Director Name] - [Phone Number]',
+            'Complete emergency response procedures and contact information',
+            null, // category_id
+            1,
+            1,
+            0,
+            $adminId,
+            null
+        ],
+        [
+            'Activity Planning Guide',
+            'activity-planning',
+            '# Activity Planning Guide
+
+## Planning Principles
+
+### Age-Appropriate Activities
+- **2-3 years**: Focus on sensory experiences, basic motor skills, simple games
+- **4-5 years**: Introduce group activities, basic crafts, simple sports
+- **6-8 years**: Complex games, team activities, creative projects
+- **9-12 years**: Leadership activities, advanced crafts, community projects
+
+### Developmental Goals
+- Physical development
+- Social skills
+- Cognitive development
+- Emotional development
+- Creative expression
+
+## Activity Categories
+
+### Creative Arts
+- Painting and drawing
+- Music and movement
+- Drama and role-play
+- Craft projects
+
+### Physical Activities
+- Gross motor games
+- Fine motor activities
+- Sports and games
+- Outdoor exploration
+
+### Educational Activities
+- Science experiments
+- Math games
+- Language activities
+- Cultural exploration
+
+### Social Activities
+- Group games
+- Team building
+- Community projects
+- Friendship activities
+
+## Planning Checklist
+
+- [ ] Age-appropriate materials
+- [ ] Safety considerations
+- [ ] Required adult supervision
+- [ ] Space and equipment needs
+- [ ] Time requirements
+- [ ] Cleanup requirements
+- [ ] Extension activities
+- [ ] Assessment methods
+
+## Seasonal Planning
+
+### Fall Activities
+- Leaf rubbings and nature crafts
+- Harvest themes
+- Indoor/outdoor transitions
+
+### Winter Activities
+- Holiday crafts
+- Indoor physical activities
+- Warm weather alternatives
+
+### Spring Activities
+- Garden and plant activities
+- Outdoor games
+- Weather-dependent planning
+
+### Summer Activities
+- Water play
+- Extended outdoor time
+- Travel and excursion planning',
+            'Comprehensive guide for planning age-appropriate activities',
+            null, // category_id
+            1,
+            0,
+            0,
+            $adminId,
+            null
+        ],
+    ];
+
+    // Get category IDs for assignment
+    $categoryIds = $pdo->query("SELECT slug, id FROM wiki_categories")->fetchAll(PDO::FETCH_KEY_PAIR);
+
+    // Update pages with category IDs
+    $pages[0][4] = $categoryIds['getting-started'] ?? null; // Welcome page
+    $pages[1][4] = $categoryIds['getting-started'] ?? null; // Daily routine
+    $pages[2][4] = $categoryIds['safety-procedures'] ?? null; // Emergency procedures
+    $pages[3][4] = $categoryIds['activities-games'] ?? null; // Activity planning
+
+    $stmt = $pdo->prepare("
+        INSERT OR IGNORE INTO wiki_pages
+        (title, slug, content, summary, category_id, is_published, is_featured, view_count, created_by, updated_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    foreach ($pages as $page) {
+        $stmt->execute($page);
+    }
+
+    // Insert sample tags for pages
+    $pageTags = [
+        [1, 1], // Welcome page - beginner
+        [2, 1], // Daily routine - beginner
+        [2, 7], // Daily routine - planning
+        [3, 3], // Emergency procedures - safety
+        [3, 4], // Emergency procedures - emergency
+        [4, 5], // Activity planning - activity
+        [4, 7], // Activity planning - planning
+        [4, 8], // Activity planning - development
+    ];
+
+    $stmt = $pdo->prepare("
+        INSERT OR IGNORE INTO wiki_page_tags (page_id, tag_id)
+        VALUES (?, ?)
+    ");
+
+    foreach ($pageTags as $tagRelation) {
+        $stmt->execute($tagRelation);
+    }
+
+    // Update search index
+    updateWikiSearchIndex($pdo);
+
+    echo "Sample wiki data inserted.\n";
+}
+
+function updateWikiSearchIndex(PDO $pdo) {
+    // Get all wiki pages with their tags
+    $pages = $pdo->query("
+        SELECT wp.id, wp.title, wp.content, wp.summary,
+               GROUP_CONCAT(wt.name) as tags
+        FROM wiki_pages wp
+        LEFT JOIN wiki_page_tags wpt ON wp.id = wpt.page_id
+        LEFT JOIN wiki_tags wt ON wpt.tag_id = wt.id
+        WHERE wp.is_published = 1
+        GROUP BY wp.id
+    ")->fetchAll(PDO::FETCH_ASSOC);
+
+    // Insert into search index
+    $stmt = $pdo->prepare("
+        INSERT OR REPLACE INTO wiki_search_index (page_id, title, content, summary, tags)
+        VALUES (?, ?, ?, ?, ?)
+    ");
+
+    foreach ($pages as $page) {
+        $stmt->execute([
+            $page['id'],
+            $page['title'],
+            $page['content'],
+            $page['summary'] ?? '',
+            $page['tags'] ?? ''
+        ]);
     }
 }
 

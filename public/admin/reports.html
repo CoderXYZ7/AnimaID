@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - Reports</title>
+    <link rel="icon" href="../../assets/logo/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../../../src/css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading reports...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden">
+
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <img src="../../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <a href="../../../dashboard.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
+                        </a>
+                        <button id="logout-btn" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <!-- Page Header -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">Reports</h2>
+                        <p class="text-gray-600 mt-1">Generate and view system reports and analytics</p>
+                    </div>
+                    <button id="refresh-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Available Reports -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" id="reports-grid">
+                <!-- Reports will be loaded here -->
+            </div>
+
+            <!-- Report Content -->
+            <div id="report-content" class="hidden">
+                <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900" id="report-title">Report Title</h3>
+                        <div class="flex space-x-2">
+                            <button id="export-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-download mr-2"></i>Export
+                            </button>
+                            <button id="close-report-btn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-times mr-2"></i>Close
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div id="report-data">
+                            <!-- Report data will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="error-screen" class="hidden fixed inset-0 bg-gray-50 flex items-center justify-center">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
+            <p class="text-gray-600 mb-4">You don't have permission to access reports.</p>
+            <p class="text-sm text-gray-500 mb-6">Reports require appropriate permissions. Please log in with an account that has report access or contact your system administrator.</p>
+            <div class="space-y-3">
+                <a href="../../../login.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Log In
+                </a>
+                <br>
+                <a href="../../../dashboard.html" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = window.location.origin + '/api';
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+        const errorScreen = document.getElementById('error-screen');
+        const reportsGrid = document.getElementById('reports-grid');
+        const reportContent = document.getElementById('report-content');
+        const reportTitle = document.getElementById('report-title');
+        const reportData = document.getElementById('report-data');
+
+        let currentUser = null;
+        let userToken = null;
+
+        // Initialize page
+        async function initPage() {
+            try {
+                // Check authentication
+                userToken = localStorage.getItem('animaid_token');
+                const userData = localStorage.getItem('animaid_user');
+
+                if (!userToken || !userData) {
+                    showErrorScreen();
+                    return;
+                }
+
+                currentUser = JSON.parse(userData);
+
+                // Verify token and check permissions
+                const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    localStorage.removeItem('animaid_token');
+                    localStorage.removeItem('animaid_user');
+                    window.location.href = '../../../login.html';
+                    return;
+                }
+
+                // Check if user has reports permissions
+                const hasPermission = await checkReportsPermission();
+                if (!hasPermission) {
+                    showErrorScreen();
+                    return;
+                }
+
+                // Load available reports
+                await loadReports();
+
+                // Show main content
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Page initialization error:', error);
+                showErrorScreen();
+            }
+        }
+
+        // Check if user has reports permissions
+        async function checkReportsPermission() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/reports`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Load available reports
+        async function loadReports() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/reports`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayReports(data.reports);
+                } else {
+                    console.error('Failed to load reports');
+                }
+            } catch (error) {
+                console.error('Error loading reports:', error);
+            }
+        }
+
+        // Display reports grid
+        function displayReports(reports) {
+            reportsGrid.innerHTML = reports.map(report => `
+                <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer" onclick="loadReport('${report.id}')">
+                    <div class="flex items-center mb-4">
+                        <div class="p-3 bg-blue-100 rounded-lg">
+                            <i class="fas fa-chart-bar text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-semibold text-gray-900">${report.name}</h3>
+                            <p class="text-sm text-gray-600">${report.description}</p>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        Endpoint: ${report.endpoint}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load specific report
+        async function loadReport(reportType) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/reports/${reportType}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayReport(reportType, data);
+                } else {
+                    console.error('Failed to load report');
+                }
+            } catch (error) {
+                console.error('Error loading report:', error);
+            }
+        }
+
+        // Display report data
+        function displayReport(reportType, data) {
+            let title = 'Report';
+            let content = '';
+
+            switch (reportType) {
+                case 'attendance':
+                    title = 'Attendance Report';
+                    content = generateAttendanceReport(data);
+                    break;
+                case 'children':
+                    title = 'Children Report';
+                    content = generateChildrenReport(data);
+                    break;
+                case 'animators':
+                    title = 'Animators Report';
+                    content = generateAnimatorsReport(data);
+                    break;
+                default:
+                    title = 'Unknown Report';
+                    content = '<p class="text-gray-600">Report data not available.</p>';
+            }
+
+            reportTitle.textContent = title;
+            reportData.innerHTML = content;
+            reportContent.classList.remove('hidden');
+
+            // Scroll to report
+            reportContent.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Generate attendance report HTML
+        function generateAttendanceReport(data) {
+            if (!data.data || data.data.length === 0) {
+                return '<p class="text-gray-600">No attendance data available for the selected period.</p>';
+            }
+
+            return `
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600">Period: ${data.period.start} to ${data.period.end}</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Checked In</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Checked Out</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Registered</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${data.data.map(row => `
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.event_title}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(row.event_date).toLocaleDateString()}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.checked_in}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.checked_out}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.total_registered}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Generate children report HTML
+        function generateChildrenReport(data) {
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <i class="fas fa-users text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Children</p>
+                                <p class="text-2xl font-bold text-gray-900">${data.data.total_children}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Active Children</p>
+                                <p class="text-2xl font-bold text-gray-900">${data.data.active_children}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <i class="fas fa-birthday-cake text-purple-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Average Age</p>
+                                <p class="text-2xl font-bold text-gray-900">${Math.round(data.data.avg_age_years)} years</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-orange-50 p-6 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-orange-100 rounded-lg">
+                                <i class="fas fa-chart-pie text-orange-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Age Distribution</p>
+                                <p class="text-sm text-gray-900">
+                                    Under 3: ${data.data.under_3}<br>
+                                    3-6: ${data.data.age_3_6}<br>
+                                    6-12: ${data.data.age_6_12}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate animators report HTML
+        function generateAnimatorsReport(data) {
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <i class="fas fa-user-tie text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Animators</p>
+                                <p class="text-2xl font-bold text-gray-900">${data.data.total_animators}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Active Animators</p>
+                                <p class="text-2xl font-bold text-gray-900">${data.data.active_animators}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <i class="fas fa-clock text-purple-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Avg Experience</p>
+                                <p class="text-2xl font-bold text-gray-900">${Math.round(data.data.avg_experience)} years</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-orange-50 p-6 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-orange-100 rounded-lg">
+                                <i class="fas fa-calendar-check text-orange-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Available Now</p>
+                                <p class="text-2xl font-bold text-gray-900">${data.data.available_now}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Refresh button
+        document.getElementById('refresh-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('refresh-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Refreshing...';
+            btn.disabled = true;
+
+            await loadReports();
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1000);
+        });
+
+        // Close report button
+        document.getElementById('close-report-btn').addEventListener('click', () => {
+            reportContent.classList.add('hidden');
+        });
+
+        // Export button
+        document.getElementById('export-btn').addEventListener('click', () => {
+            // Simple CSV export for now
+            const data = reportData.innerText;
+            const blob = new Blob([data], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'report.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                await fetch(`${API_BASE_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+
+            localStorage.removeItem('animaid_token');
+            localStorage.removeItem('animaid_user');
+            window.location.href = '../../../login.html';
+        });
+
+        // Utility functions
+        function showErrorScreen() {
+            loadingScreen.classList.add('hidden');
+            mainContent.classList.add('hidden');
+            errorScreen.classList.remove('hidden');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+
+</body>
+</html>

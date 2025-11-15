@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - Wiki</title>
+    <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../src/css/output.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <button id="sidebarToggle" class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-md mr-4 transition-colors duration-200" title="Toggle Sidebar" aria-label="Toggle sidebar navigation" aria-expanded="false">
+                        <i class="fas fa-bars" aria-hidden="true"></i>
+                    </button>
+                    <a href="../dashboard.html" class="text-xl font-bold text-gray-900">
+                        <i class="fas fa-brain text-blue-600 mr-2"></i>
+                        AnimaID
+                    </a>
+                    <div class="ml-8 flex space-x-4">
+                        <a href="../dashboard.html" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
+                        </a>
+                        <a href="wiki.html" class="text-blue-600 hover:text-blue-900 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-book mr-1"></i>Wiki
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="user-info" class="text-sm text-gray-600"></span>
+                    <button id="logout-btn" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading wiki...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden">
+        <div class="flex">
+            <!-- Sidebar -->
+            <div id="sidebar" class="relative transition-all duration-300 ease-in-out w-64 bg-white shadow-lg overflow-hidden h-screen hidden">
+                <div class="p-6">
+                    <div class="mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Categories</h2>
+                        <div id="categoriesList" class="space-y-2">
+                            <!-- Categories will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Pages</h2>
+                        <div id="recentPagesList" class="space-y-2">
+                            <!-- Recent pages will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Tags</h2>
+                        <div id="tagsList" class="flex flex-wrap gap-1">
+                            <!-- Tags will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-6">
+                        <div class="space-y-2">
+                            <a href="#featured" class="block text-gray-700 hover:text-blue-600 transition-colors">
+                                <i class="fas fa-star mr-2"></i>Featured Pages
+                            </a>
+                            <a href="#all" class="block text-gray-700 hover:text-blue-600 transition-colors">
+                                <i class="fas fa-list mr-2"></i>All Pages
+                            </a>
+                            <button id="manageCategoriesBtn" class="block text-gray-700 hover:text-blue-600 transition-colors text-left">
+                                <i class="fas fa-folder mr-2"></i>Manage Categories
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 min-h-screen">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <!-- Header -->
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-3xl font-bold text-gray-900">
+                                    <i class="fas fa-book text-blue-600 mr-3"></i>
+                                    Wiki
+                                </h1>
+                                <p class="mt-2 text-gray-600">Your knowledge base for animation center operations</p>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="relative">
+                                    <input type="text" id="searchInput" placeholder="Search wiki..."
+                                           class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <button id="newPageBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                                    <i class="fas fa-plus mr-2"></i>New Page
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Page Header -->
+                    <div id="pageHeader" class="bg-white rounded-lg shadow-sm border px-6 py-4 mb-6 hidden">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 id="pageTitle" class="text-2xl font-bold text-gray-900"></h1>
+                                <div class="flex items-center mt-2 text-sm text-gray-600">
+                                    <span id="pageCategory" class="mr-4"></span>
+                                    <span id="pageUpdated" class="mr-4"></span>
+                                    <span id="pageViews" class="mr-4"></span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button id="editPageBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                                    <i class="fas fa-edit mr-2"></i>Edit
+                                </button>
+                                <button id="pageHistoryBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                                    <i class="fas fa-history mr-2"></i>History
+                                </button>
+                            </div>
+                        </div>
+                        <div id="pageTags" class="mt-3">
+                            <!-- Tags will be displayed here -->
+                        </div>
+                    </div>
+
+                    <!-- Content Area -->
+                    <div class="p-6">
+                        <!-- Loading State -->
+                        <div id="loadingState" class="flex items-center justify-center py-12">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        </div>
+
+                        <!-- Wiki Content -->
+                        <div id="wikiContent" class="max-w-4xl mx-auto">
+                            <!-- Content will be loaded here -->
+                        </div>
+
+                        <!-- Edit Form (hidden by default) -->
+                        <div id="editForm" class="max-w-4xl mx-auto hidden">
+                            <form id="pageForm" class="bg-white rounded-lg shadow-md p-6">
+                                <div class="mb-4">
+                                    <label for="titleInput" class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                                    <input type="text" id="titleInput" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="categorySelect" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                                    <select id="categorySelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">No Category</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="summaryInput" class="block text-sm font-medium text-gray-700 mb-2">Summary</label>
+                                    <textarea id="summaryInput" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Brief summary of the page content..."></textarea>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="contentTextarea" class="block text-sm font-medium text-gray-700 mb-2">Content (Markdown)</label>
+                                    <textarea id="contentTextarea" rows="20" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" placeholder="Write your content here using Markdown..."></textarea>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="tagSelector" class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                                    <div id="tagSelector" class="w-full p-3 border border-gray-300 rounded-md min-h-12 flex flex-wrap gap-2 content-start" aria-describedby="tagSelectorHelp">
+                                        <!-- Selected tags will appear here -->
+                                    </div>
+                                    <div id="tagSelectorHelp" class="text-sm text-gray-500 mt-1">Press Enter or comma to add tags</div>
+                                    <input type="text" id="tagInput" class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type to add tags...">
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="changeDescriptionInput" class="block text-sm font-medium text-gray-700 mb-2">Change Description</label>
+                                    <input type="text" id="changeDescriptionInput" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Describe what you changed...">
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="isPublishedInput" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-2 text-sm text-gray-700">Published</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="isFeaturedInput" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-2 text-sm text-gray-700">Featured</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="flex space-x-3">
+                                        <button type="button" id="cancelEditBtn" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                                            Save Page
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Modals -->
+    <!-- History Modal -->
+    <div id="historyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Page History</h3>
+                <button id="closeHistoryModal" class="text-gray-400 hover:text-gray-600" aria-label="Close history modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="historyContent" class="max-h-96 overflow-y-auto">
+                <!-- History will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Management Modal -->
+    <div id="categoriesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Manage Categories</h3>
+                <button id="closeCategoriesModal" class="text-gray-400 hover:text-gray-600" aria-label="Close categories modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="categoriesManagementContent">
+                <!-- Categories management will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = window.location.origin + '/api';
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+
+        let currentUser = null;
+        let userToken = null;
+
+        // Global variables
+        let currentPage = null;
+        let currentView = 'home'; // home, page, edit, search
+        let searchTimeout = null;
+        let availableTags = [];
+
+        // DOM elements - will be initialized in setupEventListeners
+        let sidebar, sidebarToggle, searchInput, newPageBtn, loadingState, wikiContent, editForm, pageHeader, pageForm, historyModal, categoriesModal;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const userToken = localStorage.getItem('animaid_token');
+                const userData = localStorage.getItem('animaid_user');
+
+                if (!userToken || !userData) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                currentUser = JSON.parse(userData);
+
+                // Verify token and check permissions
+                const response = await fetch('../api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+
+                if (!response.ok) {
+                    localStorage.removeItem('animaid_token');
+                    localStorage.removeItem('animaid_user');
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                document.getElementById('user-info').textContent = `Welcome, ${currentUser.username}`;
+
+                // Check if user has wiki permissions
+                const hasPermission = await checkWikiPermission();
+                if (!hasPermission) {
+                    showErrorScreen();
+                    return;
+                }
+
+                // Setup event listeners
+                setupEventListeners();
+
+                // Load initial data
+                await loadInitialData();
+                showHomePage();
+
+                // Show main content
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Page initialization error:', error);
+                showErrorScreen();
+            }
+        }
+
+        // Check if user has wiki permissions
+        async function checkWikiPermission() {
+            try {
+                const userToken = localStorage.getItem('animaid_token');
+                const response = await fetch(`${API_BASE_URL}/wiki?page=1&limit=1`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function showErrorScreen() {
+            loadingScreen.classList.add('hidden');
+            mainContent.classList.add('hidden');
+            // Create error screen if it doesn't exist
+            let errorScreen = document.getElementById('error-screen');
+            if (!errorScreen) {
+                errorScreen = document.createElement('div');
+                errorScreen.id = 'error-screen';
+                errorScreen.className = 'fixed inset-0 bg-gray-50 flex items-center justify-center';
+                errorScreen.innerHTML = `
+                    <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
+                        <p class="text-gray-600 mb-6">You don't have permission to access the wiki.</p>
+                        <a href="../dashboard.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Dashboard
+                        </a>
+                    </div>
+                `;
+                document.body.appendChild(errorScreen);
+            }
+            errorScreen.classList.remove('hidden');
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Initialize DOM elements
+            sidebar = document.getElementById('sidebar');
+            sidebarToggle = document.getElementById('sidebarToggle');
+            searchInput = document.getElementById('searchInput');
+            newPageBtn = document.getElementById('newPageBtn');
+            loadingState = document.getElementById('loadingState');
+            wikiContent = document.getElementById('wikiContent');
+            editForm = document.getElementById('editForm');
+            pageHeader = document.getElementById('pageHeader');
+            pageForm = document.getElementById('pageForm');
+            historyModal = document.getElementById('historyModal');
+            categoriesModal = document.getElementById('categoriesModal');
+
+            // Sidebar toggle
+            sidebarToggle.addEventListener('click', toggleSidebar);
+
+            // Search
+            searchInput.addEventListener('input', handleSearchInput);
+
+            // New page button
+            newPageBtn.addEventListener('click', () => showEditForm());
+
+            // Edit form
+            pageForm.addEventListener('submit', handlePageSubmit);
+            document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
+
+            // Page actions
+            document.getElementById('editPageBtn').addEventListener('click', () => showEditForm(currentPage));
+            document.getElementById('pageHistoryBtn').addEventListener('click', showPageHistory);
+
+            // Sidebar navigation
+            document.querySelector('a[href="#featured"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                showFeaturedPages();
+            });
+            document.querySelector('a[href="#all"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                showAllPages();
+            });
+
+            // Modals
+            document.getElementById('closeHistoryModal').addEventListener('click', () => historyModal.classList.add('hidden'));
+            document.getElementById('closeCategoriesModal').addEventListener('click', () => categoriesModal.classList.add('hidden'));
+            document.getElementById('manageCategoriesBtn').addEventListener('click', showCategoriesManagement);
+
+            // Tag input
+            document.getElementById('tagInput').addEventListener('keydown', handleTagInput);
+
+            // Click outside modals to close
+            historyModal.addEventListener('click', (e) => {
+                if (e.target === historyModal) historyModal.classList.add('hidden');
+            });
+            categoriesModal.addEventListener('click', (e) => {
+                if (e.target === categoriesModal) categoriesModal.classList.add('hidden');
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', logout);
+        }
+
+        function toggleSidebar() {
+            const isHidden = sidebar.classList.contains('hidden');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            if (isHidden) {
+                sidebar.classList.remove('hidden');
+                sidebar.classList.add('block');
+                sidebarToggle.setAttribute('aria-expanded', 'true');
+            } else {
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('block');
+                sidebarToggle.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function handleSearchInput(e) {
+            const query = e.target.value.trim();
+
+            if (query.length === 0) {
+                showHomePage();
+                return;
+            }
+
+            if (query.length < 3) return;
+
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch(query);
+            }, 300);
+        }
+
+        async function loadInitialData() {
+            try {
+                const [categoriesResponse, tagsResponse] = await Promise.all([
+                    apiCall('/api/wiki/categories'),
+                    apiCall('/api/wiki/tags')
+                ]);
+
+                availableTags = tagsResponse.tags || [];
+                renderCategories(categoriesResponse.categories || []);
+                renderTags(availableTags);
+                loadRecentPages();
+            } catch (error) {
+                console.error('Failed to load initial data:', error);
+                showError('Failed to load initial data');
+            }
+        }
+
+        function renderCategories(categories) {
+            const categoriesList = document.getElementById('categoriesList');
+            categoriesList.innerHTML = '';
+
+            if (categories.length === 0) {
+                categoriesList.innerHTML = '<p class="text-gray-500 text-sm">No categories yet</p>';
+                return;
+            }
+
+            categories.forEach(category => {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = 'category-item cursor-pointer hover:bg-gray-50 p-2 rounded';
+                categoryElement.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-${category.icon || 'folder'} mr-2 text-${category.color?.replace('#', '') || 'blue'}-600"></i>
+                        <span class="text-sm font-medium">${escapeHtml(category.name)}</span>
+                        <span class="ml-auto text-xs text-gray-500">${category.page_count || 0}</span>
+                    </div>
+                `;
+                categoryElement.addEventListener('click', () => showCategoryPages(category.id));
+                categoriesList.appendChild(categoryElement);
+            });
+        }
+
+        function renderTags(tags) {
+            const tagsList = document.getElementById('tagsList');
+            tagsList.innerHTML = '';
+
+            tags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'inline-block px-2 py-1 rounded text-xs font-medium text-white cursor-pointer hover:opacity-80 transition-opacity';
+                tagElement.style.backgroundColor = tag.color || '#6B7280';
+                tagElement.textContent = tag.name;
+                tagElement.addEventListener('click', () => showTaggedPages(tag.id));
+                tagsList.appendChild(tagElement);
+            });
+        }
+
+        async function loadRecentPages() {
+            try {
+                const response = await apiCall('/api/wiki?limit=5');
+                renderRecentPages(response.pages || []);
+            } catch (error) {
+                console.error('Failed to load recent pages:', error);
+                showError('Failed to load recent pages');
+            }
+        }
+
+        function renderRecentPages(pages) {
+            const recentPagesList = document.getElementById('recentPagesList');
+            recentPagesList.innerHTML = '';
+
+            if (pages.length === 0) {
+                recentPagesList.innerHTML = '<p class="text-gray-500 text-sm">No pages yet</p>';
+                return;
+            }
+
+            pages.forEach(page => {
+                const pageElement = document.createElement('div');
+                pageElement.className = 'recent-page cursor-pointer hover:bg-gray-50 p-2 rounded';
+                pageElement.innerHTML = `
+                    <div class="text-sm font-medium text-gray-900 truncate">${escapeHtml(page.title)}</div>
+                    <div class="text-xs text-gray-500">${escapeHtml(page.updated_by_name || 'Unknown')} • ${formatDate(page.updated_at)}</div>
+                `;
+                pageElement.addEventListener('click', () => showPage(page.id));
+                recentPagesList.appendChild(pageElement);
+            });
+        }
+
+        function showHomePage() {
+            currentView = 'home';
+            pageHeader.classList.add('hidden');
+            editForm.classList.add('hidden');
+            wikiContent.classList.remove('hidden');
+            loadingState.classList.add('hidden');
+
+            wikiContent.innerHTML = `
+                <div class="text-center py-12">
+                    <i class="fas fa-book text-6xl text-gray-300 mb-4"></i>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-4">Welcome to the Wiki</h1>
+                    <p class="text-xl text-gray-600 mb-8">Your knowledge base for animation center operations</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <i class="fas fa-search text-3xl text-blue-600 mb-4"></i>
+                            <h3 class="text-lg font-semibold mb-2">Search</h3>
+                            <p class="text-gray-600">Find information quickly using our search feature</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <i class="fas fa-edit text-3xl text-green-600 mb-4"></i>
+                            <h3 class="text-lg font-semibold mb-2">Contribute</h3>
+                            <p class="text-gray-600">Add new pages and edit existing content</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <i class="fas fa-folder text-3xl text-purple-600 mb-4"></i>
+                            <h3 class="text-lg font-semibold mb-2">Organize</h3>
+                            <p class="text-gray-600">Browse content by categories and tags</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-12">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Featured Pages</h2>
+                    <div id="featuredPages" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Featured pages will be loaded here -->
+                    </div>
+                </div>
+            `;
+
+            loadFeaturedPages();
+        }
+
+        async function loadFeaturedPages() {
+            try {
+                const response = await apiCall('/api/wiki?featured=1&limit=6');
+                renderFeaturedPages(response.pages || []);
+            } catch (error) {
+                console.error('Failed to load featured pages:', error);
+                showError('Failed to load featured pages');
+            }
+        }
+
+        function renderFeaturedPages(pages) {
+            const featuredContainer = document.getElementById('featuredPages');
+
+            if (pages.length === 0) {
+                featuredContainer.innerHTML = '<p class="text-gray-500 col-span-full text-center py-8">No featured pages yet</p>';
+                return;
+            }
+
+            featuredContainer.innerHTML = pages.map(page => `
+                <div class="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow" onclick="showPage(${page.id})">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">${escapeHtml(page.title)}</h3>
+                    <p class="text-gray-600 text-sm mb-4">${escapeHtml(page.summary || 'No summary available')}</p>
+                    <div class="flex items-center justify-between text-sm text-gray-500">
+                        <span>${escapeHtml(page.updated_by_name || 'Unknown')}</span>
+                        <span>${formatDate(page.updated_at)}</span>
+                    </div>
+                    ${page.tag_count > 0 ? `<div class="mt-3">${page.tags.slice(0, 3).map(tag => `<span class="inline-block px-2 py-1 rounded text-xs font-medium text-white mr-1 mb-1" style="background-color: ${tag.color}">${escapeHtml(tag.name)}</span>`).join('')}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function showPage(pageId) {
+            try {
+                loadingState.classList.remove('hidden');
+                wikiContent.classList.add('hidden');
+
+                const response = await apiCall(`/api/wiki/${pageId}`);
+                currentPage = response.page;
+
+                renderPage(currentPage);
+                currentView = 'page';
+
+                loadingState.classList.add('hidden');
+                wikiContent.classList.remove('hidden');
+            } catch (error) {
+                console.error('Failed to load page:', error);
+                showError('Failed to load page');
+            }
+        }
+
+        function renderPage(page) {
+            pageHeader.classList.remove('hidden');
+            editForm.classList.add('hidden');
+            wikiContent.classList.remove('hidden');
+
+            // Update page header
+            document.getElementById('pageTitle').textContent = page.title;
+            document.getElementById('pageCategory').innerHTML = page.category_name ?
+                `<i class="fas fa-folder mr-1"></i>${escapeHtml(page.category_name)}` : '';
+            document.getElementById('pageUpdated').innerHTML = `<i class="fas fa-clock mr-1"></i>Updated ${formatDate(page.updated_at)} by ${escapeHtml(page.updated_by_name || 'Unknown')}`;
+            document.getElementById('pageViews').innerHTML = `<i class="fas fa-eye mr-1"></i>${page.view_count || 0} views`;
+
+            // Render tags
+            const tagsContainer = document.getElementById('pageTags');
+            tagsContainer.innerHTML = '';
+            if (page.tags && page.tags.length > 0) {
+                page.tags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'inline-block px-2 py-1 rounded text-xs font-medium text-white mr-2 mb-1';
+                    tagElement.style.backgroundColor = tag.color || '#6B7280';
+                    tagElement.textContent = tag.name;
+                    tagsContainer.appendChild(tagElement);
+                });
+            }
+
+            // Render content
+            const contentHtml = markdownToHtml(page.content || '');
+            wikiContent.innerHTML = `
+                <div class="prose prose-lg max-w-none
+                    prose-headings:text-gray-900 prose-headings:font-bold
+                    prose-h1:text-2xl prose-h1:font-bold prose-h1:mb-4 prose-h1:text-gray-900
+                    prose-h2:text-xl prose-h2:font-bold prose-h2:mt-6 prose-h2:mb-3 prose-h2:text-gray-800
+                    prose-h3:text-lg prose-h3:font-bold prose-h3:mt-5 prose-h3:mb-2 prose-h3:text-gray-700
+                    prose-p:text-gray-700 prose-p:mb-4 prose-p:leading-relaxed
+                    prose-ul:mb-4 prose-ol:mb-4 prose-li:mb-1
+                    prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:py-2 prose-blockquote:my-4 prose-blockquote:text-gray-600 prose-blockquote:italic prose-blockquote:bg-gray-50
+                    prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:text-gray-800
+                    prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:my-4
+                    prose-pre code:bg-transparent prose-pre code:p-0
+                    prose-table:w-full prose-table:border-collapse prose-table:my-4
+                    prose-th:bg-gray-50 prose-th:border prose-th:border-gray-300 prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-semibold
+                    prose-td:border prose-td:border-gray-300 prose-td:px-4 prose-td:py-2
+                    prose-img:max-w-full prose-img:h-auto">
+                    ${contentHtml}
+                </div>
+                ${page.attachments && page.attachments.length > 0 ? `
+                    <div class="mt-8 border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Attachments</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${page.attachments.map(attachment => `
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file mr-3 text-gray-400"></i>
+                                        <div class="flex-1">
+                                            <div class="font-medium text-gray-900 truncate">${escapeHtml(attachment.original_name)}</div>
+                                            <div class="text-sm text-gray-500">${formatFileSize(attachment.file_size)} • ${escapeHtml(attachment.uploaded_by_name)}</div>
+                                        </div>
+                                        <a href="/api/wiki/${page.id}/attachments/${attachment.id}/download" class="text-blue-600 hover:text-blue-800 transition-colors">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function showEditForm(page = null) {
+            currentView = 'edit';
+            pageHeader.classList.add('hidden');
+            wikiContent.classList.add('hidden');
+            editForm.classList.remove('hidden');
+
+            // Populate categories
+            populateCategorySelect();
+
+            if (page) {
+                // Editing existing page
+                document.getElementById('titleInput').value = page.title || '';
+                document.getElementById('categorySelect').value = page.category_id || '';
+                document.getElementById('summaryInput').value = page.summary || '';
+                document.getElementById('contentTextarea').value = page.content || '';
+                document.getElementById('isPublishedInput').checked = page.is_published == 1;
+                document.getElementById('isFeaturedInput').checked = page.is_featured == 1;
+
+                // Set selected tags
+                setSelectedTags(page.tags || []);
+            } else {
+                // New page
+                document.getElementById('titleInput').value = '';
+                document.getElementById('categorySelect').value = '';
+                document.getElementById('summaryInput').value = '';
+                document.getElementById('contentTextarea').value = '';
+                document.getElementById('isPublishedInput').checked = true;
+                document.getElementById('isFeaturedInput').checked = false;
+                document.getElementById('changeDescriptionInput').value = '';
+
+                setSelectedTags([]);
+            }
+        }
+
+        async function populateCategorySelect() {
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="">No Category</option>';
+
+            try {
+                const response = await apiCall('/api/wiki/categories');
+                const categories = response.categories || [];
+
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load categories for select:', error);
+                showError('Failed to load categories');
+            }
+        }
+
+        function setSelectedTags(tags) {
+            const tagSelector = document.getElementById('tagSelector');
+            tagSelector.innerHTML = '';
+
+            tags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'flex-none px-2 py-1 rounded text-xs font-medium text-white mb-1';
+                tagElement.style.backgroundColor = tag.color || '#6B7280';
+                tagElement.innerHTML = `${escapeHtml(tag.name)} <i class="fas fa-times ml-1 cursor-pointer hover:opacity-80" onclick="removeTag('${tag.id}')"></i>`;
+                tagElement.dataset.tagId = tag.id;
+                tagElement.dataset.tagName = tag.name;
+                tagSelector.appendChild(tagElement);
+            });
+        }
+
+        function handleTagInput(e) {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                const input = e.target;
+                const tagName = input.value.trim();
+
+                if (tagName) {
+                    // Find or create tag
+                    let tag = availableTags.find(t => t.name.toLowerCase() === tagName.toLowerCase());
+                    if (!tag) {
+                        // Create new tag
+                        tag = { id: 'new_' + Date.now(), name: tagName, color: '#6B7280' };
+                        availableTags.push(tag);
+                    }
+
+                    addTagToSelection(tag);
+                    input.value = '';
+                }
+            }
+        }
+
+        function addTagToSelection(tag) {
+            const tagSelector = document.getElementById('tagSelector');
+            const existingTag = tagSelector.querySelector(`[data-tag-id="${tag.id}"]`);
+
+            if (!existingTag) {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'flex-none px-2 py-1 rounded text-xs font-medium text-white mb-1';
+                tagElement.style.backgroundColor = tag.color || '#6B7280';
+                tagElement.innerHTML = `${escapeHtml(tag.name)} <i class="fas fa-times ml-1 cursor-pointer hover:opacity-80" onclick="removeTag('${tag.id}')"></i>`;
+                tagElement.dataset.tagId = tag.id;
+                tagElement.dataset.tagName = tag.name;
+                tagSelector.appendChild(tagElement);
+            }
+        }
+
+        function removeTag(tagId) {
+            const tagElement = document.querySelector(`[data-tag-id="${tagId}"]`);
+            if (tagElement) {
+                tagElement.remove();
+            }
+        }
+
+        async function handlePageSubmit(e) {
+            e.preventDefault();
+
+            // Get selected tags with full data
+            const selectedTagElements = document.querySelectorAll('[data-tag-id]');
+            const selectedTags = Array.from(selectedTagElements).map(el => {
+                const tagId = el.dataset.tagId;
+                // Find the tag object from availableTags
+                let tag = availableTags.find(t => t.id == tagId);
+                if (!tag) {
+                    // For new tags, create the object from the element
+                    tag = {
+                        id: tagId,
+                        name: el.dataset.tagName,
+                        color: el.style.backgroundColor || '#6B7280'
+                    };
+                }
+                return tag;
+            });
+
+            const formData = {
+                title: document.getElementById('titleInput').value.trim(),
+                category_id: document.getElementById('categorySelect').value || null,
+                summary: document.getElementById('summaryInput').value.trim(),
+                content: document.getElementById('contentTextarea').value.trim(),
+                tags: selectedTags,
+                is_published: document.getElementById('isPublishedInput').checked ? 1 : 0,
+                is_featured: document.getElementById('isFeaturedInput').checked ? 1 : 0,
+                change_description: document.getElementById('changeDescriptionInput').value.trim()
+            };
+
+            if (!formData.title) {
+                showError('Title is required');
+                return;
+            }
+
+            try {
+                let response;
+                if (currentPage) {
+                    // Update existing page
+                    response = await apiCall(`/api/wiki/${currentPage.id}`, 'PUT', formData);
+                } else {
+                    // Create new page
+                    response = await apiCall('/api/wiki', 'POST', formData);
+                }
+
+                showSuccess('Page saved successfully');
+                showPage(response.page_id || currentPage.id);
+            } catch (error) {
+                console.error('Failed to save page:', error);
+                showError('Failed to save page');
+            }
+        }
+
+        function cancelEdit() {
+            if (currentPage) {
+                showPage(currentPage.id);
+            } else {
+                showHomePage();
+            }
+        }
+
+        async function performSearch(query) {
+            try {
+                currentView = 'search';
+                loadingState.classList.remove('hidden');
+                wikiContent.classList.add('hidden');
+
+                const response = await apiCall(`/api/wiki/search?q=${encodeURIComponent(query)}`);
+
+                wikiContent.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-gray-900">Search Results</h1>
+                        <p class="text-gray-600 mt-2">Found ${response.results.length} results for "${escapeHtml(query)}"</p>
+                    </div>
+                    <div class="space-y-4">
+                        ${response.results.map(result => `
+                            <div class="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow" onclick="showPage(${result.page_id})">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">${escapeHtml(result.title)}</h3>
+                                <p class="text-gray-600 mb-3">${escapeHtml(result.summary || 'No summary available')}</p>
+                                ${result.highlight ? `<p class="text-sm text-gray-500 mb-3">${escapeHtml(result.highlight)}</p>` : ''}
+                                <div class="flex items-center justify-between text-sm text-gray-500">
+                                    <span>${escapeHtml(result.updated_by_name || 'Unknown')}</span>
+                                    <span>${formatDate(result.updated_at)}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                loadingState.classList.add('hidden');
+                wikiContent.classList.remove('hidden');
+            } catch (error) {
+                console.error('Search failed:', error);
+                showError('Search failed');
+            }
+        }
+
+        async function showCategoryPages(categoryId) {
+            try {
+                const response = await apiCall(`/api/wiki?category_id=${categoryId}`);
+                currentView = 'category';
+
+                wikiContent.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-gray-900">Category Pages</h1>
+                        <p class="text-gray-600 mt-2">Pages in this category</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${response.pages.map(page => `
+                            <div class="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow" onclick="showPage(${page.id})">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">${escapeHtml(page.title)}</h3>
+                                <p class="text-gray-600 text-sm mb-4">${escapeHtml(page.summary || 'No summary available')}</p>
+                                <div class="flex items-center justify-between text-sm text-gray-500">
+                                    <span>${escapeHtml(page.updated_by_name || 'Unknown')}</span>
+                                    <span>${formatDate(page.updated_at)}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                pageHeader.classList.add('hidden');
+                editForm.classList.add('hidden');
+                wikiContent.classList.remove('hidden');
+            } catch (error) {
+                console.error('Failed to load category pages:', error);
+                showError('Failed to load category pages');
+            }
+        }
+
+        async function showTaggedPages(tagId) {
+            try {
+                const response = await apiCall(`/api/wiki?tag_id=${tagId}`);
+                currentView = 'tag';
+
+                wikiContent.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-gray-900">Tagged Pages</h1>
+                        <p class="text-gray-600 mt-2">Pages with this tag</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${response.pages.map(page => `
+                            <div class="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow" onclick="showPage(${page.id})">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">${escapeHtml(page.title)}</h3>
+                                <p class="text-gray-600 text-sm mb-4">${escapeHtml(page.summary || 'No summary available')}</p>
+                                <div class="flex items-center justify-between text-sm text-gray-500">
+                                    <span>${escapeHtml(page.updated_by_name || 'Unknown')}</span>
+                                    <span>${formatDate(page.updated_at)}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                pageHeader.classList.add('hidden');
+                editForm.classList.add('hidden');
+                wikiContent.classList.remove('hidden');
+            } catch (error) {
+                console.error('Failed to load tagged pages:', error);
+                showError('Failed to load tagged pages');
+            }
+        }
+
+        async function showPageHistory() {
+            if (!currentPage) return;
+
+            try {
+                const response = await apiCall(`/api/wiki/${currentPage.id}/revisions`);
+                const historyContent = document.getElementById('historyContent');
+
+                historyContent.innerHTML = response.revisions.map(revision => `
+                    <div class="border-b border-gray-200 py-4 last:border-b-0">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-medium text-gray-900">Revision ${revision.revision_number}</div>
+                                <div class="text-sm text-gray-600">${escapeHtml(revision.edited_by_name || 'Unknown')} • ${formatDate(revision.edited_at)}</div>
+                            </div>
+                            <div class="text-right text-sm text-gray-500">
+                                <div>${revision.word_count} words</div>
+                                <div>${revision.char_count} characters</div>
+                            </div>
+                        </div>
+                        ${revision.change_description ? `<div class="mt-2 text-sm text-gray-700"><strong>Change:</strong> ${escapeHtml(revision.change_description)}</div>` : ''}
+                    </div>
+                `).join('');
+
+                historyModal.classList.remove('hidden');
+            } catch (error) {
+                console.error('Failed to load page history:', error);
+                showError('Failed to load page history');
+            }
+        }
+
+        async function showFeaturedPages() {
+            try {
+                currentView = 'featured';
+                loadingState.classList.remove('hidden');
+                wikiContent.classList.add('hidden');
+
+                const response = await apiCall('/api/wiki?featured=1');
+
+                wikiContent.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-gray-900">Featured Pages</h1>
+                        <p class="text-gray-600 mt-2">Highlighted pages in our knowledge base</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${response.pages.map(page => `
+                            <div class="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow" onclick="showPage(${page.id})">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">${escapeHtml(page.title)}</h3>
+                                <p class="text-gray-600 text-sm mb-4">${escapeHtml(page.summary || 'No summary available')}</p>
+                                <div class="flex items-center justify-between text-sm text-gray-500">
+                                    <span>${escapeHtml(page.updated_by_name || 'Unknown')}</span>
+                                    <span>${formatDate(page.updated_at)}</span>
+                                </div>
+                                ${page.tag_count > 0 ? `<div class="mt-3">${page.tags.slice(0, 3).map(tag => `<span class="inline-block px-2 py-1 rounded text-xs font-medium text-white mr-1 mb-1" style="background-color: ${tag.color}">${escapeHtml(tag.name)}</span>`).join('')}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                pageHeader.classList.add('hidden');
+                editForm.classList.add('hidden');
+                loadingState.classList.add('hidden');
+                wikiContent.classList.remove('hidden');
+            } catch (error) {
+                console.error('Failed to load featured pages:', error);
+                showError('Failed to load featured pages');
+            }
+        }
+
+        async function showAllPages() {
+            try {
+                currentView = 'all';
+                loadingState.classList.remove('hidden');
+                wikiContent.classList.add('hidden');
+
+                const response = await apiCall('/api/wiki');
+
+                wikiContent.innerHTML = `
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-gray-900">All Pages</h1>
+                        <p class="text-gray-600 mt-2">Complete list of all wiki pages</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${response.pages.map(page => `
+                            <div class="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow" onclick="showPage(${page.id})">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">${escapeHtml(page.title)}</h3>
+                                <p class="text-gray-600 text-sm mb-4">${escapeHtml(page.summary || 'No summary available')}</p>
+                                <div class="flex items-center justify-between text-sm text-gray-500">
+                                    <span>${escapeHtml(page.updated_by_name || 'Unknown')}</span>
+                                    <span>${formatDate(page.updated_at)}</span>
+                                </div>
+                                ${page.tag_count > 0 ? `<div class="mt-3">${page.tags.slice(0, 3).map(tag => `<span class="inline-block px-2 py-1 rounded text-xs font-medium text-white mr-1 mb-1" style="background-color: ${tag.color}">${escapeHtml(tag.name)}</span>`).join('')}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                pageHeader.classList.add('hidden');
+                editForm.classList.add('hidden');
+                loadingState.classList.add('hidden');
+                wikiContent.classList.remove('hidden');
+            } catch (error) {
+                console.error('Failed to load all pages:', error);
+                showError('Failed to load all pages');
+            }
+        }
+
+        function showCategoriesManagement() {
+            // Redirect to the dedicated categories management page
+            window.location.href = 'wiki-categories.html';
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                const userToken = localStorage.getItem('animaid_token');
+                await fetch('../api/auth/logout', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+            localStorage.removeItem('animaid_token');
+            localStorage.removeItem('animaid_user');
+            window.location.href = '../login.html';
+        }
+
+        // Utility functions
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const token = localStorage.getItem('animaid_token');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const config = {
+                method,
+                headers
+            };
+
+            if (data) {
+                config.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(endpoint, config);
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'API call failed');
+            }
+
+            return await response.json();
+        }
+
+        function markdownToHtml(markdown) {
+            if (!markdown) return '';
+            
+            // Use marked.js library for proper markdown parsing
+            return marked.parse(markdown);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+
+            const toast = document.createElement('div');
+            toast.className = `max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 transform transition-all duration-300 ease-in-out`;
+
+            const colors = {
+                success: 'text-green-600 bg-green-50 border-green-200',
+                error: 'text-red-600 bg-red-50 border-red-200',
+                info: 'text-blue-600 bg-blue-50 border-blue-200',
+                warning: 'text-yellow-600 bg-yellow-50 border-yellow-200'
+            };
+
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                info: 'fas fa-info-circle',
+                warning: 'fas fa-exclamation-triangle'
+            };
+
+            toast.innerHTML = `
+                <div class="p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="${icons[type]} ${colors[type].split(' ')[0]}"></i>
+                        </div>
+                        <div class="ml-3 w-0 flex-1 pt-0.5">
+                            <p class="text-sm font-medium text-gray-900">${escapeHtml(message)}</p>
+                        </div>
+                        <div class="ml-4 flex-shrink-0 flex">
+                            <button class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" onclick="this.parentElement.parentElement.parentElement.parentElement.remove()">
+                                <span class="sr-only">Close</span>
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        function showError(message) {
+            showToast(message, 'error');
+        }
+
+        function showSuccess(message) {
+            showToast(message, 'success');
+        }
+
+        // Make functions globally available
+        window.showPage = showPage;
+        window.removeTag = removeTag;
+    </script>
+</body>
+</html>

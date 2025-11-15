@@ -390,6 +390,10 @@
                     document.getElementById('api-status').textContent = 'Online';
                     document.getElementById('system-version').textContent = data.version;
                     document.getElementById('last-updated').textContent = new Date(data.timestamp).toLocaleString();
+                } else {
+                    document.getElementById('system-status').textContent = 'Error';
+                    document.getElementById('database-status').textContent = 'Error';
+                    document.getElementById('api-status').textContent = 'Error';
                 }
 
                 // Load additional statistics

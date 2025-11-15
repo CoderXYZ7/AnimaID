@@ -23,9 +23,13 @@ $publicFiles = [
     'communications.html' => 'public/pages/communications.html',
     'media.html' => 'public/pages/media.html',
     'shared.html' => 'public/pages/shared.html',
+    'pages/wiki.html' => 'public/pages/wiki.html',
+    'pages/wiki-categories.html' => 'public/pages/wiki-categories.html',
+    'public.html' => 'public/public.html',
     'admin/users.html' => 'public/admin/users.html',
     'admin/roles.html' => 'public/admin/roles.html',
     'admin/status.html' => 'public/admin/status.html',
+    'admin/reports.html' => 'public/admin/reports.html',
     'styleguide.html' => 'docs/StyleGuide.md', // For demo purposes
 ];
 

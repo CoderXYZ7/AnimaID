@@ -55,6 +55,9 @@
                         <p class="text-gray-600 mt-1">Check-in/check-out children and view attendance records</p>
                     </div>
                     <div class="flex space-x-3">
+                        <a href="children.html" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-plus mr-2"></i>New Child
+                        </a>
                         <button id="quick-checkin-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
                             <i class="fas fa-sign-in-alt mr-2"></i>Quick Check-in
                         </button>
@@ -65,7 +68,7 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
+            <!-- Upper Section: Events and Check-in -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
 
                 <!-- Today's Events -->
@@ -84,7 +87,7 @@
                 </div>
 
                 <!-- Quick Check-in -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 lg:col-span-2">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                             <i class="fas fa-search text-green-600 mr-2"></i>
@@ -117,21 +120,6 @@
                                     Select an event above, then search for children to check them in
                                 </div>
                             </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                            <i class="fas fa-history text-orange-600 mr-2"></i>
-                            Recent Activity
-                        </h3>
-                    </div>
-                    <div class="p-6">
-                        <div id="recent-activity" class="space-y-3">
-                            <!-- Recent attendance activity will be loaded here -->
                         </div>
                     </div>
                 </div>
@@ -229,7 +217,6 @@
         const mainContent = document.getElementById('main-content');
         const errorScreen = document.getElementById('error-screen');
         const todayEvents = document.getElementById('today-events');
-        const recentActivity = document.getElementById('recent-activity');
         const attendanceRecords = document.getElementById('attendance-records');
         const recordsPagination = document.getElementById('records-pagination');
         const checkinModal = document.getElementById('checkin-modal');
@@ -242,6 +229,7 @@
         let currentRecordsPage = 1;
         let totalRecordsPages = 1;
         let recordsLoaded = false;
+        let allEvents = [];
 
         // Initialize page
         async function initPage() {
@@ -278,7 +266,6 @@
 
                 // Load initial data
                 await loadTodayEvents();
-                await loadRecentActivity();
                 // Don't load attendance records initially - let user click "View Records"
 
                 // Set default date to today
@@ -309,8 +296,7 @@
         // Load today's events
         async function loadTodayEvents() {
             try {
-                const today = new Date().toISOString().split('T')[0];
-                const response = await fetch(`${API_BASE_URL}/calendar?start_date=${today}&end_date=${today}&status=published`, {
+                const response = await fetch(`${API_BASE_URL}/calendar?status=published`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
 
@@ -318,8 +304,13 @@
 
                 const data = await response.json();
 
-                displayTodayEvents(data.events);
-                populateEventSelect(data.events);
+                // Filter events for today
+                const today = new Date().toISOString().split('T')[0];
+                const todayEventsData = data.events.filter(event => event.start_date === today);
+
+                allEvents = data.events; // Store all events globally
+                displayTodayEvents(todayEventsData);
+                populateEventSelect(data.events); // Use all events for the select dropdown
 
             } catch (error) {
                 console.error('Error loading today\'s events:', error);
@@ -347,6 +338,42 @@
             `).join('');
         }
 
+        // Load events for a specific date
+        function loadEventsForDate(date) {
+            const eventsForDate = allEvents.filter(event => event.start_date === date);
+            displayEventsForDate(eventsForDate, date);
+        }
+
+        // Display events for a specific date
+        function displayEventsForDate(events, date) {
+            // Update the header to show the selected date
+            const dateHeader = document.querySelector('#today-events').parentElement.previousElementSibling.querySelector('h3');
+            const formattedDate = new Date(date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            dateHeader.innerHTML = `<i class="fas fa-calendar-day text-blue-600 mr-2"></i>Events on ${formattedDate}`;
+
+            if (events.length === 0) {
+                todayEvents.innerHTML = `<div class="text-center text-gray-500">No events scheduled for ${formattedDate}</div>`;
+                return;
+            }
+
+            todayEvents.innerHTML = events.map(event => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-gray-900">${event.title}</h4>
+                        <p class="text-xs text-gray-600">${event.start_time || 'All day'} - ${event.location || 'No location'}</p>
+                    </div>
+                    <button onclick="selectEvent(${event.id})" class="text-blue-600 hover:text-blue-900 text-sm">
+                        Select
+                    </button>
+                </div>
+            `).join('');
+        }
+
         // Populate event select dropdown
         function populateEventSelect(events) {
             const eventSelect = document.getElementById('event-select');
@@ -355,47 +382,11 @@
             events.forEach(event => {
                 const option = document.createElement('option');
                 option.value = event.id;
-                option.textContent = `${event.title} (${event.start_time || 'All day'})`;
+                const dateStr = new Date(event.start_date).toLocaleDateString();
+                const timeStr = event.start_time || 'All day';
+                option.textContent = `${event.title} (${dateStr} - ${timeStr})`;
                 eventSelect.appendChild(option);
             });
-        }
-
-        // Load recent activity
-        async function loadRecentActivity() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/attendance?page=1&limit=5`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                if (!response.ok) throw new Error('Failed to load activity');
-
-                const data = await response.json();
-
-                displayRecentActivity(data.records || []);
-
-            } catch (error) {
-                console.error('Error loading recent activity:', error);
-                recentActivity.innerHTML = '<div class="text-center text-gray-500">Error loading activity</div>';
-            }
-        }
-
-        // Display recent activity
-        function displayRecentActivity(records) {
-            if (records.length === 0) {
-                recentActivity.innerHTML = '<div class="text-center text-gray-500">No recent activity</div>';
-                return;
-            }
-
-            recentActivity.innerHTML = records.slice(0, 5).map(record => `
-                <div class="flex items-center text-sm">
-                    <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <div class="flex-1">
-                        <span class="font-medium">${record.child_name} ${record.child_surname}</span>
-                        <span class="text-gray-600 ml-1">${record.check_in_time ? 'checked in' : 'checked out'}</span>
-                    </div>
-                    <span class="text-gray-400 text-xs">${formatTime(record.check_in_time || record.check_out_time)}</span>
-                </div>
-            `).join('');
         }
 
         // Load attendance records
@@ -565,6 +556,19 @@
         document.getElementById('event-select').addEventListener('change', (e) => {
             selectedEventId = e.target.value;
             updateQuickCheckInUI();
+
+            // If an event is selected, update the records date and show events for that date
+            if (selectedEventId) {
+                // Find the selected event to get its date
+                const selectedEvent = allEvents.find(event => event.id == selectedEventId);
+                if (selectedEvent) {
+                    // Set the records date to the event's date
+                    document.getElementById('records-date').value = selectedEvent.start_date;
+
+                    // Load and display events for this date
+                    loadEventsForDate(selectedEvent.start_date);
+                }
+            }
         });
 
         // View records button
@@ -580,6 +584,12 @@
             const date = document.getElementById('records-date').value;
             const eventId = document.getElementById('event-select').value;
             loadAttendanceRecords(1, date, eventId || null);
+        });
+
+        // Update events display when date changes
+        document.getElementById('records-date').addEventListener('change', (e) => {
+            const selectedDate = e.target.value;
+            loadEventsForDate(selectedDate);
         });
 
         // Records pagination
@@ -799,7 +809,6 @@
 
                 if (response.ok) {
                     checkinModal.classList.add('hidden');
-                    await loadRecentActivity();
                     if (recordsLoaded) {
                         await loadAttendanceRecords();
                     }
@@ -839,7 +848,6 @@
                     if (recordsLoaded) {
                         await loadAttendanceRecords();
                     }
-                    await loadRecentActivity();
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     if (errorData.error && errorData.error.includes('token')) {

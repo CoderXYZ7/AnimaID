@@ -133,6 +133,153 @@ class Auth {
     }
 
     /**
+     * Check if user has any of the specified permissions
+     */
+    public function checkAnyPermission(int $userId, array $permissions): bool {
+        foreach ($permissions as $permission) {
+            if ($this->checkPermission($userId, $permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if user has all of the specified permissions
+     */
+    public function checkAllPermissions(int $userId, array $permissions): bool {
+        foreach ($permissions as $permission) {
+            if (!$this->checkPermission($userId, $permission)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if user has permission with wildcard support
+     * Examples: 'admin.*' matches 'admin.users', 'admin.roles', etc.
+     * 'registrations.*.view' matches 'registrations.children.view', 'registrations.animators.view', etc.
+     */
+    public function checkPermissionWildcard(int $userId, string $permissionPattern): bool {
+        // Get all user permissions
+        $userPermissions = $this->getUserPermissions($userId);
+
+        // Convert pattern to regex
+        $pattern = str_replace(['.', '*'], ['\.', '.*'], $permissionPattern);
+        $regex = '/^' . $pattern . '$/';
+
+        foreach ($userPermissions as $permission) {
+            if (preg_match($regex, $permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get all permissions for a user
+     */
+    public function getUserPermissions(int $userId): array {
+        $permissions = $this->db->fetchAll(
+            "SELECT DISTINCT p.name
+             FROM permissions p
+             INNER JOIN role_permissions rp ON p.id = rp.permission_id
+             INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+             WHERE ur.user_id = ?
+             ORDER BY p.name",
+            [$userId]
+        );
+
+        return array_column($permissions, 'name');
+    }
+
+    /**
+     * Check if user can perform action on resource based on ownership
+     */
+    public function checkResourcePermission(int $userId, string $permission, int $resourceOwnerId = null): bool {
+        // First check if user has the general permission
+        if (!$this->checkPermission($userId, $permission)) {
+            return false;
+        }
+
+        // If resource has an owner and user is not the owner, check for broader permissions
+        if ($resourceOwnerId !== null && $resourceOwnerId !== $userId) {
+            // Check if user has admin-level permission for this module
+            $module = explode('.', $permission)[0];
+            $adminPermission = $module . '.*';
+
+            return $this->checkPermissionWildcard($userId, $adminPermission);
+        }
+
+        return true;
+    }
+
+    /**
+     * Require permission or throw exception
+     */
+    public function requirePermission(int $userId, string $permission): void {
+        if (!$this->checkPermission($userId, $permission)) {
+            throw new Exception("Permission denied: {$permission}");
+        }
+    }
+
+    /**
+     * Require any of the permissions or throw exception
+     */
+    public function requireAnyPermission(int $userId, array $permissions): void {
+        if (!$this->checkAnyPermission($userId, $permissions)) {
+            throw new Exception("Permission denied: requires one of [" . implode(', ', $permissions) . "]");
+        }
+    }
+
+    /**
+     * Require all permissions or throw exception
+     */
+    public function requireAllPermissions(int $userId, array $permissions): void {
+        if (!$this->checkAllPermissions($userId, $permissions)) {
+            throw new Exception("Permission denied: requires all of [" . implode(', ', $permissions) . "]");
+        }
+    }
+
+    /**
+     * Check if user is admin (has any admin.* permission)
+     */
+    public function isAdmin(int $userId): bool {
+        return $this->checkPermissionWildcard($userId, 'admin.*');
+    }
+
+    /**
+     * Check if user is technical admin
+     */
+    public function isTechnicalAdmin(int $userId): bool {
+        $userRoles = $this->getUserRoles($userId);
+        foreach ($userRoles as $role) {
+            if ($role['name'] === 'technical_admin') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get permissions grouped by module for a user
+     */
+    public function getUserPermissionsGrouped(int $userId): array {
+        $permissions = $this->getUserPermissions($userId);
+
+        $grouped = [];
+        foreach ($permissions as $permission) {
+            $parts = explode('.', $permission);
+            $module = $parts[0];
+            $grouped[$module][] = $permission;
+        }
+
+        return $grouped;
+    }
+
+    /**
      * Get all roles for a user
      */
     public function getUserRoles(int $userId): array {
@@ -262,10 +409,9 @@ class Auth {
         // Add permissions to each role
         foreach ($roles as &$role) {
             $role['permissions'] = $this->db->fetchAll(
-                "SELECT p.name FROM permissions p INNER JOIN role_permissions rp ON p.id = rp.permission_id WHERE rp.role_id = ?",
+                "SELECT p.id, p.name, p.display_name, p.module FROM permissions p INNER JOIN role_permissions rp ON p.id = rp.permission_id WHERE rp.role_id = ?",
                 [$role['id']]
             );
-            $role['permissions'] = array_column($role['permissions'], 'name');
         }
 
         return $roles;
@@ -2427,5 +2573,605 @@ class Auth {
         }
 
         return $animators;
+    }
+
+    /**
+     * Get wiki pages with pagination and filtering
+     */
+    public function getWikiPages(int $page = 1, int $limit = 20, array $filters = []): array {
+        $offset = ($page - 1) * $limit;
+
+        $whereClause = 'WHERE wp.is_published = 1';
+        $params = [];
+
+        if (!empty($filters['category_id'])) {
+            $whereClause .= ' AND wp.category_id = ?';
+            $params[] = $filters['category_id'];
+        }
+
+        if (!empty($filters['tag_id'])) {
+            $whereClause .= ' AND EXISTS (SELECT 1 FROM wiki_page_tags wpt WHERE wpt.page_id = wp.id AND wpt.tag_id = ?)';
+            $params[] = $filters['tag_id'];
+        }
+
+        if (!empty($filters['search'])) {
+            $whereClause .= ' AND (wp.title LIKE ? OR wp.content LIKE ? OR wp.summary LIKE ?)';
+            $searchTerm = '%' . $filters['search'] . '%';
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+
+        if (!empty($filters['featured'])) {
+            $whereClause .= ' AND wp.is_featured = ?';
+            $params[] = $filters['featured'];
+        }
+
+        // Get pages
+        $pages = $this->db->fetchAll("
+            SELECT wp.*,
+                   wc.name as category_name, wc.slug as category_slug, wc.color as category_color,
+                   u.username as created_by_name,
+                   uu.username as updated_by_name,
+                   COUNT(DISTINCT wpt.tag_id) as tag_count,
+                   COUNT(DISTINCT wpr.id) as revision_count
+            FROM wiki_pages wp
+            LEFT JOIN wiki_categories wc ON wp.category_id = wc.id
+            LEFT JOIN users u ON wp.created_by = u.id
+            LEFT JOIN users uu ON wp.updated_by = uu.id
+            LEFT JOIN wiki_page_tags wpt ON wp.id = wpt.page_id
+            LEFT JOIN wiki_page_revisions wpr ON wp.id = wpr.page_id
+            {$whereClause}
+            GROUP BY wp.id
+            ORDER BY wp.is_featured DESC, wp.updated_at DESC, wp.created_at DESC
+            LIMIT ? OFFSET ?
+        ", array_merge($params, [$limit, $offset]));
+
+        // Get total count
+        $total = $this->db->fetchOne("
+            SELECT COUNT(*) as count FROM wiki_pages wp {$whereClause}
+        ", $params)['count'];
+
+        // Add tags to each page
+        foreach ($pages as &$page) {
+            $page['tags'] = $this->db->fetchAll("
+                SELECT wt.* FROM wiki_tags wt
+                JOIN wiki_page_tags wpt ON wt.id = wpt.tag_id
+                WHERE wpt.page_id = ?
+                ORDER BY wt.name
+            ", [$page['id']]);
+        }
+
+        return [
+            'pages' => $pages,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $total,
+                'pages' => ceil($total / $limit)
+            ]
+        ];
+    }
+
+    /**
+     * Get wiki page details
+     */
+    public function getWikiPage(int $pageId): ?array {
+        $page = $this->db->fetchOne("
+            SELECT wp.*,
+                   wc.name as category_name, wc.slug as category_slug, wc.color as category_color, wc.icon as category_icon,
+                   u.username as created_by_name,
+                   uu.username as updated_by_name
+            FROM wiki_pages wp
+            LEFT JOIN wiki_categories wc ON wp.category_id = wc.id
+            LEFT JOIN users u ON wp.created_by = u.id
+            LEFT JOIN users uu ON wp.updated_by = uu.id
+            WHERE wp.id = ?
+        ", [$pageId]);
+
+        if (!$page) {
+            return null;
+        }
+
+        // Get tags
+        $page['tags'] = $this->db->fetchAll("
+            SELECT wt.* FROM wiki_tags wt
+            JOIN wiki_page_tags wpt ON wt.id = wpt.tag_id
+            WHERE wpt.page_id = ?
+            ORDER BY wt.name
+        ", [$pageId]);
+
+        // Get attachments
+        $page['attachments'] = $this->db->fetchAll("
+            SELECT wpa.*, u.username as uploaded_by_name
+            FROM wiki_page_attachments wpa
+            LEFT JOIN users u ON wpa.uploaded_by = u.id
+            WHERE wpa.page_id = ?
+            ORDER BY wpa.created_at DESC
+        ", [$pageId]);
+
+        return $page;
+    }
+
+    /**
+     * Create wiki page
+     */
+    public function createWikiPage(array $pageData, int $createdBy): int {
+        // Process tags - create new tags if needed
+        $tagIds = [];
+        if (!empty($pageData['tags'])) {
+            $tagIds = $this->processWikiTags($pageData['tags']);
+        }
+
+        // Clean up the page data for database insertion
+        $allowedFields = ['title', 'content', 'summary', 'category_id', 'is_published', 'is_featured'];
+        $cleanPageData = array_intersect_key($pageData, array_flip($allowedFields));
+
+        // Ensure category_id is properly handled
+        if (isset($cleanPageData['category_id'])) {
+            if ($cleanPageData['category_id'] === '' || $cleanPageData['category_id'] === 'null' || $cleanPageData['category_id'] === null) {
+                $cleanPageData['category_id'] = null;
+            } else {
+                $cleanPageData['category_id'] = (int)$cleanPageData['category_id'];
+            }
+        }
+
+        // Ensure boolean fields are integers
+        if (isset($cleanPageData['is_published'])) {
+            $cleanPageData['is_published'] = $cleanPageData['is_published'] ? 1 : 0;
+        }
+        if (isset($cleanPageData['is_featured'])) {
+            $cleanPageData['is_featured'] = $cleanPageData['is_featured'] ? 1 : 0;
+        }
+
+        // Generate slug from title
+        $slug = $this->generateSlug($cleanPageData['title']);
+
+        // Ensure slug is unique
+        $originalSlug = $slug;
+        $counter = 1;
+        while ($this->db->fetchOne("SELECT id FROM wiki_pages WHERE slug = ?", [$slug])) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+
+        $pageId = $this->db->insert('wiki_pages', array_merge($cleanPageData, [
+            'slug' => $slug,
+            'created_by' => $createdBy
+        ]));
+
+        // Handle tags
+        if (!empty($tagIds)) {
+            $this->setWikiPageTags($pageId, $tagIds);
+        }
+
+        // Create initial revision
+        $this->createWikiPageRevision($pageId, $cleanPageData, $createdBy, 'Initial creation');
+
+        // Update search index
+        $this->updateWikiSearchIndex($pageId);
+
+        return $pageId;
+    }
+
+    /**
+     * Update wiki page
+     */
+    public function updateWikiPage(int $pageId, array $pageData, int $updatedBy): void {
+        // Get current page data for revision tracking
+        $currentPage = $this->getWikiPage($pageId);
+        if (!$currentPage) {
+            throw new Exception('Wiki page not found');
+        }
+
+        // Process tags - create new tags if needed
+        $tagIds = [];
+        if (isset($pageData['tags'])) {
+            $tagIds = $this->processWikiTags($pageData['tags']);
+        }
+
+        // Remove tags from pageData as it's not a database column
+        unset($pageData['tags']);
+        if (!empty($tagIds)) {
+            $pageData['tag_ids'] = $tagIds;
+        }
+
+        // Generate new slug if title changed
+        $slug = $currentPage['slug'];
+        if (isset($pageData['title']) && $pageData['title'] !== $currentPage['title']) {
+            $slug = $this->generateSlug($pageData['title']);
+
+            // Ensure slug is unique (excluding current page)
+            $originalSlug = $slug;
+            $counter = 1;
+            while ($this->db->fetchOne("SELECT id FROM wiki_pages WHERE slug = ? AND id != ?", [$slug, $pageId])) {
+                $slug = $originalSlug . '-' . $counter;
+                $counter++;
+            }
+            $pageData['slug'] = $slug;
+        }
+
+        $allowedFields = ['title', 'slug', 'content', 'summary', 'category_id', 'is_published', 'is_featured'];
+        $updateData = array_intersect_key($pageData, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $updateData['updated_by'] = $updatedBy;
+            $updateData['updated_at'] = date('Y-m-d H:i:s');
+
+            $this->db->update('wiki_pages', $updateData, 'id = ?', [$pageId]);
+
+            // Create revision if content changed
+            if (isset($pageData['content']) && $pageData['content'] !== $currentPage['content']) {
+                $changeDescription = $pageData['change_description'] ?? 'Content updated';
+                $this->createWikiPageRevision($pageId, array_merge($currentPage, $pageData), $updatedBy, $changeDescription);
+            }
+        }
+
+        // Handle tags
+        if (isset($pageData['tag_ids'])) {
+            $this->setWikiPageTags($pageId, $pageData['tag_ids']);
+        }
+
+        // Update search index
+        $this->updateWikiSearchIndex($pageId);
+    }
+
+    /**
+     * Delete wiki page
+     */
+    public function deleteWikiPage(int $pageId): void {
+        // Remove from search index
+        $this->db->query("DELETE FROM wiki_search_index WHERE page_id = ?", [$pageId]);
+
+        // Delete page (cascade will handle related records)
+        $this->db->delete('wiki_pages', 'id = ?', [$pageId]);
+    }
+
+    /**
+     * Increment wiki page view count
+     */
+    public function incrementWikiPageViewCount(int $pageId): void {
+        $this->db->query("UPDATE wiki_pages SET view_count = view_count + 1 WHERE id = ?", [$pageId]);
+    }
+
+    /**
+     * Get wiki categories
+     */
+    public function getWikiCategories(): array {
+        return $this->db->fetchAll("
+            SELECT wc.*,
+                   u.username as created_by_name,
+                   COUNT(DISTINCT wp.id) as page_count
+            FROM wiki_categories wc
+            LEFT JOIN users u ON wc.created_by = u.id
+            LEFT JOIN wiki_pages wp ON wc.id = wp.category_id AND wp.is_published = 1
+            WHERE wc.is_active = 1
+            GROUP BY wc.id
+            ORDER BY wc.sort_order, wc.name
+        ");
+    }
+
+    /**
+     * Get wiki category details
+     */
+    public function getWikiCategory(int $categoryId): ?array {
+        $category = $this->db->fetchOne("
+            SELECT wc.*,
+                   u.username as created_by_name,
+                   COUNT(DISTINCT wp.id) as page_count
+            FROM wiki_categories wc
+            LEFT JOIN users u ON wc.created_by = u.id
+            LEFT JOIN wiki_pages wp ON wc.id = wp.category_id AND wp.is_published = 1
+            WHERE wc.id = ? AND wc.is_active = 1
+            GROUP BY wc.id
+        ", [$categoryId]);
+
+        if (!$category) {
+            return null;
+        }
+
+        // Get recent pages in this category
+        $category['recent_pages'] = $this->db->fetchAll("
+            SELECT wp.id, wp.title, wp.slug, wp.updated_at, u.username as updated_by_name
+            FROM wiki_pages wp
+            LEFT JOIN users u ON wp.updated_by = u.id
+            WHERE wp.category_id = ? AND wp.is_published = 1
+            ORDER BY wp.updated_at DESC
+            LIMIT 5
+        ", [$categoryId]);
+
+        return $category;
+    }
+
+    /**
+     * Create wiki category
+     */
+    public function createWikiCategory(array $categoryData, int $createdBy): int {
+        // Generate slug from name
+        $slug = $this->generateSlug($categoryData['name']);
+
+        // Ensure slug is unique
+        $originalSlug = $slug;
+        $counter = 1;
+        while ($this->db->fetchOne("SELECT id FROM wiki_categories WHERE slug = ?", [$slug])) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $this->db->insert('wiki_categories', array_merge($categoryData, [
+            'slug' => $slug,
+            'created_by' => $createdBy
+        ]));
+    }
+
+    /**
+     * Update wiki category
+     */
+    public function updateWikiCategory(int $categoryId, array $categoryData): void {
+        // Generate new slug if name changed
+        $currentCategory = $this->db->fetchOne("SELECT name, slug FROM wiki_categories WHERE id = ?", [$categoryId]);
+        $slug = $currentCategory['slug'];
+
+        if (isset($categoryData['name']) && $categoryData['name'] !== $currentCategory['name']) {
+            $slug = $this->generateSlug($categoryData['name']);
+
+            // Ensure slug is unique (excluding current category)
+            $originalSlug = $slug;
+            $counter = 1;
+            while ($this->db->fetchOne("SELECT id FROM wiki_categories WHERE slug = ? AND id != ?", [$slug, $categoryId])) {
+                $slug = $originalSlug . '-' . $counter;
+                $counter++;
+            }
+            $categoryData['slug'] = $slug;
+        }
+
+        $allowedFields = ['name', 'slug', 'description', 'color', 'icon', 'parent_id', 'sort_order', 'is_active'];
+        $updateData = array_intersect_key($categoryData, array_flip($allowedFields));
+
+        if (!empty($updateData)) {
+            $updateData['updated_at'] = date('Y-m-d H:i:s');
+            $this->db->update('wiki_categories', $updateData, 'id = ?', [$categoryId]);
+        }
+    }
+
+    /**
+     * Delete wiki category
+     */
+    public function deleteWikiCategory(int $categoryId): void {
+        // Move pages to null category
+        $this->db->update('wiki_pages', ['category_id' => null], 'category_id = ?', [$categoryId]);
+
+        // Delete category
+        $this->db->delete('wiki_categories', 'id = ?', [$categoryId]);
+    }
+
+    /**
+     * Get wiki tags
+     */
+    public function getWikiTags(): array {
+        return $this->db->fetchAll("
+            SELECT wt.*,
+                   COUNT(DISTINCT wpt.page_id) as usage_count
+            FROM wiki_tags wt
+            LEFT JOIN wiki_page_tags wpt ON wt.id = wpt.tag_id
+            GROUP BY wt.id
+            ORDER BY wt.name
+        ");
+    }
+
+    /**
+     * Create wiki tag
+     */
+    public function createWikiTag(array $tagData): int {
+        // Generate slug from name
+        $slug = $this->generateSlug($tagData['name']);
+
+        // Ensure slug is unique
+        $originalSlug = $slug;
+        $counter = 1;
+        while ($this->db->fetchOne("SELECT id FROM wiki_tags WHERE slug = ?", [$slug])) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $this->db->insert('wiki_tags', array_merge($tagData, [
+            'slug' => $slug
+        ]));
+    }
+
+    /**
+     * Search wiki pages
+     */
+    public function searchWikiPages(string $query, int $limit = 20): array {
+        $results = $this->db->fetchAll("
+            SELECT wsi.page_id, wsi.title, wsi.content, wsi.summary, wsi.tags,
+                   wp.slug, wp.updated_at,
+                   wc.name as category_name, wc.color as category_color,
+                   u.username as updated_by_name,
+                   snippet(wiki_search_index, 1, '<mark>', '</mark>', '...', 50) as highlight
+            FROM wiki_search_index wsi
+            JOIN wiki_pages wp ON wsi.page_id = wp.id
+            LEFT JOIN wiki_categories wc ON wp.category_id = wc.id
+            LEFT JOIN users u ON wp.updated_by = u.id
+            WHERE wiki_search_index MATCH ?
+            ORDER BY rank
+            LIMIT ?
+        ", [$query, $limit]);
+
+        return $results;
+    }
+
+    /**
+     * Get wiki page revisions
+     */
+    public function getWikiPageRevisions(int $pageId): array {
+        return $this->db->fetchAll("
+            SELECT wpr.*,
+                   u.username as edited_by_name
+            FROM wiki_page_revisions wpr
+            LEFT JOIN users u ON wpr.edited_by = u.id
+            WHERE wpr.page_id = ?
+            ORDER BY wpr.revision_number DESC
+        ", [$pageId]);
+    }
+
+    /**
+     * Get wiki page attachments
+     */
+    public function getWikiPageAttachments(int $pageId): array {
+        return $this->db->fetchAll("
+            SELECT wpa.*,
+                   u.username as uploaded_by_name
+            FROM wiki_page_attachments wpa
+            LEFT JOIN users u ON wpa.uploaded_by = u.id
+            WHERE wpa.page_id = ?
+            ORDER BY wpa.created_at DESC
+        ", [$pageId]);
+    }
+
+    /**
+     * Get wiki page attachment details
+     */
+    public function getWikiPageAttachment(int $attachmentId): ?array {
+        return $this->db->fetchOne("
+            SELECT wpa.*,
+                   u.username as uploaded_by_name
+            FROM wiki_page_attachments wpa
+            LEFT JOIN users u ON wpa.uploaded_by = u.id
+            WHERE wpa.id = ?
+        ", [$attachmentId]);
+    }
+
+    /**
+     * Add wiki page attachment
+     */
+    public function addWikiPageAttachment(int $pageId, array $attachmentData, int $uploadedBy): int {
+        return $this->db->insert('wiki_page_attachments', array_merge($attachmentData, [
+            'page_id' => $pageId,
+            'uploaded_by' => $uploadedBy
+        ]));
+    }
+
+    /**
+     * Set wiki page tags
+     */
+    private function setWikiPageTags(int $pageId, array $tagIds): void {
+        // Remove existing tags
+        $this->db->delete('wiki_page_tags', 'page_id = ?', [$pageId]);
+
+        // Add new tags
+        foreach ($tagIds as $tagId) {
+            $this->db->insert('wiki_page_tags', [
+                'page_id' => $pageId,
+                'tag_id' => $tagId
+            ]);
+        }
+    }
+
+    /**
+     * Create wiki page revision
+     */
+    private function createWikiPageRevision(int $pageId, array $pageData, int $editedBy, string $changeDescription): void {
+        // Get next revision number
+        $maxRevision = $this->db->fetchOne("SELECT MAX(revision_number) as max_rev FROM wiki_page_revisions WHERE page_id = ?", [$pageId])['max_rev'] ?? 0;
+        $revisionNumber = $maxRevision + 1;
+
+        // Calculate word and character counts
+        $wordCount = str_word_count(strip_tags($pageData['content'] ?? ''));
+        $charCount = strlen($pageData['content'] ?? '');
+
+        $this->db->insert('wiki_page_revisions', [
+            'page_id' => $pageId,
+            'title' => $pageData['title'],
+            'content' => $pageData['content'] ?? '',
+            'summary' => $pageData['summary'] ?? '',
+            'change_description' => $changeDescription,
+            'edited_by' => $editedBy,
+            'revision_number' => $revisionNumber,
+            'word_count' => $wordCount,
+            'char_count' => $charCount
+        ]);
+    }
+
+    /**
+     * Update wiki search index for a page
+     */
+    private function updateWikiSearchIndex(int $pageId): void {
+        $page = $this->getWikiPage($pageId);
+        if (!$page) return;
+
+        // Get tags as comma-separated string
+        $tags = implode(' ', array_column($page['tags'], 'name'));
+
+        $this->db->query("
+            INSERT OR REPLACE INTO wiki_search_index (page_id, title, content, summary, tags)
+            VALUES (?, ?, ?, ?, ?)
+        ", [
+            $pageId,
+            $page['title'],
+            $page['content'] ?? '',
+            $page['summary'] ?? '',
+            $tags
+        ]);
+    }
+
+    /**
+     * Process wiki tags - create new tags if needed
+     */
+    private function processWikiTags(array $tags): array {
+        $tagIds = [];
+
+        foreach ($tags as $tag) {
+            if (is_string($tag)) {
+                // Legacy support - tag is just a string ID
+                if (is_numeric($tag)) {
+                    $tagIds[] = (int)$tag;
+                } else if (strpos($tag, 'new_') === 0) {
+                    // This is a new tag that needs to be created
+                    // For now, skip it since we don't have the tag name
+                    continue;
+                }
+            } else if (is_array($tag) && isset($tag['id'])) {
+                // Tag is an object with id, name, etc.
+                $tagId = $tag['id'];
+
+                if (is_numeric($tagId)) {
+                    // Existing tag
+                    $tagIds[] = (int)$tagId;
+                } else if (strpos($tagId, 'new_') === 0 && isset($tag['name'])) {
+                    // New tag that needs to be created
+                    $existingTag = $this->db->fetchOne("SELECT id FROM wiki_tags WHERE name = ?", [$tag['name']]);
+                    if ($existingTag) {
+                        // Tag already exists, use its ID
+                        $tagIds[] = $existingTag['id'];
+                    } else {
+                        // Create new tag
+                        $newTagId = $this->createWikiTag([
+                            'name' => $tag['name'],
+                            'color' => $tag['color'] ?? '#6B7280'
+                        ]);
+                        $tagIds[] = $newTagId;
+                    }
+                }
+            }
+        }
+
+        return $tagIds;
+    }
+
+    /**
+     * Generate URL-friendly slug from text
+     */
+    private function generateSlug(string $text): string {
+        // Convert to lowercase
+        $slug = strtolower($text);
+
+        // Replace non-alphanumeric characters with hyphens
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+
+        // Remove leading/trailing hyphens
+        $slug = trim($slug, '-');
+
+        return $slug;
     }
 }
