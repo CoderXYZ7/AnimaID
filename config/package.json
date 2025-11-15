@@ -8,11 +8,20 @@
     "build-css-prod": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --minify"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.0",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0"
   },
-  "keywords": ["animation", "center", "management", "php", "tailwindcss"],
+  "keywords": [
+    "animation",
+    "center",
+    "management",
+    "php",
+    "tailwindcss"
+  ],
   "author": "AnimaID Team",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "i18next": "^25.6.2"
+  }
 }

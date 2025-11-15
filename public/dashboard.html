@@ -10,6 +10,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- i18next CDN -->
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
@@ -17,7 +20,7 @@
     <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
         <div class="text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p class="text-gray-600">Loading dashboard...</p>
+            <p class="text-gray-600" data-i18n="common.loading">Loading dashboard...</p>
         </div>
     </div>
 
@@ -42,7 +45,7 @@
 
                         <button id="logout-btn" class="text-gray-600 hover:text-gray-900 transition-colors">
                             <i class="fas fa-sign-out-alt mr-1"></i>
-                            <span class="hidden sm:inline">Logout</span>
+                            <span class="hidden sm:inline" data-i18n="auth.logout">Logout</span>
                         </button>
                     </div>
                 </div>
@@ -54,8 +57,8 @@
 
             <!-- Welcome Section -->
             <div class="mb-8">
-                <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome to AnimaID</h2>
-                <p class="text-gray-600">Manage your animation center efficiently with our comprehensive platform.</p>
+                <h2 class="text-3xl font-bold text-gray-900 mb-2" data-i18n="dashboard.welcome">Welcome to AnimaID</h2>
+                <p class="text-gray-600" data-i18n="dashboard.subtitle">Manage your animation center efficiently with our comprehensive platform.</p>
             </div>
 
             <!-- Stats Cards -->
@@ -66,7 +69,7 @@
                             <i class="fas fa-users text-blue-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600">Total Users</p>
+                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.users">Total Users</p>
                             <p class="text-2xl font-bold text-gray-900" id="stats-users">-</p>
                         </div>
                     </div>
@@ -78,7 +81,7 @@
                             <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600">Activities</p>
+                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.activities">Activities</p>
                             <p class="text-2xl font-bold text-gray-900">-</p>
                         </div>
                     </div>
@@ -90,7 +93,7 @@
                             <i class="fas fa-child text-orange-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600">Children</p>
+                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.children">Children</p>
                             <p class="text-2xl font-bold text-gray-900">-</p>
                         </div>
                     </div>
@@ -102,7 +105,7 @@
                             <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600">Reports</p>
+                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.reports">Reports</p>
                             <p class="text-2xl font-bold text-gray-900">-</p>
                         </div>
                     </div>
@@ -111,41 +114,41 @@
 
             <!-- Quick Actions -->
             <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4" data-i18n="dashboard.quick_actions">Quick Actions</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <a href="calendar.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-calendar-alt text-green-600 mr-3"></i>
-                        <span class="text-sm font-medium">Calendar</span>
+                        <span class="text-sm font-medium" data-i18n="nav.calendar">Calendar</span>
                     </a>
 
                     <a href="attendance.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-clipboard-check text-blue-600 mr-3"></i>
-                        <span class="text-sm font-medium">Attendance</span>
+                        <span class="text-sm font-medium" data-i18n="nav.attendance">Attendance</span>
                     </a>
 
                     <a href="children.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-child text-orange-600 mr-3"></i>
-                        <span class="text-sm font-medium">Children</span>
+                        <span class="text-sm font-medium" data-i18n="nav.children">Children</span>
                     </a>
 
                     <a href="animators.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-user-tie text-purple-600 mr-3"></i>
-                        <span class="text-sm font-medium">Animators</span>
+                        <span class="text-sm font-medium" data-i18n="nav.animators">Animators</span>
                     </a>
 
                     <a href="communications.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-comments text-red-600 mr-3"></i>
-                        <span class="text-sm font-medium">Communications</span>
+                        <span class="text-sm font-medium" data-i18n="nav.communications">Communications</span>
                     </a>
 
                     <a href="media.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-folder text-yellow-600 mr-3"></i>
-                        <span class="text-sm font-medium">Media Manager</span>
+                        <span class="text-sm font-medium" data-i18n="nav.media">Media Manager</span>
                     </a>
 
                     <a href="pages/wiki.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-book text-indigo-600 mr-3"></i>
-                        <span class="text-sm font-medium">Wiki</span>
+                        <span class="text-sm font-medium" data-i18n="nav.wiki">Wiki</span>
                     </a>
 
                     <a href="admin/users.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
@@ -165,14 +168,14 @@
 
                     <a href="admin/reports.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-chart-bar text-red-600 mr-3"></i>
-                        <span class="text-sm font-medium">Reports</span>
+                        <span class="text-sm font-medium" data-i18n="nav.reports">Reports</span>
                     </a>
                 </div>
             </div>
 
             <!-- User Permissions -->
             <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Your Permissions</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4" data-i18n="dashboard.permissions">Your Permissions</h3>
                 <div id="permissions-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Permissions will be loaded here -->
                 </div>
@@ -180,20 +183,28 @@
         </main>
     </div>
 
+    <!-- Language Selector -->
+    <div class="text-center mb-4" id="language-selector">
+        <!-- Language selector will be inserted here -->
+    </div>
+
     <!-- Error Screen -->
     <div id="error-screen" class="hidden fixed inset-0 bg-gray-50 flex items-center justify-center">
         <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
             <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
-            <p class="text-gray-600 mb-6">You need to be logged in to access this page.</p>
+            <h3 class="text-xl font-bold text-gray-900 mb-2" data-i18n="status.denied">Access Denied</h3>
+            <p class="text-gray-600 mb-6" data-i18n="status.denied.message">You need to be logged in to access this page.</p>
             <a href="login.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
                 <i class="fas fa-sign-in-alt mr-2"></i>
-                Go to Login
+                <span data-i18n="status.denied.button">Go to Login</span>
             </a>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        // Import i18next
+        import { initI18n, createLanguageSelector, getCurrentLanguage } from './src/js/i18n.js';
+
         // Configuration
         const API_BASE_URL = window.location.origin + '/api';
 
@@ -353,8 +364,31 @@
             errorScreen.classList.remove('hidden');
         }
 
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', initDashboard);
+        // Initialize i18n and handle DOM ready
+        window.addEventListener('DOMContentLoaded', async function() {
+            // Initialize i18next
+            await initI18n();
+
+            // Update all elements with data-i18n attributes
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.dataset.i18n;
+                const translation = i18next.t(key);
+                element.textContent = translation;
+            });
+
+            // Add language selector
+            const selectorContainer = document.getElementById('language-selector');
+            if (selectorContainer) {
+                const selector = createLanguageSelector();
+                selectorContainer.appendChild(selector);
+            }
+
+            // Update HTML lang attribute
+            document.documentElement.lang = getCurrentLanguage();
+
+            // Now initialize dashboard
+            await initDashboard();
+        });
     </script>
 
 </body>
