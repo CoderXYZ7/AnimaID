@@ -1681,6 +1681,17 @@ class Auth {
             throw new Exception('Animator is already linked to this user');
         }
 
+        // Check if user is already a primary user for another animator
+        if ($relationshipType === 'primary') {
+            $existingPrimary = $this->db->fetchOne(
+                "SELECT id FROM animator_users WHERE user_id = ? AND relationship_type = 'primary'",
+                [$userId]
+            );
+            if ($existingPrimary) {
+                throw new Exception('This user is already a primary user for another animator.');
+            }
+        }
+
         return $this->db->insert('animator_users', [
             'animator_id' => $animatorId,
             'user_id' => $userId,

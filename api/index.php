@@ -85,7 +85,13 @@ try {
 
     // More specific error handling
     $errorMsg = $e->getMessage();
-    if (strpos($errorMsg, 'Invalid credentials') !== false) {
+    if (strpos($errorMsg, 'This user is already a primary user for another animator') !== false) {
+        $statusCode = 409; // Conflict
+        $errorMessage = $errorMsg;
+    } elseif (strpos($errorMsg, 'Animator is already linked to this user') !== false) {
+        $statusCode = 409; // Conflict
+        $errorMessage = $errorMsg;
+    } elseif (strpos($errorMsg, 'Invalid credentials') !== false) {
         $statusCode = 401;
         $errorMessage = 'Invalid credentials';
     } elseif (strpos($errorMsg, 'Invalid token') !== false || strpos($errorMsg, 'Expired token') !== false) {
@@ -1003,6 +1009,21 @@ function handleAnimatorsRequest(?string $animatorId, string $method, array $body
     // Check if this is a notes operation: /api/animators/{id}/notes
     if ($animatorId && isset($pathSegments[2]) && $pathSegments[2] === 'notes') {
         $animatorId = (int)$animatorId;
+        $noteId = $pathSegments[3] ?? null;
+
+        if ($noteId) {
+            $noteId = (int)$noteId;
+            switch ($method) {
+                case 'DELETE':
+                    if (!$auth->checkPermission($user['id'], 'registrations.edit')) {
+                        throw new Exception('Insufficient permissions');
+                    }
+                    $auth->getDb()->delete('animator_notes', 'id = ? AND animator_id = ?', [$noteId, $animatorId]);
+                    return ['message' => 'Note deleted successfully'];
+                default:
+                    throw new Exception('Method not allowed for individual note');
+            }
+        }
 
         switch ($method) {
             case 'GET':

@@ -1,10 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
-    "./*.html",
-    "./admin/*.html",
-    "./src/**/*.{js,php}",
-    "./api/**/*.{js,php}"
+    "../public/**/*.html",
+    "../public/**/*.js",
+    "../src/**/*.{js,php}",
+    "../api/**/*.{js,php}"
+  ],
+  safelist: [
+    'bg-green-500',
+    'bg-red-500',
   ],
   theme: {
     extend: {

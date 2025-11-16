@@ -8,6 +8,29 @@
 // Get the requested path
 $requestUri = $_SERVER['REQUEST_URI'];
 $path = parse_url($requestUri, PHP_URL_PATH);
+
+// Serve static files directly if they exist in the public directory
+$staticFilePath = __DIR__ . '/public' . $path;
+if (file_exists($staticFilePath) && is_file($staticFilePath)) {
+    $extension = pathinfo($staticFilePath, PATHINFO_EXTENSION);
+    $contentTypes = [
+        'html' => 'text/html',
+        'css' => 'text/css',
+        'js' => 'application/javascript',
+        'json' => 'application/json',
+        'md' => 'text/markdown',
+        'ico' => 'image/x-icon',
+        'png' => 'image/png',
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'svg' => 'image/svg+xml',
+    ];
+    $contentType = $contentTypes[$extension] ?? 'text/plain';
+    header("Content-Type: {$contentType}");
+    readfile($staticFilePath);
+    exit;
+}
+
 $path = ltrim($path, '/');
 
 // Define public files that can be served

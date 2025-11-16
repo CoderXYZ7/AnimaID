@@ -4,8 +4,8 @@
   "description": "Animation Center Management Platform",
   "main": "index.php",
   "scripts": {
-    "build-css": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --watch",
-    "build-css-prod": "tailwindcss -i ./src/css/input.css -o ./src/css/output.css --minify"
+    "build-css": "tailwindcss -i ../src/css/input.css -o ../src/css/output.css --watch",
+    "build-css-prod": "tailwindcss -i ../src/css/input.css -o ../src/css/output.css --minify"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",
