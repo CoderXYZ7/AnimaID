@@ -1,0 +1,1773 @@
+// public/js/pages/children.js
+
+console.log('Children script loaded');
+
+const API_BASE_URL = window.location.origin + '/api';
+
+// DOM Elements
+const loadingScreen = document.getElementById('loading-screen');
+const mainContent = document.getElementById('main-content');
+const errorScreen = document.getElementById('error-screen');
+const childrenList = document.getElementById('children-list');
+const pagination = document.getElementById('pagination');
+const childModal = document.getElementById('child-modal');
+const tabContent = document.getElementById('tab-content');
+
+let currentUser = null;
+let userToken = null;
+let currentPage = 1;
+let totalPages = 1;
+let currentFilters = {};
+let currentChildId = null;
+let tempGuardians = []; // Store guardians temporarily during child creation
+let tempDocuments = []; // Store documents temporarily during child creation
+let tempNotes = []; // Store notes temporarily during child creation
+
+// Initialize page
+async function initPage() {
+    try {
+        // Check authentication
+        userToken = localStorage.getItem('animaid_token');
+        const userData = localStorage.getItem('animaid_user');
+
+        if (!userToken || !userData) {
+            showErrorScreen();
+            return;
+        }
+
+        currentUser = JSON.parse(userData);
+
+        // Verify token and check permissions
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+
+        if (!response.ok) {
+            localStorage.removeItem('animaid_token');
+            localStorage.removeItem('animaid_user');
+            window.location.href = '../login.html';
+            return;
+        }
+
+        // Check if user has children permissions
+        const hasPermission = await checkChildrenPermission();
+        if (!hasPermission) {
+            showErrorScreen();
+            return;
+        }
+
+        // Add event listeners
+        addEventListeners();
+
+        // Load initial data
+        await loadChildren();
+
+        // Show main content
+        loadingScreen.classList.add('hidden');
+        mainContent.classList.remove('hidden');
+
+    } catch (error) {
+        console.error('Page initialization error:', error);
+        showErrorScreen();
+    }
+}
+
+// Check if user has children permissions
+async function checkChildrenPermission() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/children?page=1&limit=1`, {
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
+}
+
+// Load children
+async function loadChildren(page = 1, filters = {}) {
+    try {
+        const params = new URLSearchParams({
+            page: page,
+            limit: 10,
+            ...filters
+        });
+
+        const response = await fetch(`${API_BASE_URL}/children?${params}`, {
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load children');
+
+        const data = await response.json();
+
+        displayChildren(data.children);
+        updatePagination(data.pagination);
+
+        currentPage = page;
+        currentFilters = filters;
+
+    } catch (error) {
+        console.error('Error loading children:', error);
+        childrenList.innerHTML = '<div class="px-6 py-4 text-center text-gray-500">Error loading children</div>';
+    }
+}
+
+// Display children
+function displayChildren(children) {
+    if (children.length === 0) {
+        childrenList.innerHTML = '<div class="px-6 py-4 text-center text-gray-500">No children found</div>';
+        return;
+    }
+
+    childrenList.innerHTML = children.map(child => {
+        const age = child.birth_date ? calculateAge(child.birth_date) : 'N/A';
+        const statusColor = getStatusColor(child.status);
+
+        return `
+            <div class="px-6 py-4 hover:bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <i class="fas fa-child text-blue-600 text-lg"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-medium text-gray-900">${child.first_name} ${child.last_name}</h4>
+                                <p class="text-sm text-gray-600">Registration: ${child.registration_number || 'N/A'}</p>
+                                <div class="flex items-center space-x-4 mt-1">
+                                    <span class="text-xs text-gray-500">
+                                        <i class="fas fa-birthday-cake mr-1"></i>
+                                        Age: ${age}
+                                    </span>
+                                    <span class="text-xs text-gray-500">
+                                        <i class="fas fa-school mr-1"></i>
+                                        ${child.school || 'No school'}
+                                    </span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">
+                                        ${child.status}
+                                    </span>
+                                </div>
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <span class="text-xs text-gray-500">
+                                        <i class="fas fa-user-friends mr-1"></i>
+                                        ${child.guardians_count || 0} guardians
+                                    </span>
+                                    <span class="text-xs text-gray-500">
+                                        <i class="fas fa-file-alt mr-1"></i>
+                                        ${child.documents_count || 0} documents
+                                    </span>
+                                    <span class="text-xs text-gray-500">
+                                        <i class="fas fa-sticky-note mr-1"></i>
+                                        ${child.notes_count || 0} notes
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="viewChild(${child.id})" class="text-blue-600 hover:text-blue-900 p-1" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="editChild(${child.id})" class="text-blue-600 hover:text-blue-900 p-1" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteChild(${child.id})" class="text-red-600 hover:text-red-900 p-1" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Calculate age from birth date
+function calculateAge(birthDate) {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+    }
+
+    return age;
+}
+
+// Get status color
+function getStatusColor(status) {
+    const colors = {
+        'active': 'bg-green-100 text-green-800',
+        'inactive': 'bg-gray-100 text-gray-800',
+        'suspended': 'bg-red-100 text-red-800',
+        'graduated': 'bg-blue-100 text-blue-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+}
+
+// Update pagination
+function updatePagination(paginationData) {
+    const showingFrom = document.getElementById('showing-from');
+    const showingTo = document.getElementById('showing-to');
+    const totalChildren = document.getElementById('total-children');
+    const prevPage = document.getElementById('prev-page');
+    const nextPage = document.getElementById('next-page');
+
+    // Check if elements exist before updating
+    if (showingFrom) showingFrom.textContent = ((paginationData.page - 1) * paginationData.limit) + 1;
+    if (showingTo) showingTo.textContent = Math.min(paginationData.page * paginationData.limit, paginationData.total);
+    if (totalChildren) totalChildren.textContent = paginationData.total;
+
+    if (prevPage) prevPage.disabled = paginationData.page <= 1;
+    if (nextPage) nextPage.disabled = paginationData.page >= paginationData.pages;
+
+    totalPages = paginationData.pages;
+}
+
+// Add event listeners
+function addEventListeners() {
+    // Tab switching
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+
+            // Add active class to clicked tab
+            this.classList.add('active', 'border-blue-500', 'text-blue-600');
+            this.classList.remove('border-transparent', 'text-gray-500');
+
+            // Hide all tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            // Show selected tab content
+            const tabId = this.id.replace('tab-', '') + '-tab';
+            document.getElementById(tabId).classList.remove('hidden');
+        });
+    });
+
+    // Add child modal
+    document.getElementById('add-child-btn').addEventListener('click', () => {
+        document.getElementById('modal-title').textContent = 'Add New Child';
+        resetChildForm();
+        currentChildId = null;
+        childModal.classList.remove('hidden');
+        // Switch to basic tab
+        document.getElementById('tab-basic').click();
+    });
+
+    // Add event listeners for sub-resource buttons
+    document.getElementById('add-guardian-btn').addEventListener('click', () => {
+        openGuardianModal();
+    });
+
+    document.getElementById('add-document-btn').addEventListener('click', () => {
+        openDocumentModal();
+    });
+
+    document.getElementById('add-note-btn').addEventListener('click', () => {
+        openNoteModal();
+    });
+
+    // Guardian modal event listeners
+    document.getElementById('close-guardian-modal').addEventListener('click', closeGuardianModal);
+    document.getElementById('cancel-guardian-btn').addEventListener('click', closeGuardianModal);
+    document.getElementById('save-guardian-btn').addEventListener('click', saveGuardian);
+
+    // Document modal event listeners
+    document.getElementById('close-document-modal').addEventListener('click', closeDocumentModal);
+    document.getElementById('cancel-document-btn').addEventListener('click', closeDocumentModal);
+    document.getElementById('save-document-btn').addEventListener('click', saveDocument);
+    document.getElementById('document-file').addEventListener('change', handleFileSelection);
+
+    // Note modal event listeners
+    document.getElementById('close-note-modal').addEventListener('click', closeNoteModal);
+    document.getElementById('cancel-note-btn').addEventListener('click', closeNoteModal);
+    document.getElementById('save-note-btn').addEventListener('click', saveNote);
+
+    // Load sub-resources when tabs are clicked
+    document.getElementById('tab-guardians').addEventListener('click', () => {
+        if (currentChildId) {
+            loadGuardians(currentChildId);
+        } else {
+            displayTempGuardians();
+        }
+    });
+
+    document.getElementById('tab-documents').addEventListener('click', () => {
+        if (currentChildId) {
+            loadDocuments(currentChildId);
+        } else {
+            displayTempDocuments();
+        }
+    });
+
+    document.getElementById('tab-notes').addEventListener('click', () => {
+        if (currentChildId) {
+            loadNotes(currentChildId);
+        } else {
+            displayTempNotes();
+        }
+    });
+
+    // Close modal
+    document.getElementById('close-modal').addEventListener('click', () => {
+        childModal.classList.add('hidden');
+    });
+
+    document.getElementById('cancel-btn').addEventListener('click', () => {
+        childModal.classList.add('hidden');
+    });
+
+    // Save child
+    document.getElementById('save-child-btn').addEventListener('click', async () => {
+        try {
+            // Validate required fields
+            const basicForm = document.getElementById('basic-form');
+            if (!basicForm.checkValidity()) {
+                basicForm.reportValidity();
+                return;
+            }
+
+            // Collect data from basic and medical tabs only
+            const basicData = new FormData(document.getElementById('basic-form'));
+            const medicalData = new FormData(document.getElementById('medical-form'));
+
+            const childData = {
+                first_name: basicData.get('first_name') || '',
+                last_name: basicData.get('last_name') || '',
+                birth_date: basicData.get('birth_date') || null,
+                gender: basicData.get('gender') || null,
+                address: basicData.get('address') || null,
+                phone: basicData.get('phone') || null,
+                email: basicData.get('email') || null,
+                nationality: basicData.get('nationality') || null,
+                language: basicData.get('language') || null,
+                school: basicData.get('school') || null,
+                grade: basicData.get('grade') || null,
+                status: basicData.get('status') || 'active',
+                // Medical data
+                blood_type: medicalData.get('blood_type') || null,
+                allergies: medicalData.get('allergies') || null,
+                medications: medicalData.get('medications') || null,
+                medical_conditions: medicalData.get('medical_conditions') || null,
+                doctor_name: medicalData.get('doctor_name') || null,
+                doctor_phone: medicalData.get('doctor_phone') || null,
+                insurance_provider: medicalData.get('insurance_provider') || null,
+                insurance_number: medicalData.get('insurance_number') || null,
+                emergency_contact_name: medicalData.get('emergency_contact_name') || null,
+                emergency_contact_phone: medicalData.get('emergency_contact_phone') || null,
+                emergency_contact_relationship: medicalData.get('emergency_contact_relationship') || null,
+                special_needs: medicalData.get('special_needs') || null,
+                medical_notes: medicalData.get('notes') || null
+            };
+
+            // Remove null values to avoid sending empty strings
+            Object.keys(childData).forEach(key => {
+                if (childData[key] === null || childData[key] === '') {
+                    delete childData[key];
+                }
+            });
+
+            console.log('Sending child data:', childData);
+
+            const method = currentChildId ? 'PUT' : 'POST';
+            const url = currentChildId ? `${API_BASE_URL}/children/${currentChildId}` : `${API_BASE_URL}/children`;
+
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userToken}`
+                },
+                body: JSON.stringify(childData)
+            });
+
+            const data = await response.json();
+            console.log('Response:', response.status, data);
+
+            if (response.ok) {
+                const childId = data.child_id || data.child?.id || currentChildId;
+
+                // If creating a new child and we have temporary sub-resources, save them now
+                if (!currentChildId && childId) {
+                    // Save temporary guardians
+                    if (tempGuardians.length > 0) {
+                        for (const guardian of tempGuardians) {
+                            try {
+                                await fetch(`${API_BASE_URL}/children/${childId}/guardians`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${userToken}`
+                                    },
+                                    body: JSON.stringify(guardian)
+                                });
+                            } catch (error) {
+                                console.error('Error saving guardian:', error);
+                                // Continue with other guardians even if one fails
+                            }
+                        }
+                        // Clear temporary guardians
+                        tempGuardians = [];
+                    }
+
+                    // Save temporary documents
+                    if (tempDocuments.length > 0) {
+                        for (const docFormData of tempDocuments) {
+                            try {
+                                await fetch(`${API_BASE_URL}/children/${childId}/documents`, {
+                                    method: 'POST',
+                                    headers: { 'Authorization': `Bearer ${userToken}` },
+                                    body: docFormData
+                                });
+                            } catch (error) {
+                                console.error('Error saving document:', error);
+                                // Continue with other documents even if one fails
+                            }
+                        }
+                        // Clear temporary documents
+                        tempDocuments = [];
+                    }
+
+                    // Save temporary notes
+                    if (tempNotes.length > 0) {
+                        for (const note of tempNotes) {
+                            try {
+                                await fetch(`${API_BASE_URL}/children/${childId}/notes`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${userToken}`
+                                    },
+                                    body: JSON.stringify(note)
+                                });
+                            } catch (error) {
+                                console.error('Error saving note:', error);
+                                // Continue with other notes even if one fails
+                            }
+                        }
+                        // Clear temporary notes
+                        tempNotes = [];
+                    }
+                }
+
+                childModal.classList.add('hidden');
+                await loadChildren(currentPage, currentFilters);
+                alert(`Child ${currentChildId ? 'updated' : 'created'} successfully!`);
+            } else {
+                alert('Error: ' + (data.error || `Failed to ${currentChildId ? 'update' : 'create'} child`));
+            }
+
+        } catch (error) {
+            console.error('Error saving child:', error);
+            alert('Network error. Please try again.');
+        }
+    });
+
+    // Filter children
+    document.getElementById('filter-btn').addEventListener('click', () => {
+        const filters = {
+            search: document.getElementById('search-input').value.trim(),
+            status: document.getElementById('status-filter').value,
+            age_min: document.getElementById('age-min').value,
+            age_max: document.getElementById('age-max').value
+        };
+
+        // Remove empty filters
+        Object.keys(filters).forEach(key => {
+            if (!filters[key]) delete filters[key];
+        });
+
+        loadChildren(1, filters);
+    });
+
+    document.getElementById('clear-filters-btn').addEventListener('click', () => {
+        document.getElementById('search-input').value = '';
+        document.getElementById('status-filter').value = '';
+        document.getElementById('age-min').value = '';
+        document.getElementById('age-max').value = '';
+        loadChildren(1, {});
+    });
+
+    // Pagination
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 1) {
+            loadChildren(currentPage - 1, currentFilters);
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            loadChildren(currentPage + 1, currentFilters);
+        }
+    });
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        try {
+            await fetch(`${API_BASE_URL}/auth/logout`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+
+        localStorage.removeItem('animaid_token');
+        localStorage.removeItem('animaid_user');
+        window.location.href = '../login.html';
+    });
+}
+
+// Utility functions
+function resetChildForm() {
+    document.getElementById('basic-form').reset();
+    document.getElementById('medical-form').reset();
+    // Clear temporary arrays
+    tempGuardians = [];
+    tempDocuments = [];
+    tempNotes = [];
+    // Reset other tabs if needed
+}
+
+function showErrorScreen() {
+    loadingScreen.classList.add('hidden');
+    mainContent.classList.add('hidden');
+    errorScreen.classList.remove('hidden');
+}
+
+// Global functions for inline event handlers
+window.viewChild = async function(childId) {
+    try {
+        // Load child details
+        const url = new URL(`${API_BASE_URL}/children/${childId}`);
+        url.searchParams.set('token', userToken);
+
+        console.log('userToken:', userToken);
+        console.log('url:', url.toString());
+
+        // Use fetch with credentials for better header support
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${userToken}` },
+            credentials: 'include',
+            mode: 'cors'
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+
+        const data = await response.json();
+        const child = data.child;
+
+        // Create view modal HTML
+        const viewModalHtml = `
+            <div id="view-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" style="z-index: 10000;">
+                <div class="relative top-4 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+                    <div class="mt-3">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-2xl font-semibold text-gray-900">Child Details: ${escapeHtml(child.first_name)} ${escapeHtml(child.last_name)}</h3>
+                            <button id="close-view-modal" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+
+                        <!-- Tab Navigation -->
+                        <div class="border-b border-gray-200 mb-6">
+                            <nav class="-mb-px flex space-x-8">
+                                <button id="view-tab-basic" class="view-tab-button active border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                                    Basic Information
+                                </button>
+                                <button id="view-tab-medical" class="view-tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                                    Medical Information
+                                </button>
+                                <button id="view-tab-guardians" class="view-tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                                    Guardians (${child.guardians_count || 0})
+                                </button>
+                                <button id="view-tab-documents" class="view-tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                                    Documents (${child.documents_count || 0})
+                                </button>
+                                <button id="view-tab-notes" class="view-tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                                    Notes (${child.notes_count || 0})
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div id="view-tab-content">
+                            <!-- Basic Information Tab -->
+                            <div id="view-basic-tab" class="view-tab-content">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h4>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Full Name:</span>
+                                                <span class="text-sm text-gray-900">${escapeHtml(child.first_name)} ${escapeHtml(child.last_name)}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Birth Date:</span>
+                                                <span class="text-sm text-gray-900">${child.birth_date ? formatDate(child.birth_date) : 'N/A'}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Age:</span>
+                                                <span class="text-sm text-gray-900">${child.birth_date ? calculateAge(child.birth_date) : 'N/A'}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Gender:</span>
+                                                <span class="text-sm text-gray-900 capitalize">${child.gender || 'N/A'}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Status:</span>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(child.status)}">${child.status}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h4>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Address:</span>
+                                                <span class="text-sm text-gray-900">${child.address || 'N/A'}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Phone:</span>
+                                                <span class="text-sm text-gray-900">${child.phone || 'N/A'}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Email:</span>
+                                                <span class="text-sm text-gray-900">${child.email || 'N/A'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Background</h4>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Nationality:</span>
+                                                <span class="text-sm text-gray-900">${child.nationality || 'N/A'}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Language:</span>
+                                                <span class="text-sm text-gray-900">${child.language || 'N/A'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Education</h4>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">School:</span>
+                                                <span class="text-sm text-gray-900">${child.school || 'N/A'}</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-sm font-medium text-gray-700">Grade/Class:</span>
+                                                <span class="text-sm text-gray-900">${child.grade || 'N/A'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Medical Information Tab -->
+                            <div id="view-medical-tab" class="view-tab-content hidden">
+                                <div class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Medical Basics</h4>
+                                            <div class="space-y-3">
+                                                <div class="flex justify-between">
+                                                    <span class="text-sm font-medium text-gray-700">Blood Type:</span>
+                                                    <span class="text-sm text-gray-900">${child.medical?.blood_type || 'N/A'}</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-sm font-medium text-gray-700">Doctor:</span>
+                                                    <span class="text-sm text-gray-900">${child.medical?.doctor_name || 'N/A'}</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-sm font-medium text-gray-700">Doctor Phone:</span>
+                                                    <span class="text-sm text-gray-900">${child.medical?.doctor_phone || 'N/A'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Insurance</h4>
+                                            <div class="space-y-3">
+                                                <div class="flex justify-between">
+                                                    <span class="text-sm font-medium text-gray-700">Provider:</span>
+                                                    <span class="text-sm text-gray-900">${child.medical?.insurance_provider || 'N/A'}</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-sm font-medium text-gray-700">Policy Number:</span>
+                                                    <span class="text-sm text-gray-900">${child.medical?.insurance_number || 'N/A'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Health Conditions</h4>
+                                        <div class="space-y-4">
+                                            ${child.medical?.allergies ? `
+                                                <div>
+                                                    <h5 class="text-sm font-medium text-gray-700 mb-2">Allergies:</h5>
+                                                    <p class="text-sm text-gray-900 bg-yellow-50 p-3 rounded-md">${escapeHtml(child.medical.allergies)}</p>
+                                                </div>
+                                            ` : ''}
+                                            ${child.medical?.medications ? `
+                                                <div>
+                                                    <h5 class="text-sm font-medium text-gray-700 mb-2">Medications:</h5>
+                                                    <p class="text-sm text-gray-900 bg-blue-50 p-3 rounded-md">${escapeHtml(child.medical.medications)}</p>
+                                                </div>
+                                            ` : ''}
+                                            ${child.medical?.medical_conditions ? `
+                                                <div>
+                                                    <h5 class="text-sm font-medium text-gray-700 mb-2">Medical Conditions:</h5>
+                                                    <p class="text-sm text-gray-900 bg-red-50 p-3 rounded-md">${escapeHtml(child.medical.medical_conditions)}</p>
+                                                </div>
+                                            ` : ''}
+                                            ${child.medical?.special_needs ? `
+                                                <div>
+                                                    <h5 class="text-sm font-medium text-gray-700 mb-2">Special Needs:</h5>
+                                                    <p class="text-sm text-gray-900 bg-purple-50 p-3 rounded-md">${escapeHtml(child.medical.special_needs)}</p>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Emergency Contact</h4>
+                                            <div class="space-y-3">
+                                                <div class="flex justify-between">
+                                                    <span class="text-sm font-medium text-gray-700">Name:</span>
+                                                    <span class="text-sm text-gray-900">${child.medical?.emergency_contact_name || 'N/A'}</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-sm font-medium text-gray-700">Phone:</span>
+                                                    <span class="text-sm text-gray-900">${child.medical?.emergency_contact_phone || 'N/A'}</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-sm font-medium text-gray-700">Relationship:</span>
+                                                    <span class="text-sm text-gray-900">${child.medical?.emergency_contact_relationship || 'N/A'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-lg font-semibold text-gray-900 mb-4">Additional Notes</h4>
+                                            ${child.medical?.medical_notes ? `
+                                                <p class="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">${escapeHtml(child.medical.medical_notes)}</p>
+                                            ` : '<p class="text-sm text-gray-500">No additional medical notes</p>'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Guardians Tab -->
+                            <div id="view-guardians-tab" class="view-tab-content hidden">
+                                <div class="space-y-4">
+                                    ${child.guardians && child.guardians.length > 0 ? `
+                                        ${child.guardians.map(guardian => `
+                                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                                <div class="flex justify-between items-start">
+                                                    <div class="flex-1">
+                                                        <h4 class="font-medium text-gray-900">${escapeHtml(guardian.first_name)} ${escapeHtml(guardian.last_name)}</h4>
+                                                        <p class="text-sm text-gray-600">${guardian.relationship || 'Guardian'}</p>
+                                                        <div class="mt-2 space-y-1">
+                                                            ${guardian.phone ? `<p class="text-sm text-gray-600"><i class="fas fa-phone mr-2"></i>${guardian.phone}</p>` : ''}
+                                                            ${guardian.email ? `<p class="text-sm text-gray-600"><i class="fas fa-envelope mr-2"></i>${guardian.email}</p>` : ''}
+                                                            ${guardian.address ? `<p class="text-sm text-gray-600"><i class="fas fa-map-marker-alt mr-2"></i>${escapeHtml(guardian.address)}</p>` : ''}
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex items-center space-x-2">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${guardian.is_primary ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                                            ${guardian.is_primary ? 'Primary' : 'Secondary'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    ` : `
+                                        <div class="text-center py-8">
+                                            <i class="fas fa-user-friends text-gray-300 text-4xl mb-4"></i>
+                                            <p class="text-gray-500">No guardians registered</p>
+                                        </div>
+                                    `}
+                                </div>
+                            </div>
+
+                            <!-- Documents Tab -->
+                            <div id="view-documents-tab" class="view-tab-content hidden">
+                                <div class="space-y-4">
+                                    ${child.documents && child.documents.length > 0 ? `
+                                        ${child.documents.map(doc => `
+                                            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                                <div class="flex justify-between items-center">
+                                                    <div class="flex items-center space-x-3">
+                                                        <i class="fas fa-file text-blue-500 text-xl"></i>
+                                                        <div>
+                                                            <h4 class="font-medium text-gray-900">${escapeHtml(doc.name)}</h4>
+                                                            <p class="text-sm text-gray-600">${doc.type || 'Document'} • ${formatFileSize(doc.size)}</p>
+                                                            <p class="text-xs text-gray-500">Uploaded: ${formatDate(doc.created_at)}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex items-center space-x-2">
+                                                        <button data-doc-id="${doc.id}" data-child-id="${child.id}" class="text-green-600 hover:text-green-800 p-2 download-btn" title="Download">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    ` : `
+                                        <div class="text-center py-8">
+                                            <i class="fas fa-file-alt text-gray-300 text-4xl mb-4"></i>
+                                            <p class="text-gray-500">No documents uploaded</p>
+                                        </div>
+                                    `}
+                                </div>
+                            </div>
+
+                            <!-- Notes Tab -->
+                            <div id="view-notes-tab" class="view-tab-content hidden">
+                                <div class="space-y-4">
+                                    ${child.notes && child.notes.length > 0 ? `
+                                        ${child.notes.map(note => `
+                                            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                                <div class="flex justify-between items-start mb-2">
+                                                    <h4 class="font-medium text-gray-900">${escapeHtml(note.title)}</h4>
+                                                    <span class="text-xs text-gray-500">${formatDate(note.created_at)}</span>
+                                                </div>
+                                                <p class="text-sm text-gray-700">${escapeHtml(note.content)}</p>
+                                                ${note.author ? `<p class="text-xs text-gray-500 mt-2">By: ${escapeHtml(note.author)}</p>` : ''}
+                                            </div>
+                                        `).join('')}
+                                    ` : `
+                                        <div class="text-center py-8">
+                                            <i class="fas fa-sticky-note text-gray-300 text-4xl mb-4"></i>
+                                            <p class="text-gray-500">No notes available</p>
+                                        </div>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                            <button id="close-view-modal-btn" class="px-6 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+                                Close
+                            </button>
+                            <button onclick="editChild(${child.id})" class="px-6 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-edit mr-2"></i>Edit Child
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', viewModalHtml);
+
+        // Setup event listeners for the view modal
+        setupViewModalListeners();
+
+    } catch (error) {
+        console.error('Error loading child for view:', error);
+        alert('Failed to load child details');
+    }
+};
+
+// Setup view modal event listeners
+function setupViewModalListeners() {
+    // Close modal buttons
+    document.getElementById('close-view-modal').addEventListener('click', hideViewModal);
+    document.getElementById('close-view-modal-btn').addEventListener('click', hideViewModal);
+
+    // Tab switching for view modal
+    document.querySelectorAll('.view-tab-button').forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.view-tab-button').forEach(btn => {
+                btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+
+            // Add active class to clicked tab
+            this.classList.add('active', 'border-blue-500', 'text-blue-600');
+            this.classList.remove('border-transparent', 'text-gray-500');
+
+            // Hide all tab content
+            document.querySelectorAll('.view-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            // Show selected tab content
+            const tabId = this.id.replace('view-tab-', 'view-') + '-tab';
+            document.getElementById(tabId).classList.remove('hidden');
+        });
+    });
+
+    // Add download button event listeners
+    document.querySelectorAll('#view-modal .download-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const documentId = parseInt(this.getAttribute('data-doc-id'));
+            const childId = parseInt(this.getAttribute('data-child-id'));
+            console.log('Download button clicked for doc:', documentId, 'child:', childId);
+            console.log('window.downloadDocument exists:', typeof window.downloadDocument);
+            try {
+                window.downloadDocument(documentId, childId);
+            } catch (error) {
+                console.error('Error calling downloadDocument:', error);
+            }
+        });
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('view-modal').addEventListener('click', function(e) {
+        if (e.target === this) hideViewModal();
+    });
+}
+
+// Hide view modal
+function hideViewModal() {
+    const modal = document.getElementById('view-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+window.editChild = async function(childId) {
+    try {
+        // Load child details
+        const response = await fetch(`${API_BASE_URL}/children/${childId}`, {
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+
+        if (!response.ok) {
+            alert('Failed to load child details');
+            return;
+        }
+
+        const data = await response.json();
+        const child = data.child;
+
+        // Populate basic form
+        document.getElementById('modal-title').textContent = 'Edit Child';
+        document.getElementById('first-name').value = child.first_name;
+        document.getElementById('last-name').value = child.last_name;
+        document.getElementById('birth-date').value = child.birth_date || '';
+        document.getElementById('gender').value = child.gender || '';
+        document.getElementById('address').value = child.address || '';
+        document.getElementById('phone').value = child.phone || '';
+        document.getElementById('email').value = child.email || '';
+        document.getElementById('nationality').value = child.nationality || '';
+        document.getElementById('language').value = child.language || '';
+        document.getElementById('school').value = child.school || '';
+        document.getElementById('grade').value = child.grade || '';
+        document.getElementById('status').value = child.status;
+
+        // Populate medical form
+        if (child.medical) {
+            document.getElementById('blood-type').value = child.medical.blood_type || '';
+            document.getElementById('allergies').value = child.medical.allergies || '';
+            document.getElementById('medications').value = child.medical.medications || '';
+            document.getElementById('medical-conditions').value = child.medical.medical_conditions || '';
+            document.getElementById('doctor-name').value = child.medical.doctor_name || '';
+            document.getElementById('doctor-phone').value = child.medical.doctor_phone || '';
+            document.getElementById('insurance-provider').value = child.medical.insurance_provider || '';
+            document.getElementById('insurance-number').value = child.medical.insurance_number || '';
+            document.getElementById('emergency-contact-name').value = child.medical.emergency_contact_name || '';
+            document.getElementById('emergency-contact-phone').value = child.medical.emergency_contact_phone || '';
+            document.getElementById('emergency-contact-relationship').value = child.medical.emergency_contact_relationship || '';
+            document.getElementById('special-needs').value = child.medical.special_needs || '';
+            document.getElementById('medical-notes').value = child.medical.medical_notes || '';
+        }
+
+        // Store child ID for update
+        currentChildId = childId;
+
+        // Show modal
+        childModal.classList.remove('hidden');
+        // Switch to basic tab
+        document.getElementById('tab-basic').click();
+
+    } catch (error) {
+        console.error('Error loading child for edit:', error);
+        alert('Failed to load child details');
+    }
+};
+
+window.deleteChild = async function(childId) {
+    if (!confirm('Are you sure you want to delete this child record? This action cannot be undone and will remove all associated data.')) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${childId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+
+        if (response.ok) {
+            await loadChildren(currentPage, currentFilters);
+            alert('Child record deleted successfully!');
+        } else {
+            alert('Failed to delete child record');
+        }
+
+    } catch (error) {
+        console.error('Error deleting child:', error);
+        alert('Network error. Please try again.');
+    }
+};
+
+// Guardians functionality
+async function loadGuardians(childId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${childId}/guardians`, {
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load guardians');
+
+        const data = await response.json();
+        displayGuardians(data.guardians);
+
+    } catch (error) {
+        console.error('Error loading guardians:', error);
+        document.getElementById('guardians-list').innerHTML = '<p class="text-gray-500">Error loading guardians</p>';
+    }
+}
+
+function displayGuardians(guardians) {
+    const container = document.getElementById('guardians-list');
+
+    if (guardians.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">No guardians registered</p>';
+        return;
+    }
+
+    container.innerHTML = guardians.map(guardian => `
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <h4 class="font-medium text-gray-900">${escapeHtml(guardian.first_name)} ${escapeHtml(guardian.last_name)}</h4>
+                    <p class="text-sm text-gray-600">${guardian.relationship || 'Guardian'}</p>
+                    <div class="mt-2 space-y-1">
+                        ${guardian.phone ? `<p class="text-sm text-gray-600"><i class="fas fa-phone mr-2"></i>${guardian.phone}</p>` : ''}
+                        ${guardian.email ? `<p class="text-sm text-gray-600"><i class="fas fa-envelope mr-2"></i>${guardian.email}</p>` : ''}
+                        ${guardian.address ? `<p class="text-sm text-gray-600"><i class="fas fa-map-marker-alt mr-2"></i>${escapeHtml(guardian.address)}</p>` : ''}
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${guardian.is_primary ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                        ${guardian.is_primary ? 'Primary' : 'Secondary'}
+                    </span>
+                    <button onclick="editGuardian(${currentChildId}, ${guardian.id})" class="text-blue-600 hover:text-blue-800 p-1" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteGuardian(${currentChildId}, ${guardian.id})" class="text-red-600 hover:text-red-900 p-1" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Display temporary guardians during child creation
+function displayTempGuardians() {
+    const container = document.getElementById('guardians-list');
+
+    if (tempGuardians.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">No guardians added yet</p>';
+        return;
+    }
+
+    container.innerHTML = tempGuardians.map((guardian, index) => `
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <h4 class="font-medium text-gray-900">${escapeHtml(guardian.first_name)} ${escapeHtml(guardian.last_name)}</h4>
+                    <p class="text-sm text-gray-600">${guardian.relationship || 'Guardian'}</p>
+                    <div class="mt-2 space-y-1">
+                        ${guardian.phone ? `<p class="text-sm text-gray-600"><i class="fas fa-phone mr-2"></i>${guardian.phone}</p>` : ''}
+                        ${guardian.email ? `<p class="text-sm text-gray-600"><i class="fas fa-envelope mr-2"></i>${guardian.email}</p>` : ''}
+                        ${guardian.address ? `<p class="text-sm text-gray-600"><i class="fas fa-map-marker-alt mr-2"></i>${escapeHtml(guardian.address)}</p>` : ''}
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${guardian.is_primary ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                        ${guardian.is_primary ? 'Primary' : 'Secondary'}
+                    </span>
+                    <button onclick="removeTempGuardian(${index})" class="text-red-600 hover:text-red-900 p-1" title="Remove">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Remove temporary guardian
+window.removeTempGuardian = function(index) {
+    tempGuardians.splice(index, 1);
+    displayTempGuardians();
+};
+
+// Display temporary documents during child creation
+function displayTempDocuments() {
+    const container = document.getElementById('documents-list');
+
+    if (tempDocuments.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">No documents added yet</p>';
+        return;
+    }
+
+    container.innerHTML = tempDocuments.map((docFormData, index) => {
+        const file = docFormData.get('file');
+        const docType = docFormData.get('document_type');
+        const notes = docFormData.get('notes');
+
+        return `
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-file text-blue-500 text-xl"></i>
+                        <div>
+                            <h4 class="font-medium text-gray-900">${file ? file.name : 'Document'}</h4>
+                            <p class="text-sm text-gray-600">${docType || 'Document'} • ${file ? formatFileSize(file.size) : 'Unknown size'}</p>
+                            <p class="text-xs text-gray-500">Pending upload</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="removeTempDocument(${index})" class="text-red-600 hover:text-red-900 p-2" title="Remove">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Remove temporary document
+window.removeTempDocument = function(index) {
+    tempDocuments.splice(index, 1);
+    displayTempDocuments();
+};
+
+// Display temporary notes during child creation
+function displayTempNotes() {
+    const container = document.getElementById('notes-list');
+
+    if (tempNotes.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">No notes added yet</p>';
+        return;
+    }
+
+    container.innerHTML = tempNotes.map((note, index) => `
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <div class="flex justify-between items-start mb-2">
+                <h4 class="font-medium text-gray-900">${escapeHtml(note.title)}</h4>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-gray-500">Pending save</span>
+                    <button onclick="removeTempNote(${index})" class="text-red-600 hover:text-red-900 p-1" title="Remove">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="text-sm text-gray-700">${escapeHtml(note.content)}</p>
+            <div class="mt-2 flex items-center space-x-2">
+                <span class="text-xs text-gray-500">By: Current User</span>
+                ${note.is_private ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Private</span>' : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Remove temporary note
+window.removeTempNote = function(index) {
+    tempNotes.splice(index, 1);
+    displayTempNotes();
+};
+
+// Documents functionality
+async function loadDocuments(childId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${childId}/documents`, {
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load documents');
+
+        const data = await response.json();
+        displayDocuments(data.documents);
+
+    } catch (error) {
+        console.error('Error loading documents:', error);
+        document.getElementById('documents-list').innerHTML = '<p class="text-gray-500">Error loading documents</p>';
+    }
+}
+
+function displayDocuments(documents) {
+    const container = document.getElementById('documents-list');
+
+    if (documents.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">No documents uploaded</p>';
+        return;
+    }
+
+    container.innerHTML = documents.map(doc => `
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-file text-blue-500 text-xl"></i>
+                    <div>
+                        <h4 class="font-medium text-gray-900">${escapeHtml(doc.name)}</h4>
+                        <p class="text-sm text-gray-600">${doc.type || 'Document'} • ${formatFileSize(doc.size)}</p>
+                        <p class="text-xs text-gray-500">Uploaded: ${formatDate(doc.created_at)}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="downloadDocument(${doc.id})" class="text-green-600 hover:text-green-800 p-2" title="Download">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button onclick="deleteDocument(${currentChildId}, ${doc.id})" class="text-red-600 hover:text-red-900 p-2" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Notes functionality
+async function loadNotes(childId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${childId}/notes`, {
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load notes');
+
+        const data = await response.json();
+        displayNotes(data.notes);
+
+    } catch (error) {
+        console.error('Error loading notes:', error);
+        document.getElementById('notes-list').innerHTML = '<p class="text-gray-500">Error loading notes</p>';
+    }
+}
+
+function displayNotes(notes) {
+    const container = document.getElementById('notes-list');
+
+    if (notes.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">No notes available</p>';
+        return;
+    }
+
+    container.innerHTML = notes.map(note => `
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <div class="flex justify-between items-start mb-2">
+                <h4 class="font-medium text-gray-900">${escapeHtml(note.title)}</h4>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-gray-500">${formatDate(note.created_at)}</span>
+                    <button onclick="editNote(${currentChildId}, ${note.id})" class="text-blue-600 hover:text-blue-800 p-1" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteNote(${currentChildId}, ${note.id})" class="text-red-600 hover:text-red-900 p-1" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="text-sm text-gray-700">${escapeHtml(note.content)}</p>
+            <div class="mt-2 flex items-center space-x-2">
+                <span class="text-xs text-gray-500">By: ${escapeHtml(note.created_by_name)}</span>
+                ${note.is_private ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Private</span>' : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Modal functions
+function openGuardianModal() {
+    document.getElementById('guardian-modal-title').textContent = 'Add Guardian';
+    document.getElementById('guardian-form').reset();
+    document.getElementById('guardian-modal').classList.remove('hidden');
+}
+
+function closeGuardianModal() {
+    document.getElementById('guardian-modal').classList.add('hidden');
+}
+
+async function saveGuardian() {
+    const form = document.getElementById('guardian-form');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const formData = new FormData(form);
+    const guardianData = {
+        first_name: formData.get('first_name'),
+        last_name: formData.get('last_name'),
+        relationship: formData.get('relationship'),
+        phone: formData.get('phone'),
+        mobile: formData.get('mobile'),
+        email: formData.get('email'),
+        address: formData.get('address'),
+        workplace: formData.get('workplace'),
+        work_phone: formData.get('work_phone'),
+        can_pickup: formData.get('can_pickup') === 'on',
+        notes: formData.get('notes'),
+        is_primary: formData.get('is_primary') === 'on'
+    };
+
+    // If creating a new child, store guardian temporarily
+    if (!currentChildId) {
+        tempGuardians.push(guardianData);
+        closeGuardianModal();
+        displayTempGuardians();
+        alert('Guardian added successfully!');
+        return;
+    }
+
+    // If editing existing child, save to API immediately
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${currentChildId}/guardians`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
+            },
+            body: JSON.stringify(guardianData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            closeGuardianModal();
+            loadGuardians(currentChildId);
+            alert('Guardian added successfully!');
+        } else {
+            alert('Error: ' + (data.error || 'Failed to add guardian'));
+        }
+
+    } catch (error) {
+        console.error('Error saving guardian:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+function openDocumentModal() {
+    document.getElementById('document-form').reset();
+    document.getElementById('file-name').classList.add('hidden');
+    document.getElementById('document-modal').classList.remove('hidden');
+}
+
+function closeDocumentModal() {
+    document.getElementById('document-modal').classList.add('hidden');
+}
+
+function handleFileSelection(event) {
+    const file = event.target.files[0];
+    const fileNameElement = document.getElementById('file-name');
+
+    if (file) {
+        fileNameElement.textContent = `Selected: ${file.name}`;
+        fileNameElement.classList.remove('hidden');
+    } else {
+        fileNameElement.classList.add('hidden');
+    }
+}
+
+async function saveDocument() {
+    const form = document.getElementById('document-form');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const formData = new FormData(form);
+    formData.append('document_type', formData.get('document_type'));
+    formData.append('expiry_date', formData.get('expiry_date') || '');
+    formData.append('notes', formData.get('notes') || '');
+
+    // If creating a new child, store document temporarily
+    if (!currentChildId) {
+        tempDocuments.push(formData);
+        closeDocumentModal();
+        displayTempDocuments();
+        alert('Document added successfully!');
+        return;
+    }
+
+    // If editing existing child, upload to API immediately
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${currentChildId}/documents`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${userToken}` },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            closeDocumentModal();
+            loadDocuments(currentChildId);
+            alert('Document uploaded successfully!');
+        } else {
+            alert('Error: ' + (data.error || 'Failed to upload document'));
+        }
+
+    } catch (error) {
+        console.error('Error uploading document:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+function openNoteModal() {
+    document.getElementById('note-modal-title').textContent = 'Add Note';
+    document.getElementById('note-form').reset();
+    document.getElementById('note-modal').classList.remove('hidden');
+}
+
+function closeNoteModal() {
+    document.getElementById('note-modal').classList.add('hidden');
+}
+
+async function saveNote() {
+    const form = document.getElementById('note-form');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const formData = new FormData(form);
+    const noteData = {
+        title: formData.get('title'),
+        content: formData.get('content'),
+        note_type: formData.get('note_type'),
+        is_private: formData.get('is_private') === 'on'
+    };
+
+    // If creating a new child, store note temporarily
+    if (!currentChildId) {
+        tempNotes.push(noteData);
+        closeNoteModal();
+        displayTempNotes();
+        alert('Note added successfully!');
+        return;
+    }
+
+    // If editing existing child, save to API immediately
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${currentChildId}/notes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
+            },
+            body: JSON.stringify(noteData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            closeNoteModal();
+            loadNotes(currentChildId);
+            alert('Note added successfully!');
+        } else {
+            alert('Error: ' + (data.error || 'Failed to add note'));
+        }
+
+    } catch (error) {
+        console.error('Error saving note:', error);
+        alert('Network error. Please try again.');
+    }
+}
+
+// Global functions for child sub-resources
+window.addGuardian = async function(childId) {
+    const guardianData = {
+        first_name: prompt('First Name:'),
+        last_name: prompt('Last Name:'),
+        relationship: prompt('Relationship:'),
+        phone: prompt('Phone:'),
+        email: prompt('Email:'),
+        address: prompt('Address:'),
+        is_primary: confirm('Is this the primary guardian?')
+    };
+
+    if (!guardianData.first_name || !guardianData.last_name) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${childId}/guardians`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
+            },
+            body: JSON.stringify(guardianData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('Guardian added successfully!');
+            loadGuardians(childId);
+        } else {
+            alert('Error: ' + (data.error || 'Failed to add guardian'));
+        }
+
+    } catch (error) {
+        console.error('Error adding guardian:', error);
+        alert('Network error. Please try again.');
+    }
+};
+
+window.editGuardian = async function(childId, guardianId) {
+    // For simplicity, we'll just show an alert. In a real app, you'd open a modal
+    alert('Edit guardian functionality would open a modal here');
+};
+
+window.deleteGuardian = async function(childId, guardianId) {
+    if (!confirm('Are you sure you want to remove this guardian?')) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${childId}/guardians/${guardianId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+
+        if (response.ok) {
+            alert('Guardian removed successfully!');
+            loadGuardians(childId);
+        } else {
+            alert('Failed to remove guardian');
+        }
+
+    } catch (error) {
+        console.error('Error deleting guardian:', error);
+        alert('Network error. Please try again.');
+    }
+};
+
+window.uploadDocument = async function(childId) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('document_type', prompt('Document Type (e.g., birth_certificate, medical_form):') || 'other');
+        formData.append('notes', prompt('Notes (optional):') || '');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/children/${childId}/documents`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${userToken}` },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('Document uploaded successfully!');
+                loadDocuments(childId);
+            } else {
+                alert('Error: ' + (data.error || 'Failed to upload document'));
+            }
+
+        } catch (error) {
+            console.error('Error uploading document:', error);
+            alert('Network error. Please try again.');
+        }
+    };
+    input.click();
+};
+
+window.deleteDocument = async function(childId, documentId) {
+    if (!confirm('Are you sure you want to delete this document?')) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${childId}/documents/${documentId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+
+        if (response.ok) {
+            alert('Document deleted successfully!');
+            loadDocuments(childId);
+        } else {
+            alert('Failed to delete document');
+        }
+
+    } catch (error) {
+        console.error('Error deleting document:', error);
+        alert('Network error. Please try again.');
+    }
+};
+
+// Download document
+window.downloadDocument = async function(documentId, childId) {
+    console.log('downloadDocument function called with:', { documentId, childId });
+
+    // Use currentChildId if childId is not provided (for backwards compatibility)
+    const targetChildId = childId || currentChildId;
+    if (!targetChildId) {
+        alert('Child ID not available for document download');
+        return;
+    }
+
+    console.log('Downloading document:', { documentId, childId: targetChildId, userToken: userToken ? 'present' : 'missing' });
+
+    const downloadUrl = `${API_BASE_URL}/children/${targetChildId}/documents/${documentId}`;
+    console.log('Download URL:', downloadUrl);
+
+    try {
+        const response = await fetch(downloadUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${userToken}`,
+                'Accept': '*/*'
+            },
+            credentials: 'include'
+        });
+
+        console.log('Download response status:', response.status);
+        console.log('Download response headers:', Object.fromEntries(response.headers.entries()));
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Download failed with response:', errorText);
+            throw new Error(`Failed to download document: ${response.status} ${errorText}`);
+        }
+
+        const blob = await response.blob();
+        console.log('Blob size:', blob.size, 'type:', blob.type);
+
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = 'document';
+        if (contentDisposition) {
+            const match = contentDisposition.match(/filename="(.+)"/);
+            if (match) filename = match[1];
+        }
+        console.log('Filename:', filename);
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        console.log('Download completed successfully');
+    } catch (error) {
+        console.error('Error downloading document:', error);
+        alert('Failed to download document: ' + error.message);
+    }
+};
+
+window.addNote = async function(childId) {
+    const noteData = {
+        title: prompt('Note Title:'),
+        content: prompt('Note Content:'),
+        note_type: prompt('Note Type (observation, incident, achievement, medical, behavioral):') || 'observation',
+        is_private: confirm('Is this note private?')
+    };
+
+    if (!noteData.title || !noteData.content) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${childId}/notes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
+            },
+            body: JSON.stringify(noteData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('Note added successfully!');
+            loadNotes(childId);
+        } else {
+            alert('Error: ' + (data.error || 'Failed to add note'));
+        }
+
+    } catch (error) {
+        console.error('Error adding note:', error);
+        alert('Network error. Please try again.');
+    }
+};
+
+window.editNote = async function(childId, noteId) {
+    // For simplicity, we'll just show an alert. In a real app, you'd open a modal
+    alert('Edit note functionality would open a modal here');
+};
+
+window.deleteNote = async function(childId, noteId) {
+    if (!confirm('Are you sure you want to delete this note?')) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/children/${childId}/notes/${noteId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+
+        if (response.ok) {
+            alert('Note deleted successfully!');
+            loadNotes(childId);
+        } else {
+            alert('Failed to delete note');
+        }
+
+    } catch (error) {
+        console.error('Error deleting note:', error);
+        alert('Network error. Please try again.');
+    }
+};
+
+// Utility functions
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', initPage);

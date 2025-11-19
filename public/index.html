@@ -25,6 +25,15 @@
                     <a href="#features" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
                     <a href="#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
                     <a href="#contact" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+                    <!-- Unified Theme and Language Switcher -->
+                    <div class="flex items-center space-x-4">
+                        <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <div id="language-selector-container">
+                            <!-- Language selector will be dynamically inserted here by JavaScript -->
+                        </div>
+                    </div>
                     <a href="login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                         <i class="fas fa-sign-in-alt mr-1"></i>Login
                     </a>
@@ -243,5 +252,9 @@
         </div>
     </footer>
 
+
+
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="js/themeLanguageSwitcher.js"></script>
 </body>
 </html>

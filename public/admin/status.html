@@ -40,6 +40,15 @@
                         <button id="logout-btn" class="text-gray-600 hover:text-gray-900 transition-colors">
                             <i class="fas fa-sign-out-alt mr-1"></i>Logout
                         </button>
+                        <!-- Unified Theme and Language Switcher -->
+                        <div class="flex items-center space-x-4">
+                            <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                                <i class="fas fa-sun"></i>
+                            </button>
+                            <div id="language-selector-container">
+                                <!-- Language selector will be dynamically inserted here by JavaScript -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -555,5 +564,9 @@
         document.addEventListener('DOMContentLoaded', initPage);
     </script>
 
+
+
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="../../js/themeLanguageSwitcher.js"></script>
 </body>
 </html>

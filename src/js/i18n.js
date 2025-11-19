@@ -1,3 +1,5 @@
+// src/js/i18n.js (modified)
+
 // Note: In vanilla JavaScript, we'll use the CDN version in the HTML
 // We'll use the global i18next from the CDN
 let i18next = window.i18next;
@@ -61,6 +63,19 @@ const resources = {
             "common.filter": "Filter",
             "common.export": "Export",
             "common.import": "Import",
+            "common.backToDashboard": "Back to Dashboard",
+            "common.logout": "Logout",
+            "common.status": "Status",
+            "common.allStatus": "All Status",
+            "common.active": "Active",
+            "common.inactive": "Inactive",
+            "common.suspended": "Suspended",
+            "common.terminated": "Terminated",
+            "common.showing": "Showing",
+            "common.to": "to",
+            "common.of": "of",
+            "common.previous": "Previous",
+            "common.next": "Next",
 
             // Status messages
             "status.denied": "Access Denied",
@@ -78,7 +93,117 @@ const resources = {
             "dashboard.permissions": "Your Permissions",
 
             // Footer
-            "footer.version": "AnimaID v0.9 - Animation Center Management Platform"
+            "footer.version": "AnimaID v0.9 - Animation Center Management Platform",
+
+            // Animators Management
+            "animators.loading": "Loading animators management...",
+            "animators.title": "Animators Management",
+            "animators.subtitle": "Manage animator profiles, documents, and availability",
+            "animators.addAnimator": "Add Animator",
+            "animators.searchPlaceholder": "Name or animator #",
+            "animators.specialization": "Specialization",
+            "animators.specializationPlaceholder": "e.g., Music, Art, Sports",
+            "animators.registeredAnimators": "Registered Animators",
+            "animators.animators": "animators",
+            "animators.addNewAnimator": "Add New Animator",
+            "animators.basicInfo": "Basic Information",
+            "animators.linkedUsers": "Linked Users",
+            "animators.documents": "Documents",
+            "animators.notes": "Notes",
+            "animators.firstName": "First Name",
+            "animators.lastName": "Last Name",
+            "animators.birthDate": "Birth Date",
+            "animators.gender": "Gender",
+            "animators.selectGender": "Select Gender",
+            "animators.male": "Male",
+            "animators.female": "Female",
+            "animators.hireDate": "Hire Date",
+            "animators.nationality": "Nationality",
+            "animators.language": "Language",
+            "animators.education": "Education",
+            "animators.address": "Address",
+            "animators.phone": "Phone",
+            "animators.email": "Email",
+            "animators.linkedUserAccounts": "Linked User Accounts",
+            "animators.linkUser": "Link User",
+            "animators.documentsFiles": "Documents & Files",
+            "animators.addDocument": "Add Document",
+            "animators.notesObservations": "Notes & Observations",
+            "animators.addNote": "Add Note",
+            "animators.saveAnimator": "Save Animator",
+            "animators.uploadDocument": "Upload Document",
+            "animators.selectFile": "Select File",
+            "animators.uploadFile": "Upload a file",
+            "animators.orDragDrop": "or drag and drop",
+            "animators.fileTypes": "PDF, DOC, DOCX, JPG, PNG up to 10MB",
+            "animators.documentType": "Document Type",
+            "animators.selectDocumentType": "Select Document Type",
+            "animators.birthCertificate": "Birth Certificate",
+            "animators.medicalForm": "Medical Form",
+            "animators.vaccinationRecord": "Vaccination Record",
+            "animators.insuranceCard": "Insurance Card",
+            "animators.photo": "Photo",
+            "animators.registrationForm": "Registration Form",
+            "animators.consentForm": "Consent Form",
+            "animators.emergencyContact": "Emergency Contact Info",
+            "animators.cv": "CV/Resume",
+            "animators.certification": "Certification",
+            "animators.contract": "Contract",
+            "animators.expiryDate": "Expiry Date",
+            "animators.notesPlaceholder": "Any additional notes about this document",
+            "animators.noteTitle": "Title",
+            "animators.noteTitlePlaceholder": "Brief title for this note",
+            "animators.noteType": "Note Type",
+            "animators.selectNoteType": "Select Note Type",
+            "animators.observation": "Observation",
+            "animators.incident": "Incident",
+            "animators.achievement": "Achievement",
+            "animators.medical": "Medical",
+            "animators.behavioral": "Behavioral",
+            "animators.developmental": "Developmental",
+            "animators.social": "Social",
+            "animators.academic": "Academic",
+            "animators.performance": "Performance",
+            "animators.training": "Training",
+            "animators.noteContent": "Content",
+            "animators.noteContentPlaceholder": "Detailed content of the note",
+            "animators.markPrivate": "Mark as private (only staff can view)",
+            "animators.saveNote": "Save Note",
+            "animators.accessDenied": "Access Denied",
+            "animators.accessDeniedMessage": "You don't have permission to access animators management.",
+
+            // Children Management
+            "children.loading": "Loading children management...",
+            "children.title": "Children Management",
+            "children.subtitle": "Manage child registrations, profiles, and documentation",
+            "children.addChild": "Add Child",
+            "children.searchPlaceholder": "Name or registration #",
+            "children.minAge": "Min Age",
+            "children.maxAge": "Max Age",
+            "children.registeredChildren": "Registered Children",
+            "children.pagination": "Showing {{showingFrom}} to {{showingTo}} of {{totalChildren}} children",
+            "children.graduated": "Graduated",
+
+            // Attendance Management
+            "attendance.loading": "Loading attendance...",
+            "attendance.title": "Attendance Management",
+            "attendance.subtitle": "Check-in/check-out children and view attendance records",
+            "attendance.newChild": "New Child",
+            "attendance.quickCheckin": "Quick Check-in",
+            "attendance.viewRecords": "View Records",
+            "attendance.todaysEvents": "Today's Events",
+            "attendance.quickCheckinDescription": "Select an event, then search for children to check them in",
+            "attendance.selectEvent": "Select Event *",
+            "attendance.chooseEvent": "Choose an event first...",
+            "attendance.selectEventHelp": "You must select an event before searching for children",
+            "attendance.searchChild": "Search Child",
+            "attendance.searchChildPlaceholder": "Enter child name or registration #...",
+            "attendance.attendanceRecords": "Attendance Records",
+            "attendance.clickViewRecords": "Click \"View Records\" to load attendance records",
+            "attendance.pagination": "Showing {{showingFrom}} to {{showingTo}} of {{totalRecords}} records",
+            "attendance.checkinChild": "Check-in Child",
+            "attendance.confirmCheckin": "Confirm Check-in",
+            "attendance.noPermission": "You don't have permission to access attendance management."
         }
     },
     it: {
@@ -123,6 +248,19 @@ const resources = {
             "common.filter": "Filtra",
             "common.export": "Esporta",
             "common.import": "Importa",
+            "common.backToDashboard": "Torna alla Dashboard",
+            "common.logout": "Esci",
+            "common.status": "Stato",
+            "common.allStatus": "Tutti gli Stati",
+            "common.active": "Attivo",
+            "common.inactive": "Inattivo",
+            "common.suspended": "Sospeso",
+            "common.terminated": "Terminato",
+            "common.showing": "Mostrando",
+            "common.to": "a",
+            "common.of": "di",
+            "common.previous": "Precedente",
+            "common.next": "Successivo",
 
             // Status messages
             "status.denied": "Accesso Negato",
@@ -140,7 +278,117 @@ const resources = {
             "dashboard.permissions": "I Tuoi Permessi",
 
             // Footer
-            "footer.version": "AnimaID v0.9 - Piattaforma di Gestione Centro di Animazione"
+            "footer.version": "AnimaID v0.9 - Piattaforma di Gestione Centro di Animazione",
+
+            // Animators Management - Italian
+            "animators.loading": "Caricamento gestione animatori...",
+            "animators.title": "Gestione Animatori",
+            "animators.subtitle": "Gestisci profili animatori, documenti e disponibilità",
+            "animators.addAnimator": "Aggiungi Animatore",
+            "animators.searchPlaceholder": "Nome o numero animatore",
+            "animators.specialization": "Specializzazione",
+            "animators.specializationPlaceholder": "es. Musica, Arte, Sport",
+            "animators.registeredAnimators": "Animatori Registrati",
+            "animators.animators": "animatori",
+            "animators.addNewAnimator": "Aggiungi Nuovo Animatore",
+            "animators.basicInfo": "Informazioni Base",
+            "animators.linkedUsers": "Utenti Collegati",
+            "animators.documents": "Documenti",
+            "animators.notes": "Note",
+            "animators.firstName": "Nome",
+            "animators.lastName": "Cognome",
+            "animators.birthDate": "Data di Nascita",
+            "animators.gender": "Genere",
+            "animators.selectGender": "Seleziona Genere",
+            "animators.male": "Maschio",
+            "animators.female": "Femmina",
+            "animators.hireDate": "Data Assunzione",
+            "animators.nationality": "Nazionalità",
+            "animators.language": "Lingua",
+            "animators.education": "Istruzione",
+            "animators.address": "Indirizzo",
+            "animators.phone": "Telefono",
+            "animators.email": "Email",
+            "animators.linkedUserAccounts": "Account Utenti Collegati",
+            "animators.linkUser": "Collega Utente",
+            "animators.documentsFiles": "Documenti & File",
+            "animators.addDocument": "Aggiungi Documento",
+            "animators.notesObservations": "Note & Osservazioni",
+            "animators.addNote": "Aggiungi Nota",
+            "animators.saveAnimator": "Salva Animatore",
+            "animators.uploadDocument": "Carica Documento",
+            "animators.selectFile": "Seleziona File",
+            "animators.uploadFile": "Carica un file",
+            "animators.orDragDrop": "o trascina e rilascia",
+            "animators.fileTypes": "PDF, DOC, DOCX, JPG, PNG fino a 10MB",
+            "animators.documentType": "Tipo Documento",
+            "animators.selectDocumentType": "Seleziona Tipo Documento",
+            "animators.birthCertificate": "Certificato di Nascita",
+            "animators.medicalForm": "Modulo Medico",
+            "animators.vaccinationRecord": "Registro Vaccinazioni",
+            "animators.insuranceCard": "Tessera Assicurativa",
+            "animators.photo": "Foto",
+            "animators.registrationForm": "Modulo Iscrizione",
+            "animators.consentForm": "Modulo Consenso",
+            "animators.emergencyContact": "Info Contatto Emergenza",
+            "animators.cv": "CV/Curriculum",
+            "animators.certification": "Certificazione",
+            "animators.contract": "Contratto",
+            "animators.expiryDate": "Data Scadenza",
+            "animators.notesPlaceholder": "Eventuali note aggiuntive su questo documento",
+            "animators.noteTitle": "Titolo",
+            "animators.noteTitlePlaceholder": "Breve titolo per questa nota",
+            "animators.noteType": "Tipo Nota",
+            "animators.selectNoteType": "Seleziona Tipo Nota",
+            "animators.observation": "Osservazione",
+            "animators.incident": "Incidente",
+            "animators.achievement": "Risultato",
+            "animators.medical": "Medico",
+            "animators.behavioral": "Comportamentale",
+            "animators.developmental": "Sviluppo",
+            "animators.social": "Sociale",
+            "animators.academic": "Accademico",
+            "animators.performance": "Prestazione",
+            "animators.training": "Formazione",
+            "animators.noteContent": "Contenuto",
+            "animators.noteContentPlaceholder": "Contenuto dettagliato della nota",
+            "animators.markPrivate": "Segna come privato (solo staff può visualizzare)",
+            "animators.saveNote": "Salva Nota",
+            "animators.accessDenied": "Accesso Negato",
+            "animators.accessDeniedMessage": "Non hai i permessi per accedere alla gestione animatori.",
+
+            // Children Management - Italian
+            "children.loading": "Caricamento gestione bambini...",
+            "children.title": "Gestione Bambini",
+            "children.subtitle": "Gestisci registrazioni, profili e documentazione dei bambini",
+            "children.addChild": "Aggiungi Bambino",
+            "children.searchPlaceholder": "Nome o numero di registrazione",
+            "children.minAge": "Età Minima",
+            "children.maxAge": "Età Massima",
+            "children.registeredChildren": "Bambini Registrati",
+            "children.pagination": "Mostrando {{showingFrom}} a {{showingTo}} di {{totalChildren}} bambini",
+            "children.graduated": "Completato",
+
+            // Attendance Management - Italian
+            "attendance.loading": "Caricamento presenze...",
+            "attendance.title": "Gestione Presenze",
+            "attendance.subtitle": "Check-in/check-out bambini e visualizza registri presenze",
+            "attendance.newChild": "Nuovo Bambino",
+            "attendance.quickCheckin": "Check-in Rapido",
+            "attendance.viewRecords": "Visualizza Registri",
+            "attendance.todaysEvents": "Eventi di Oggi",
+            "attendance.quickCheckinDescription": "Seleziona un evento, poi cerca bambini per registrarli",
+            "attendance.selectEvent": "Seleziona Evento *",
+            "attendance.chooseEvent": "Scegli un evento prima...",
+            "attendance.selectEventHelp": "Devi selezionare un evento prima di cercare bambini",
+            "attendance.searchChild": "Cerca Bambino",
+            "attendance.searchChildPlaceholder": "Inserisci nome o numero di registrazione...",
+            "attendance.attendanceRecords": "Registri Presenze",
+            "attendance.clickViewRecords": "Clicca \"Visualizza Registri\" per caricare i registri presenze",
+            "attendance.pagination": "Mostrando {{showingFrom}} a {{showingTo}} di {{totalRecords}} registri",
+            "attendance.checkinChild": "Check-in Bambino",
+            "attendance.confirmCheckin": "Conferma Check-in",
+            "attendance.noPermission": "Non hai i permessi per accedere alla gestione presenze."
         }
     }
 };
@@ -190,27 +438,4 @@ export const changeLanguage = async (lng) => {
 // Get translation
 export const t = (key, options) => i18next.t(key, options);
 
-// Create language selector
-export const createLanguageSelector = () => {
-    const selector = document.createElement('div');
-    selector.id = 'language-selector';
-    selector.className = 'flex items-center space-x-2';
-
-    Object.values(availableLanguages).forEach(lang => {
-        const button = document.createElement('button');
-        button.className = 'px-3 py-1 text-sm rounded-md border hover:bg-gray-50 transition-colors';
-        button.dataset.lang = lang.code;
-        button.textContent = `${lang.flag} ${lang.name}`;
-
-        button.addEventListener('click', async () => {
-            if (await changeLanguage(lang.code)) {
-                // Refresh page to apply changes
-                window.location.reload();
-            }
-        });
-
-        selector.appendChild(button);
-    });
-
-    return selector;
-};
+// Removed createLanguageSelector as it will be handled by themeLanguageSwitcher.js

@@ -11,12 +11,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- i18next CDN -->
-    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
 
     <div class="max-w-md w-full space-y-8">
+        <!-- Unified Theme and Language Switcher -->
+        <div class="flex items-center space-x-4 justify-end">
+            <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                <i class="fas fa-sun"></i>
+            </button>
+            <div id="language-selector-container">
+                <!-- Language selector will be dynamically inserted here by JavaScript -->
+            </div>
+        </div>
         <!-- Header -->
         <div class="text-center">
             <div class="flex items-center justify-center space-x-2 mb-8">
@@ -146,10 +154,7 @@
             </div>
         </div>
 
-        <!-- Language Selector -->
-        <div class="text-center mb-4" id="language-selector">
-            <!-- Language selector will be inserted here -->
-        </div>
+
 
         <!-- Footer -->
         <div class="text-center">
@@ -159,10 +164,9 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="js/themeLanguageSwitcher.js"></script>
     <script type="module">
-        // Import i18next
-        import { initI18n, createLanguageSelector, getCurrentLanguage } from './src/js/i18n.js';
-
         // Configuration
         const API_BASE_URL = window.location.origin + '/api';
 
@@ -248,58 +252,6 @@
             }
         });
 
-        // Initialize i18n and handle DOM ready
-        window.addEventListener('DOMContentLoaded', async function() {
-            // Initialize i18next
-            await initI18n();
-
-            // Update all elements with data-i18n attributes
-            document.querySelectorAll('[data-i18n]').forEach(element => {
-                const key = element.dataset.i18n;
-                const translation = i18next.t(key);
-                element.textContent = translation;
-            });
-
-            // Add language selector
-            const selectorContainer = document.getElementById('language-selector');
-            if (selectorContainer) {
-                const selector = createLanguageSelector();
-                selectorContainer.appendChild(selector);
-            }
-
-            // Update HTML lang attribute
-            document.documentElement.lang = getCurrentLanguage();
-
-            // Check if user is already logged in
-            const token = localStorage.getItem('animaid_token');
-            if (token) {
-                // Verify token is still valid
-                fetch(`${API_BASE_URL}/auth/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // User is still logged in, redirect to return URL or dashboard
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const returnUrl = urlParams.get('return') || 'dashboard.html';
-                        window.location.href = decodeURIComponent(returnUrl);
-                    } else {
-                        // Token is invalid, remove it
-                        localStorage.removeItem('animaid_token');
-                        localStorage.removeItem('animaid_user');
-                    }
-                })
-                .catch(() => {
-                    // Network error, keep user on login page
-                    localStorage.removeItem('animaid_token');
-                    localStorage.removeItem('animaid_user');
-                });
-            }
-        });
-
         // Utility functions
         function setLoadingState(loading) {
             loginButton.disabled = loading;
@@ -332,6 +284,8 @@
         // Auto-focus username field
         usernameInput.focus();
     </script>
+
+
 
 </body>
 </html>

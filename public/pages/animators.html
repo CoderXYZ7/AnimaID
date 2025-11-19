@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/custom.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
 
@@ -18,7 +17,7 @@
     <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
         <div class="text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p class="text-gray-600">Loading animators management...</p>
+            <p class="text-gray-600" data-i18n="animators.loading">Loading animators management...</p>
         </div>
     </div>
 
@@ -36,11 +35,20 @@
 
                     <div class="flex items-center space-x-4">
                         <a href="../dashboard.html" class="text-gray-600 hover:text-blue-600 transition-colors">
-                            <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
+                            <i class="fas fa-arrow-left mr-1"></i><span data-i18n="common.backToDashboard">Back to Dashboard</span>
                         </a>
                         <button id="logout-btn" class="text-gray-600 hover:text-gray-900 transition-colors">
-                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                            <i class="fas fa-sign-out-alt mr-1"></i><span data-i18n="common.logout">Logout</span>
                         </button>
+                        <!-- Unified Theme and Language Switcher -->
+                        <div class="flex items-center space-x-4">
+                            <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                                <i class="fas fa-sun"></i>
+                            </button>
+                            <div id="language-selector-container">
+                                <!-- Language selector will be dynamically inserted here by JavaScript -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -52,11 +60,11 @@
             <div class="mb-8">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h2 class="text-3xl font-bold text-gray-900">Animators Management</h2>
-                        <p class="text-gray-600 mt-1">Manage animator profiles, documents, and availability</p>
+                        <h2 class="text-3xl font-bold text-gray-900" data-i18n="animators.title">Animators Management</h2>
+                        <p class="text-gray-600 mt-1" data-i18n="animators.subtitle">Manage animator profiles, documents, and availability</p>
                     </div>
                     <button id="add-animator-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                        <i class="fas fa-plus mr-2"></i>Add Animator
+                        <i class="fas fa-plus mr-2"></i><span data-i18n="animators.addAnimator">Add Animator</span>
                     </button>
                 </div>
             </div>
@@ -65,36 +73,38 @@
             <div class="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                        <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="common.search">Search</label>
                         <input
                             type="text"
                             id="search-input"
                             placeholder="Name or animator #"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            data-i18n-placeholder="animators.searchPlaceholder"
                         >
                     </div>
                     <div>
-                        <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="common.status">Status</label>
                         <select id="status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="suspended">Suspended</option>
-                            <option value="terminated">Terminated</option>
+                            <option value="" data-i18n="common.allStatus">All Status</option>
+                            <option value="active" data-i18n="common.active">Active</option>
+                            <option value="inactive" data-i18n="common.inactive">Inactive</option>
+                            <option value="suspended" data-i18n="common.suspended">Suspended</option>
+                            <option value="terminated" data-i18n="common.terminated">Terminated</option>
                         </select>
                     </div>
                     <div>
-                        <label for="specialization-filter" class="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
+                        <label for="specialization-filter" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.specialization">Specialization</label>
                         <input
                             type="text"
                             id="specialization-filter"
                             placeholder="e.g., Music, Art, Sports"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            data-i18n-placeholder="animators.specializationPlaceholder"
                         >
                     </div>
                     <div class="flex items-end space-x-2">
                         <button id="filter-btn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
-                            <i class="fas fa-filter mr-2"></i>Filter
+                            <i class="fas fa-filter mr-2"></i><span data-i18n="common.filter">Filter</span>
                         </button>
                         <button id="clear-filters-btn" class="bg-gray-400 hover:bg-gray-500 text-white px-3 py-2 rounded-lg transition-colors">
                             <i class="fas fa-times"></i>
@@ -106,7 +116,7 @@
             <!-- Animators List -->
             <div class="bg-white rounded-lg shadow-md border border-gray-200">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Registered Animators</h3>
+                    <h3 class="text-lg font-semibold text-gray-900" data-i18n="animators.registeredAnimators">Registered Animators</h3>
                 </div>
 
                 <div class="divide-y divide-gray-200" id="animators-list">
@@ -116,14 +126,14 @@
                 <!-- Pagination -->
                 <div id="pagination" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                     <div class="text-sm text-gray-700">
-                        Showing <span id="showing-from">1</span> to <span id="showing-to">10</span> of <span id="total-animators">0</span> animators
+                        <span data-i18n="common.showing">Showing</span> <span id="showing-from">1</span> <span data-i18n="common.to">to</span> <span id="showing-to">10</span> <span data-i18n="common.of">of</span> <span id="total-animators">0</span> <span data-i18n="animators.animators">animators</span>
                     </div>
                     <div class="flex space-x-2">
                         <button id="prev-page" class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <i class="fas fa-chevron-left mr-1"></i>Previous
+                            <i class="fas fa-chevron-left mr-1"></i><span data-i18n="common.previous">Previous</span>
                         </button>
                         <button id="next-page" class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            Next<i class="fas fa-chevron-right ml-1"></i>
+                            <span data-i18n="common.next">Next</span><i class="fas fa-chevron-right ml-1"></i>
                         </button>
                     </div>
                 </div>
@@ -136,7 +146,7 @@
         <div class="relative top-4 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 id="modal-title" class="text-2xl font-semibold text-gray-900">Add New Animator</h3>
+                    <h3 id="modal-title" class="text-2xl font-semibold text-gray-900" data-i18n="animators.addNewAnimator">Add New Animator</h3>
                     <button id="close-modal" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times text-xl"></i>
                     </button>
@@ -145,16 +155,16 @@
                 <!-- Tab Navigation -->
                 <div class="border-b border-gray-200 mb-6">
                     <nav class="-mb-px flex space-x-8">
-                        <button id="tab-basic" class="tab-button active border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                        <button id="tab-basic" class="tab-button active border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-i18n="animators.basicInfo">
                             Basic Information
                         </button>
-                        <button id="tab-users" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                        <button id="tab-users" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-i18n="animators.linkedUsers">
                             Linked Users
                         </button>
-                        <button id="tab-documents" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                        <button id="tab-documents" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-i18n="animators.documents">
                             Documents
                         </button>
-                        <button id="tab-notes" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                        <button id="tab-notes" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-i18n="animators.notes">
                             Notes
                         </button>
                     </nav>
@@ -167,7 +177,7 @@
                         <form id="basic-form" class="space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                                    <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.firstName">First Name *</label>
                                     <input
                                         type="text"
                                         id="first-name"
@@ -177,7 +187,7 @@
                                     >
                                 </div>
                                 <div>
-                                    <label for="last-name" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                                    <label for="last-name" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.lastName">Last Name *</label>
                                     <input
                                         type="text"
                                         id="last-name"
@@ -190,7 +200,7 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
-                                    <label for="birth-date" class="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
+                                    <label for="birth-date" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.birthDate">Birth Date</label>
                                     <input
                                         type="date"
                                         id="birth-date"
@@ -199,20 +209,20 @@
                                     >
                                 </div>
                                 <div>
-                                    <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                    <label for="gender" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.gender">Gender</label>
                                     <select
                                         id="gender"
                                         name="gender"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     >
-                                        <option value="">Select Gender</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                        <option value="other">Other</option>
+                                        <option value="" data-i18n="animators.selectGender">Select Gender</option>
+                                        <option value="male" data-i18n="animators.male">Male</option>
+                                        <option value="female" data-i18n="animators.female">Female</option>
+                                        <option value="other" data-i18n="animators.other">Other</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="hire-date" class="block text-sm font-medium text-gray-700 mb-1">Hire Date</label>
+                                    <label for="hire-date" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.hireDate">Hire Date</label>
                                     <input
                                         type="date"
                                         id="hire-date"
@@ -224,7 +234,7 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="nationality" class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                                    <label for="nationality" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.nationality">Nationality</label>
                                     <input
                                         type="text"
                                         id="nationality"
@@ -233,7 +243,7 @@
                                     >
                                 </div>
                                 <div>
-                                    <label for="language" class="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                                    <label for="language" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.language">Language</label>
                                     <input
                                         type="text"
                                         id="language"
@@ -245,7 +255,7 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="education" class="block text-sm font-medium text-gray-700 mb-1">Education</label>
+                                    <label for="education" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.education">Education</label>
                                     <input
                                         type="text"
                                         id="education"
@@ -254,7 +264,7 @@
                                     >
                                 </div>
                                 <div>
-                                    <label for="specialization" class="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
+                                    <label for="specialization" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.specialization">Specialization</label>
                                     <input
                                         type="text"
                                         id="specialization"
@@ -265,7 +275,7 @@
                             </div>
 
                             <div>
-                                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                <label for="address" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.address">Address</label>
                                 <textarea
                                     id="address"
                                     name="address"
@@ -276,7 +286,7 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.phone">Phone</label>
                                     <input
                                         type="tel"
                                         id="phone"
@@ -285,7 +295,7 @@
                                     >
                                 </div>
                                 <div>
-                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.email">Email</label>
                                     <input
                                         type="email"
                                         id="email"
@@ -296,16 +306,16 @@
                             </div>
 
                             <div>
-                                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <label for="status" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="common.status">Status</label>
                                 <select
                                     id="status"
                                     name="status"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="suspended">Suspended</option>
-                                    <option value="terminated">Terminated</option>
+                                    <option value="active" data-i18n="common.active">Active</option>
+                                    <option value="inactive" data-i18n="common.inactive">Inactive</option>
+                                    <option value="suspended" data-i18n="common.suspended">Suspended</option>
+                                    <option value="terminated" data-i18n="common.terminated">Terminated</option>
                                 </select>
                             </div>
                         </form>
@@ -315,9 +325,9 @@
                     <div id="users-tab" class="tab-content hidden">
                         <div class="space-y-4">
                             <div class="flex justify-between items-center">
-                                <h4 class="text-lg font-medium text-gray-900">Linked User Accounts</h4>
+                                <h4 class="text-lg font-medium text-gray-900" data-i18n="animators.linkedUserAccounts">Linked User Accounts</h4>
                                 <button id="add-user-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                    <i class="fas fa-link mr-2"></i>Link User
+                                    <i class="fas fa-link mr-2"></i><span data-i18n="animators.linkUser">Link User</span>
                                 </button>
                             </div>
                             <div id="linked-users-list" class="space-y-4">
@@ -330,9 +340,9 @@
                     <div id="documents-tab" class="tab-content hidden">
                         <div class="space-y-4">
                             <div class="flex justify-between items-center">
-                                <h4 class="text-lg font-medium text-gray-900">Documents & Files</h4>
+                                <h4 class="text-lg font-medium text-gray-900" data-i18n="animators.documentsFiles">Documents & Files</h4>
                                 <button id="add-document-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                    <i class="fas fa-plus mr-2"></i>Add Document
+                                    <i class="fas fa-plus mr-2"></i><span data-i18n="animators.addDocument">Add Document</span>
                                 </button>
                             </div>
                             <div id="documents-list" class="space-y-4">
@@ -345,9 +355,9 @@
                     <div id="notes-tab" class="tab-content hidden">
                         <div class="space-y-4">
                             <div class="flex justify-between items-center">
-                                <h4 class="text-lg font-medium text-gray-900">Notes & Observations</h4>
+                                <h4 class="text-lg font-medium text-gray-900" data-i18n="animators.notesObservations">Notes & Observations</h4>
                                 <button id="add-note-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                    <i class="fas fa-plus mr-2"></i>Add Note
+                                    <i class="fas fa-plus mr-2"></i><span data-i18n="animators.addNote">Add Note</span>
                                 </button>
                             </div>
                             <div id="notes-list" class="space-y-4">
@@ -361,10 +371,10 @@
 
                 <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
                     <button id="cancel-btn" class="px-6 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
-                        Cancel
+                        <span data-i18n="common.cancel">Cancel</span>
                     </button>
                     <button id="save-animator-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-save mr-2"></i>Save Animator
+                        <i class="fas fa-save mr-2"></i><span data-i18n="animators.saveAnimator">Save Animator</span>
                     </button>
                 </div>
             </div>
@@ -376,7 +386,7 @@
         <div class="relative top-4 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-2xl font-semibold text-gray-900">Upload Document</h3>
+                    <h3 class="text-2xl font-semibold text-gray-900" data-i18n="animators.uploadDocument">Upload Document</h3>
                     <button id="close-document-modal" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times text-xl"></i>
                     </button>
@@ -384,18 +394,18 @@
 
                 <form id="document-form" class="space-y-6">
                     <div>
-                        <label for="document-file" class="block text-sm font-medium text-gray-700 mb-1">Select File *</label>
+                        <label for="document-file" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.selectFile">Select File *</label>
                         <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                             <div class="space-y-1 text-center">
                                 <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-4"></i>
                                 <div class="flex text-sm text-gray-600">
                                     <label for="document-file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                        <span>Upload a file</span>
+                                        <span data-i18n="animators.uploadFile">Upload a file</span>
                                         <input id="document-file" name="file" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt" class="sr-only" required>
                                     </label>
-                                    <p class="pl-1">or drag and drop</p>
+                                    <p class="pl-1" data-i18n="animators.orDragDrop">or drag and drop</p>
                                 </div>
-                                <p class="text-xs text-gray-500">
+                                <p class="text-xs text-gray-500" data-i18n="animators.fileTypes">
                                     PDF, DOC, DOCX, JPG, PNG up to 10MB
                                 </p>
                                 <p id="file-name" class="text-sm text-gray-900 font-medium mt-2 hidden"></p>
@@ -404,31 +414,31 @@
                     </div>
 
                     <div>
-                        <label for="document-type" class="block text-sm font-medium text-gray-700 mb-1">Document Type *</label>
+                        <label for="document-type" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.documentType">Document Type *</label>
                         <select
                             id="document-type"
                             name="document_type"
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         >
-                            <option value="">Select Document Type</option>
-                            <option value="birth_certificate">Birth Certificate</option>
-                            <option value="medical_form">Medical Form</option>
-                            <option value="vaccination_record">Vaccination Record</option>
-                            <option value="insurance_card">Insurance Card</option>
-                            <option value="photo">Photo</option>
-                            <option value="registration_form">Registration Form</option>
-                            <option value="consent_form">Consent Form</option>
-                            <option value="emergency_contact">Emergency Contact Info</option>
-                            <option value="cv">CV/Resume</option>
-                            <option value="certification">Certification</option>
-                            <option value="contract">Contract</option>
-                            <option value="other">Other</option>
+                            <option value="" data-i18n="animators.selectDocumentType">Select Document Type</option>
+                            <option value="birth_certificate" data-i18n="animators.birthCertificate">Birth Certificate</option>
+                            <option value="medical_form" data-i18n="animators.medicalForm">Medical Form</option>
+                            <option value="vaccination_record" data-i18n="animators.vaccinationRecord">Vaccination Record</option>
+                            <option value="insurance_card" data-i18n="animators.insuranceCard">Insurance Card</option>
+                            <option value="photo" data-i18n="animators.photo">Photo</option>
+                            <option value="registration_form" data-i18n="animators.registrationForm">Registration Form</option>
+                            <option value="consent_form" data-i18n="animators.consentForm">Consent Form</option>
+                            <option value="emergency_contact" data-i18n="animators.emergencyContact">Emergency Contact Info</option>
+                            <option value="cv" data-i18n="animators.cv">CV/Resume</option>
+                            <option value="certification" data-i18n="animators.certification">Certification</option>
+                            <option value="contract" data-i18n="animators.contract">Contract</option>
+                            <option value="other" data-i18n="animators.other">Other</option>
                         </select>
                     </div>
 
                     <div>
-                        <label for="document-expiry" class="block text-sm font-medium text-gray-700 mb-1">Expiry Date (optional)</label>
+                        <label for="document-expiry" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.expiryDate">Expiry Date (optional)</label>
                         <input
                             type="date"
                             id="document-expiry"
@@ -438,23 +448,24 @@
                     </div>
 
                     <div>
-                        <label for="document-notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <label for="document-notes" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.notes">Notes</label>
                         <textarea
                             id="document-notes"
                             name="notes"
                             rows="3"
                             placeholder="Any additional notes about this document"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            data-i18n-placeholder="animators.notesPlaceholder"
                         ></textarea>
                     </div>
                 </form>
 
                 <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
                     <button id="cancel-document-btn" class="px-6 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
-                        Cancel
+                        <span data-i18n="common.cancel">Cancel</span>
                     </button>
                     <button id="save-document-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-upload mr-2"></i>Upload Document
+                        <i class="fas fa-upload mr-2"></i><span data-i18n="animators.uploadDocument">Upload Document</span>
                     </button>
                 </div>
             </div>
@@ -466,7 +477,7 @@
         <div class="relative top-4 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 id="note-modal-title" class="text-2xl font-semibold text-gray-900">Add Note</h3>
+                    <h3 id="note-modal-title" class="text-2xl font-semibold text-gray-900" data-i18n="animators.addNote">Add Note</h3>
                     <button id="close-note-modal" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times text-xl"></i>
                     </button>
@@ -474,7 +485,7 @@
 
                 <form id="note-form" class="space-y-6">
                     <div>
-                        <label for="note-title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                        <label for="note-title" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.noteTitle">Title *</label>
                         <input
                             type="text"
                             id="note-title"
@@ -482,34 +493,35 @@
                             required
                             placeholder="Brief title for this note"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            data-i18n-placeholder="animators.noteTitlePlaceholder"
                         >
                     </div>
 
                     <div>
-                        <label for="note-type" class="block text-sm font-medium text-gray-700 mb-1">Note Type *</label>
+                        <label for="note-type" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.noteType">Note Type *</label>
                         <select
                             id="note-type"
                             name="note_type"
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         >
-                            <option value="">Select Note Type</option>
-                            <option value="observation">Observation</option>
-                            <option value="incident">Incident</option>
-                            <option value="achievement">Achievement</option>
-                            <option value="medical">Medical</option>
-                            <option value="behavioral">Behavioral</option>
-                            <option value="developmental">Developmental</option>
-                            <option value="social">Social</option>
-                            <option value="academic">Academic</option>
-                            <option value="performance">Performance</option>
-                            <option value="training">Training</option>
-                            <option value="other">Other</option>
+                            <option value="" data-i18n="animators.selectNoteType">Select Note Type</option>
+                            <option value="observation" data-i18n="animators.observation">Observation</option>
+                            <option value="incident" data-i18n="animators.incident">Incident</option>
+                            <option value="achievement" data-i18n="animators.achievement">Achievement</option>
+                            <option value="medical" data-i18n="animators.medical">Medical</option>
+                            <option value="behavioral" data-i18n="animators.behavioral">Behavioral</option>
+                            <option value="developmental" data-i18n="animators.developmental">Developmental</option>
+                            <option value="social" data-i18n="animators.social">Social</option>
+                            <option value="academic" data-i18n="animators.academic">Academic</option>
+                            <option value="performance" data-i18n="animators.performance">Performance</option>
+                            <option value="training" data-i18n="animators.training">Training</option>
+                            <option value="other" data-i18n="animators.other">Other</option>
                         </select>
                     </div>
 
                     <div>
-                        <label for="note-content" class="block text-sm font-medium text-gray-700 mb-1">Content *</label>
+                        <label for="note-content" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="animators.noteContent">Content *</label>
                         <textarea
                             id="note-content"
                             name="content"
@@ -517,6 +529,7 @@
                             required
                             placeholder="Detailed content of the note"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            data-i18n-placeholder="animators.noteContentPlaceholder"
                         ></textarea>
                     </div>
 
@@ -527,7 +540,7 @@
                             name="is_private"
                             class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         >
-                        <label for="note-is-private" class="ml-2 block text-sm text-gray-900">
+                        <label for="note-is-private" class="ml-2 block text-sm text-gray-900" data-i18n="animators.markPrivate">
                             Mark as private (only staff can view)
                         </label>
                     </div>
@@ -535,10 +548,10 @@
 
                 <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
                     <button id="cancel-note-btn" class="px-6 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
-                        Cancel
+                        <span data-i18n="common.cancel">Cancel</span>
                     </button>
                     <button id="save-note-btn" class="px-6 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-save mr-2"></i>Save Note
+                        <i class="fas fa-save mr-2"></i><span data-i18n="animators.saveNote">Save Note</span>
                     </button>
                 </div>
             </div>
@@ -551,38 +564,19 @@
     <div id="error-screen" class="hidden fixed inset-0 bg-gray-50 flex items-center justify-center">
         <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
             <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
-            <p class="text-gray-600 mb-6">You don't have permission to access animators management.</p>
+            <h3 class="text-xl font-bold text-gray-900 mb-2" data-i18n="animators.accessDenied">Access Denied</h3>
+            <p class="text-gray-600 mb-6" data-i18n="animators.accessDeniedMessage">You don't have permission to access animators management.</p>
             <a href="../dashboard.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>
-                Back to Dashboard
+                <span data-i18n="common.backToDashboard">Back to Dashboard</span>
             </a>
         </div>
     </div>
 
-    <button id="theme-switcher">
-        <i class="fas fa-sun"></i>
-    </button>
-
-    <script src="../js/pages/animators.js" type="module"></script>
-    <script>
-        const themeSwitcher = document.getElementById('theme-switcher');
-        const body = document.body;
-
-        themeSwitcher.addEventListener('click', () => {
-            body.classList.toggle('dark');
-            const isDarkMode = body.classList.contains('dark');
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            themeSwitcher.innerHTML = isDarkMode ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-        });
-
-        // On page load
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            body.classList.add('dark');
-            themeSwitcher.innerHTML = '<i class="fas fa-moon"></i>';
-        }
-    </script>
+    <!-- i18next CDN -->
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="../../js/themeLanguageSwitcher.js"></script>
+    <script type="module" src="../js/pages/animators.js"></script>
 
 </body>
 </html>

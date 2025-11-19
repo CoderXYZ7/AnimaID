@@ -43,6 +43,15 @@
                         <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                         <span class="text-sm text-gray-500">Shared Content</span>
                     </div>
+                    <!-- Unified Theme and Language Switcher -->
+                    <div class="flex items-center space-x-4">
+                        <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <div id="language-selector-container">
+                            <!-- Language selector will be dynamically inserted here by JavaScript -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -337,5 +346,9 @@
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', initPage);
     </script>
+
+
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="../../js/themeLanguageSwitcher.js"></script>
 </body>
 </html>

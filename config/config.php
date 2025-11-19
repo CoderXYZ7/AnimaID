@@ -58,6 +58,7 @@ return [
         'cors_origins' => ['http://localhost:3000', 'http://localhost:8080'],
         'cors_headers' => ['Content-Type', 'Authorization', 'X-Requested-With'],
         'cors_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        'port' => 8000, // Port used for API calls
     ],
 
     // File Upload Settings

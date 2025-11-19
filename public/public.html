@@ -25,6 +25,15 @@
                     <a href="#calendar" class="text-gray-700 hover:text-blue-600 font-medium">Calendar</a>
                     <a href="#contact" class="text-gray-700 hover:text-blue-600 font-medium">Contact</a>
                 </nav>
+                <!-- Unified Theme and Language Switcher -->
+                <div class="flex items-center space-x-4">
+                    <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-sun"></i>
+                    </button>
+                    <div id="language-selector-container">
+                        <!-- Language selector will be dynamically inserted here by JavaScript -->
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -548,5 +557,8 @@
         // Make functions global for onclick handlers
         window.openCommentModal = openCommentModal;
     </script>
+
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="js/themeLanguageSwitcher.js"></script>
 </body>
 </html>
