@@ -23,8 +23,8 @@ $apiPort = $config['api']['port'] ?? 8000;
 if (($protocol === 'https' && $apiPort === 443) || ($protocol === 'http' && $apiPort === 80)) {
     $apiBaseUrl = $protocol . '://' . $host . '/api';
 } else {
-    // Use the same port as the main site (from HTTP_HOST)
-    $apiBaseUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/api';
+    // Use the configured port for non-standard ports
+    $apiBaseUrl = $protocol . '://' . $host . ':' . $apiPort . '/api';
 }
 
 // Output the JavaScript configuration

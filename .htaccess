@@ -1,25 +1,13 @@
 # Enable rewrite engine
 RewriteEngine On
 
-# Allow access to existing files and directories
-RewriteCond %{REQUEST_FILENAME} -f [OR]
+# If the requested file exists, serve it directly
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule . - [L]
+
+# If the requested directory exists, serve it directly
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule . - [L]
 
 # Route everything else through index.php
 RewriteRule ^(.*)$ index.php [QSA,L]
-
-# Set proper MIME types for JavaScript files
-<FilesMatch "\.js$">
-    Header set Content-Type application/javascript
-</FilesMatch>
-
-# Set proper MIME types for CSS files  
-<FilesMatch "\.css$">
-    Header set Content-Type text/css
-</FilesMatch>
-
-# Set proper MIME types for images
-<FilesMatch "\.(png|jpg|jpeg|gif|ico|svg)$">
-    Header set Content-Type image/%{REQUEST_URI:e}
-</FilesMatch>
