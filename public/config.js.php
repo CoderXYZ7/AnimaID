@@ -18,12 +18,11 @@ $host = preg_replace('/:\d+$/', '', $host);
 // Get the configured API port
 $apiPort = $config['api']['port'] ?? 8000;
 
-// For the server, we need to use the same port as the main site
-// Don't include port in URL for standard ports
-if (($protocol === 'https' && $apiPort === 443) || ($protocol === 'http' && $apiPort === 80)) {
+// For HTTPS, don't include port in URL (standard HTTPS port 443)
+// For HTTP with non-standard ports, include the port
+if ($protocol === 'https') {
     $apiBaseUrl = $protocol . '://' . $host . '/api';
 } else {
-    // Use the configured port for non-standard ports
     $apiBaseUrl = $protocol . '://' . $host . ':' . $apiPort . '/api';
 }
 
