@@ -229,6 +229,8 @@
     <script type="module">
         // Configuration
         const API_BASE_URL = window.ANIMAID_CONFIG?.api?.baseUrl || window.location.origin + '/api';
+        console.log('Dashboard: API_BASE_URL =', API_BASE_URL);
+        console.log('Dashboard: Token exists =', !!localStorage.getItem('animaid_token'));
 
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
@@ -257,16 +259,20 @@
                 currentUser = JSON.parse(userData);
 
                 // Verify token with server
+                console.log('Dashboard: Verifying token with server...');
                 const response = await fetch(`${API_BASE_URL}/auth/me`, {
                     headers: {
                         'Authorization': `Bearer ${userToken}`
                     }
                 });
 
+                console.log('Dashboard: Token validation response status:', response.status);
                 const data = await response.json();
+                console.log('Dashboard: Token validation response data:', data);
 
                 if (!response.ok || !data.success) {
                     // Token invalid, redirect to login
+                    console.log('Dashboard: Token validation failed, redirecting to login');
                     localStorage.removeItem('animaid_token');
                     localStorage.removeItem('animaid_user');
                     window.location.href = 'login.html';
