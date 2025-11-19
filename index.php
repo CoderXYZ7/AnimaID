@@ -54,6 +54,7 @@ $publicFiles = [
     'admin/status.html' => 'public/admin/status.html',
     'admin/reports.html' => 'public/admin/reports.html',
     'styleguide.html' => 'docs/StyleGuide.md', // For demo purposes
+    'config.js' => 'public/config.js.php', // Add config.js route
 ];
 
 // Check if requesting a public file
