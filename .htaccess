@@ -1,12 +1,8 @@
 RewriteEngine On
 
-# If the requested file exists as a directory, redirect to index.html
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^(.+)/$ /$1 [R=301,L]
+# Serve static files directly from public directory
+RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f
+RewriteRule ^(.*)$ /public/$1 [L]
 
-# If the requested file exists as a file, serve it directly
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule . - [L]
-
-# If the requested file doesn't exist, route through index.php
+# Route everything else through index.php
 RewriteRule ^(.*)$ index.php [QSA,L]
