@@ -50,12 +50,47 @@ if ($requestBody === null) {
     $requestBody = [];
 }
 
-// Get authorization header
-$authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-$token = null;
-if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
-    $token = $matches[1];
+// Get authorization header using robust extraction
+function getAuthToken(): ?string {
+    // 1. Read all headers in a case-insensitive way
+    $headers = function_exists('getallheaders') ? getallheaders() : [];
+    
+    $authHeader = null;
+    
+    // Try direct index first
+    if (isset($headers['Authorization'])) {
+        $authHeader = $headers['Authorization'];
+    } else {
+        // Case-insensitive search (some SAPIs normalize keys differently)
+        foreach ($headers as $name => $value) {
+            if (strtolower($name) === 'authorization') {
+                $authHeader = $value;
+                break;
+            }
+        }
+    }
+    
+    // 2. Fallbacks via $_SERVER (for some Apache setups)
+    if (!$authHeader && isset($_SERVER['HTTP_AUTHORIZATION'])) {
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+    }
+    if (!$authHeader && isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+        $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+    }
+    
+    if (!$authHeader) {
+        return null;
+    }
+    
+    // 3. Expect "Bearer <token>"
+    if (stripos($authHeader, 'Bearer ') === 0) {
+        return trim(substr($authHeader, 7));
+    }
+    
+    return null;
 }
+
+$token = getAuthToken();
 
 // For GET requests, also check query parameter as fallback
 if (!$token && $_SERVER['REQUEST_METHOD'] === 'GET') {
