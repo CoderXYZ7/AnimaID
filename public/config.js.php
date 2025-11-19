@@ -18,11 +18,13 @@ $host = preg_replace('/:\d+$/', '', $host);
 // Get the configured API port
 $apiPort = $config['api']['port'] ?? 8000;
 
-// If we're on port 443 (HTTPS) or 80 (HTTP), don't include port in URL
+// For the server, we need to use the same port as the main site
+// Don't include port in URL for standard ports
 if (($protocol === 'https' && $apiPort === 443) || ($protocol === 'http' && $apiPort === 80)) {
     $apiBaseUrl = $protocol . '://' . $host . '/api';
 } else {
-    $apiBaseUrl = $protocol . '://' . $host . ':' . $apiPort . '/api';
+    // Use the same port as the main site (from HTTP_HOST)
+    $apiBaseUrl = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/api';
 }
 
 // Output the JavaScript configuration
