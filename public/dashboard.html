@@ -213,7 +213,7 @@
     <script type="module" src="js/themeLanguageSwitcher.js"></script>
     <script type="module">
         // Configuration
-        const API_BASE_URL = window.location.origin + '/api';
+        const API_BASE_URL = window.ANIMAID_CONFIG?.api?.baseUrl || window.location.origin + '/api';
 
         // DOM Elements
         const loadingScreen = document.getElementById('loading-screen');
