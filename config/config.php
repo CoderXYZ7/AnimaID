@@ -13,7 +13,7 @@ return [
 
     // JWT Configuration
     'jwt' => [
-        'secret' => 'your-super-secure-jwt-secret-key-change-this-in-production-123456789',
+        'secret' => 'animaid-production-secret-key-2025-11-19-change-in-production',
         'algorithm' => 'HS256',
         'expiration_hours' => 2, // Token expires in 2 hours
         'refresh_expiration_days' => 7, // Refresh token expires in 7 days
