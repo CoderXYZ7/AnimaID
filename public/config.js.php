@@ -18,8 +18,12 @@ $host = preg_replace('/:\d+$/', '', $host);
 // Get the configured API port
 $apiPort = $config['api']['port'] ?? 8000;
 
-// Build the API base URL
-$apiBaseUrl = $protocol . '://' . $host . ':' . $apiPort . '/api';
+// If we're on port 443 (HTTPS) or 80 (HTTP), don't include port in URL
+if (($protocol === 'https' && $apiPort === 443) || ($protocol === 'http' && $apiPort === 80)) {
+    $apiBaseUrl = $protocol . '://' . $host . '/api';
+} else {
+    $apiBaseUrl = $protocol . '://' . $host . ':' . $apiPort . '/api';
+}
 
 // Output the JavaScript configuration
 echo "// AnimaID Frontend Configuration\n";
