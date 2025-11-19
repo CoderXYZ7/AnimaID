@@ -1,8 +1,25 @@
+# Enable rewrite engine
 RewriteEngine On
 
-# Serve static files directly from public directory
-RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f
-RewriteRule ^(.*)$ /public/$1 [L]
+# Allow access to existing files and directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule . - [L]
 
 # Route everything else through index.php
 RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Set proper MIME types for JavaScript files
+<FilesMatch "\.js$">
+    Header set Content-Type application/javascript
+</FilesMatch>
+
+# Set proper MIME types for CSS files  
+<FilesMatch "\.css$">
+    Header set Content-Type text/css
+</FilesMatch>
+
+# Set proper MIME types for images
+<FilesMatch "\.(png|jpg|jpeg|gif|ico|svg)$">
+    Header set Content-Type image/%{REQUEST_URI:e}
+</FilesMatch>
