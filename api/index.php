@@ -148,7 +148,7 @@ try {
     error_log("API Error Details - Method: {$requestMethod}, Endpoint: {$endpoint}, UserId: {$resourceId}");
     error_log("API Error Request Body: " . json_encode($requestBody));
     error_log("API Error Stack Trace: " . $e->getTraceAsString());
-    error_log("API Error Auth Header: " . ($authHeader ?? 'null'));
+    error_log("API Error Extracted Token: " . ($token ? 'present' : 'null'));
     error_log("API Error GET Token: " . ($_GET['token'] ?? 'null'));
     error_log("API Error All Headers: " . json_encode(getallheaders()));
 
