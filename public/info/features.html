@@ -3,30 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimaID - API Documentation</title>
+    <title>AnimaID - Features</title>
     <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../src/css/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 text-gray-900">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-2">
-                    <a href="../" class="flex items-center space-x-2">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
-                    </a>
+                    <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                    <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                 </div>
                 <nav class="hidden md:flex space-x-8">
-                    <a href="../#features" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
-                    <a href="../#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
-                    <a href="../#contact" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
                     <!-- Unified Theme and Language Switcher -->
                     <div class="flex items-center space-x-4">
                         <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
@@ -37,172 +32,110 @@
                         </div>
                     </div>
                     <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                        <i class="fas fa-sign-in-alt mr-1"></i>Staff Login
                     </a>
                 </nav>
+                <div class="md:hidden flex items-center space-x-2">
+                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </a>
+                    <button class="text-gray-600">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Back to Home -->
-        <div class="mb-6">
-            <a href="../" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i>Back to Home
-            </a>
-        </div>
-
-        <!-- Content -->
-        <div class="bg-white rounded-lg shadow-sm p-8">
-            <div id="content">
-                <!-- Markdown content will be inserted here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12 mt-16">
+    <main class="py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h4 class="text-xl font-bold">AnimaID</h4>
+            <div class="text-center mb-16">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">AnimaID Features</h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Discover the powerful capabilities that make AnimaID the ultimate management platform for animation centers.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Existing features -->
+                <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
                     </div>
-                    <p class="text-gray-400 mb-4">
-                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Staff Coordination</h3>
+                    <p class="text-gray-600">
+                        Manage roles, permissions, and shifts with cumulative tags for progressive access.
                     </p>
                 </div>
 
-                <div>
-                    <h5 class="font-semibold mb-4">Platform</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
-                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
-                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
-                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
-                    </ul>
+                <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Activity Management</h3>
+                    <p class="text-gray-600">
+                        Organize calendars, registrations, and attendance tracking for all activities.
+                    </p>
                 </div>
 
-                <div>
-                    <h5 class="font-semibold mb-4">Support</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
-                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
-                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
-                    </ul>
+                <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-comments text-orange-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Communication Hub</h3>
+                    <p class="text-gray-600">
+                        Internal messaging, public notices, and media sharing for seamless communication.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-puzzle-piece text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Modular Applets</h3>
+                    <p class="text-gray-600">
+                        Extensible system with hot-pluggable applets for custom features and integrations.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-mobile-alt text-blue-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Multi-Device Access</h3>
+                    <p class="text-gray-600">
+                        Responsive web interfaces and mobile apps for staff and public access.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-bar text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Analytics & Reporting</h3>
+                    <p class="text-gray-600">
+                        KPIs, statistics, and insights to optimize resources and planning.
+                    </p>
                 </div>
             </div>
 
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <div class="mt-16 text-center">
+                <a href="../public.html" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors">
+                    <i class="fas fa-rocket mr-2"></i>View Public Portal Demo
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-400">
                 <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
             </div>
         </div>
     </footer>
-
-    <script>
-        const markdownContent = `# AnimaID Features
-
-## Core Platform Features
-
-AnimaID is a comprehensive management platform designed specifically for animation centers, educational labs, and recreational activity organizations. It provides a unified digital environment to coordinate staff, organize activities, manage attendance, and facilitate communication between staff, parents, and families.
-
-### Key Benefits
-
-- **Centralized Management**: All operations in one platform
-- **Multi-language Support**: Available in English and Italian
-- **Role-based Access**: Progressive permissions system
-- **Mobile-friendly**: Responsive design works on all devices
-- **Extensible**: Modular architecture with applet system
-
-### Core Modules
-
-#### Staff Coordination
-- Manage roles, permissions, and shifts with cumulative tags for progressive access
-- Support different user types: Technical Admins, AnimaID Staff, and Parents & Families
-- Progressive role system from basic assistants to full administrators
-
-#### Activity Management
-- Comprehensive calendar system for scheduling activities and events
-- Registration management for children and families
-- Attendance tracking with real-time monitoring
-- Resource and room booking capabilities
-
-#### Communication Hub
-- Internal messaging system between staff members
-- Public announcements and notices for families
-- Communication threads and discussions
-- Media sharing and file attachments
-
-#### Child Management
-- Complete child profile management including medical information
-- Parent/guardian contact details
-- Activity enrollment and tracking
-- Emergency contact protocols
-
-#### Media Management
-- Photo, video, and document organization
-- Activity galleries and portfolios
-- Access control and sharing permissions
-- Integration with communication features
-
-### Technical Architecture
-
-#### Modern Web Stack
-- **Backend**: PHP 8.1+ with SQLite database
-- **Frontend**: HTML5, TailwindCSS, vanilla JavaScript
-- **APIs**: RESTful JSON endpoints with JWT authentication
-- **Mobile**: Responsive design with PWA capabilities
-
-#### Security & Permissions
-- Role-based access control (RBAC)
-- JWT token authentication
-- Cumulative permission tags
-- Input validation and sanitization
-
-#### Deployment & Scalability
-- Container-ready with Docker
-- Single-file SQLite deployment
-- Multi-instance support
-- Portable and distributable
-
-### Extensibility
-
-#### Applet System
-- Hot-pluggable modules for custom features
-- Third-party integration capabilities
-- API-first design for extensibility
-
-#### Multi-deployment Support
-- Designed for deployment across multiple animation centers
-- Centralized or distributed management options
-- Configuration flexibility
-
-### User Experience
-
-#### Responsive Design
-- Works seamlessly on desktop, tablet, and mobile devices
-- Touch-friendly interfaces for staff on the go
-- Adaptive layouts for different screen sizes
-
-#### Accessibility
-- Multilingual support (currently English and Italian)
-- Keyboard navigation support
-- Screen reader compatibility
-- High contrast theme options
-
-## Version Information
-
-Current version: 0.9 (Draft)
-Planned features for future versions include enhanced reporting, advanced analytics, and expanded mobile capabilities.`;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const contentElement = document.getElementById('content');
-            contentElement.innerHTML = marked.parse(markdownContent);
-        });
-    </script>
 
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
     <script type="module" src="../js/themeLanguageSwitcher.js"></script>

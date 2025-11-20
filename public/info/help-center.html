@@ -3,30 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimaID - API Documentation</title>
+    <title>AnimaID - Help Center</title>
     <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../src/css/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 text-gray-900">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-2">
-                    <a href="../" class="flex items-center space-x-2">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
-                    </a>
+                    <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                    <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                 </div>
                 <nav class="hidden md:flex space-x-8">
-                    <a href="../#features" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
-                    <a href="../#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
-                    <a href="../#contact" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
                     <!-- Unified Theme and Language Switcher -->
                     <div class="flex items-center space-x-4">
                         <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
@@ -37,562 +32,149 @@
                         </div>
                     </div>
                     <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                        <i class="fas fa-sign-in-alt mr-1"></i>Staff Login
                     </a>
                 </nav>
+                <div class="md:hidden flex items-center space-x-2">
+                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </a>
+                    <button class="text-gray-600">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Back to Home -->
-        <div class="mb-6">
-            <a href="../" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i>Back to Home
-            </a>
-        </div>
+    <main class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Help Center</h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Find answers to common questions and get assistance with AnimaID.
+                </p>
+            </div>
 
-        <!-- Content -->
-        <div class="bg-white rounded-lg shadow-sm p-8">
-            <div id="content">
-                <!-- Markdown content will be inserted here -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div class="bg-white rounded-lg shadow-sm p-8 text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-search text-blue-600 text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Search Help</h2>
+                    <p class="text-gray-700 mb-6">
+                        Use our search tool to find answers to your questions quickly.
+                    </p>
+                    <input type="text" placeholder="Search help articles..."
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-8 text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-book-open text-green-600 text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Browse Topics</h2>
+                    <p class="text-gray-700 mb-6">
+                        Explore categorized help articles organized by topic.
+                    </p>
+                    <div class="space-y-2">
+                        <a href="#getting-started" class="block text-blue-600 hover:text-blue-800">Getting Started</a>
+                        <a href="#account-management" class="block text-blue-600 hover:text-blue-800">Account Management</a>
+                        <a href="#activities-management" class="block text-blue-600 hover:text-blue-800">Activities & Attendance</a>
+                        <a href="#technical-support" class="block text-blue-600 hover:text-blue-800">Technical Support</a>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-8 text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-comments text-orange-600 text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Contact Support</h2>
+                    <p class="text-gray-700 mb-6">
+                        Can't find what you're looking for? Get in touch with our support team.
+                    </p>
+                    <a href="contact.html" class="bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-6 rounded-lg transition-colors inline-block">
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-8 mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+                <div class="space-y-6">
+                    <div class="border-b border-gray-200 pb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I reset my password?</h3>
+                        <p class="text-gray-700">
+                            To reset your password, click on the "Forgot Password" link on the login page and follow the instructions sent to your registered email address.
+                        </p>
+                    </div>
+
+                    <div class="border-b border-gray-200 pb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I register a new child?</h3>
+                        <p class="text-gray-700">
+                            Staff members with appropriate permissions can register new children through the Children section in the dashboard. Fill in all required information and upload any necessary documents.
+                        </p>
+                    </div>
+
+                    <div class="border-b border-gray-200 pb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I view attendance records?</h3>
+                        <p class="text-gray-700">
+                            Attendance records can be viewed in the Attendance section of the dashboard. You can filter by date range, child, or activity.
+                        </p>
+                    </div>
+
+                    <div class="border-b border-gray-200 pb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I update activity schedules?</h3>
+                        <p class="text-gray-700">
+                            Activity schedules are managed through the Calendar section. Coordinators and administrators can create, edit, or cancel activities as needed.
+                        </p>
+                    </div>
+
+                    <div class="pb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I access the public portal?</h3>
+                        <p class="text-gray-700">
+                            The public portal is accessible at /public.html and allows families to view activity information, register for events, and manage their information without requiring a staff account.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Need More Help?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Video Tutorials</h3>
+                        <p class="text-gray-700 mb-4">
+                            Watch step-by-step video guides for common tasks in AnimaID.
+                        </p>
+                        <button class="text-blue-600 hover:text-blue-800 transition-colors font-medium">
+                            <i class="fas fa-play-circle mr-2"></i>View Tutorials
+                        </button>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Community Forum</h3>
+                        <p class="text-gray-700 mb-4">
+                            Join our community forum to ask questions and share tips with other AnimaID users.
+                        </p>
+                        <button class="text-blue-600 hover:text-blue-800 transition-colors font-medium">
+                            <i class="fas fa-users mr-2"></i>Join Forum
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12 mt-16">
+    <footer class="bg-gray-900 text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h4 class="text-xl font-bold">AnimaID</h4>
-                    </div>
-                    <p class="text-gray-400 mb-4">
-                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
-                    </p>
-                </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4">Platform</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
-                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
-                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
-                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4">Support</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
-                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
-                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <div class="text-center text-gray-400">
                 <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
             </div>
         </div>
     </footer>
-
-    <script>
-        const markdownContent = `🔗 AnimaID API Endpoints
-
-## Overview
-
-The AnimaID API provides RESTful endpoints for authentication, user management, and system administration. All endpoints return JSON responses and use JWT tokens for authentication (except login/register).
-
-## Authentication Endpoints
-
-### POST /api/auth/login
-Authenticate a user and return JWT token.
-
-**Request Body:**
-\`\`\`json
-{
-  "username": "string",
-  "password": "string"
-}
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "token": "jwt_token_here",
-  "user": {
-    "id": 1,
-    "username": "admin",
-    "email": "admin@example.com",
-    "roles": [
-      {
-        "id": 1,
-        "name": "technical_admin",
-        "display_name": "Technical Admin",
-        "is_primary": true
-      }
-    ]
-  },
-  "expires_at": "2025-11-02T15:29:49Z"
-}
-\`\`\`
-
-**Response (Error - 401):**
-\`\`\`json
-{
-  "success": false,
-  "error": "Invalid credentials"
-}
-\`\`\`
-
-### POST /api/auth/logout
-Invalidate the current session token.
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "message": "Logged out successfully"
-}
-\`\`\`
-
-### POST /api/auth/refresh
-Refresh an expired JWT token using a valid refresh token.
-
-**Request Body:**
-\`\`\`json
-{
-  "refresh_token": "refresh_token_here"
-}
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "token": "new_jwt_token",
-  "expires_at": "2025-11-02T16:29:49Z"
-}
-\`\`\`
-
-### GET /api/auth/me
-Get current user information and roles.
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "user": {
-    "id": 1,
-    "username": "admin",
-    "email": "admin@example.com",
-    "roles": [
-      {
-        "id": 1,
-        "name": "technical_admin",
-        "display_name": "Technical Admin",
-        "is_primary": true
-      }
-    ],
-    "last_login": "2025-11-02T14:29:49Z"
-  }
-}
-\`\`\`
-
-## User Management Endpoints
-
-### GET /api/users
-Get paginated list of users (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Query Parameters:**
-- \`page\` (integer, default: 1)
-- \`limit\` (integer, default: 20)
-- \`search\` (string, optional)
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "users": [
-    {
-      "id": 1,
-      "username": "admin",
-      "email": "admin@example.com",
-      "is_active": true,
-      "roles": ["technical_admin"],
-      "created_at": "2025-11-01T10:00:00Z",
-      "last_login": "2025-11-02T14:29:49Z"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 1,
-    "pages": 1
-  }
-}
-\`\`\`
-
-### POST /api/users
-Create a new user (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Request Body:**
-\`\`\`json
-{
-  "username": "newuser",
-  "email": "user@example.com",
-  "password": "securepassword123",
-  "role_ids": [2, 3]  // Array of role IDs to assign
-}
-\`\`\`
-
-**Response (Success - 201):**
-\`\`\`json
-{
-  "success": true,
-  "user": {
-    "id": 2,
-    "username": "newuser",
-    "email": "user@example.com",
-    "roles": ["organizzatore"]
-  }
-}
-\`\`\`
-
-### GET /api/users/{id}
-Get specific user details (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "user": {
-    "id": 2,
-    "username": "newuser",
-    "email": "user@example.com",
-    "is_active": true,
-    "roles": [
-      {
-        "id": 2,
-        "name": "organizzatore",
-        "display_name": "Organizzatore",
-        "is_primary": false
-      }
-    ],
-    "created_at": "2025-11-02T10:00:00Z",
-    "last_login": null
-  }
-}
-\`\`\`
-
-### PUT /api/users/{id}
-Update user information (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Request Body:**
-\`\`\`json
-{
-  "email": "newemail@example.com",
-  "is_active": true,
-  "role_ids": [2, 4]  // Update roles
-}
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "user": {
-    "id": 2,
-    "username": "newuser",
-    "email": "newemail@example.com",
-    "roles": ["organizzatore", "animatore"]
-  }
-}
-\`\`\`
-
-### DELETE /api/users/{id}
-Deactivate a user (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "message": "User deactivated successfully"
-}
-\`\`\`
-
-## Role Management Endpoints
-
-### GET /api/roles
-Get all available roles.
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "roles": [
-    {
-      "id": 1,
-      "name": "technical_admin",
-      "display_name": "Technical Admin",
-      "description": "Full system access",
-      "is_system_role": true,
-      "permissions": ["admin.users", "admin.system", "admin.roles"]
-    }
-  ]
-}
-\`\`\`
-
-### POST /api/roles
-Create a new custom role (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Request Body:**
-\`\`\`json
-{
-  "name": "custom_role",
-  "display_name": "Custom Role",
-  "description": "A custom role for specific needs",
-  "permission_ids": [1, 2, 3]
-}
-\`\`\`
-
-**Response (Success - 201):**
-\`\`\`json
-{
-  "success": true,
-  "role": {
-    "id": 6,
-    "name": "custom_role",
-    "display_name": "Custom Role",
-    "permissions": ["registrations.view", "calendar.view"]
-  }
-}
-\`\`\`
-
-### PUT /api/roles/{id}
-Update role permissions (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Request Body:**
-\`\`\`json
-{
-  "permission_ids": [1, 2, 4, 5]
-}
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "role": {
-    "id": 6,
-    "name": "custom_role",
-    "permissions": ["registrations.view", "calendar.view", "attendance.view"]
-  }
-}
-\`\`\`
-
-## Permission Endpoints
-
-### GET /api/permissions
-Get all available permissions grouped by module.
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "permissions": {
-    "registrations": [
-      {
-        "id": 1,
-        "name": "registrations.view",
-        "display_name": "View Registrations",
-        "description": "Can view child registrations"
-      }
-    ],
-    "calendar": [
-      {
-        "id": 2,
-        "name": "calendar.view",
-        "display_name": "View Calendar",
-        "description": "Can view calendar events"
-      }
-    ]
-  }
-}
-\`\`\`
-
-## System Endpoints
-
-### GET /api/system/status
-Get system status and health check.
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "status": "healthy",
-  "version": "0.9",
-  "database": "connected",
-  "timestamp": "2025-11-02T15:29:49Z"
-}
-\`\`\`
-
-### POST /api/system/backup
-Trigger system backup (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "message": "Backup completed successfully",
-  "backup_file": "backup_20251102_152949.sql"
-}
-\`\`\`
-
-## Error Responses
-
-All endpoints may return the following error responses:
-
-**401 Unauthorized:**
-\`\`\`json
-{
-  "success": false,
-  "error": "Authentication required"
-}
-\`\`\`
-
-**403 Forbidden:**
-\`\`\`json
-{
-  "success": false,
-  "error": "Insufficient permissions"
-}
-\`\`\`
-
-**404 Not Found:**
-\`\`\`json
-{
-  "success": false,
-  "error": "Resource not found"
-}
-\`\`\`
-
-**422 Unprocessable Entity:**
-\`\`\`json
-{
-  "success": false,
-  "error": "Validation failed",
-  "details": {
-    "username": ["Username is required"],
-    "email": ["Invalid email format"]
-  }
-}
-\`\`\`
-
-**500 Internal Server Error:**
-\`\`\`json
-{
-  "success": false,
-  "error": "Internal server error"
-}
-\`\`\`
-
-## Rate Limiting
-
-- **Authenticated requests**: 1000 requests per hour per user
-- **Unauthenticated requests**: 100 requests per hour per IP
-- Rate limit headers are included in responses:
-  - \`X-RateLimit-Limit\`: Maximum requests per hour
-  - \`X-RateLimit-Remaining\`: Remaining requests
-  - \`X-RateLimit-Reset\`: Time when limit resets (Unix timestamp)
-
-## API Versioning
-
-All endpoints are prefixed with \`/api/\`. Future versions will use \`/api/v2/\`, \`/api/v3/\`, etc.
-
-## Content Types
-
-- **Request**: \`application/json\`
-- **Response**: \`application/json\`
-- **Charset**: UTF-8`;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const contentElement = document.getElementById('content');
-            contentElement.innerHTML = marked.parse(markdownContent);
-        });
-    </script>
 
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
     <script type="module" src="../js/themeLanguageSwitcher.js"></script>

@@ -3,30 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimaID - API Documentation</title>
+    <title>AnimaID - Contact</title>
     <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../src/css/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 text-gray-900">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-2">
-                    <a href="../" class="flex items-center space-x-2">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
-                    </a>
+                    <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                    <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                 </div>
                 <nav class="hidden md:flex space-x-8">
-                    <a href="../#features" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
-                    <a href="../#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
-                    <a href="../#contact" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
                     <!-- Unified Theme and Language Switcher -->
                     <div class="flex items-center space-x-4">
                         <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
@@ -37,562 +32,146 @@
                         </div>
                     </div>
                     <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                        <i class="fas fa-sign-in-alt mr-1"></i>Staff Login
                     </a>
                 </nav>
+                <div class="md:hidden flex items-center space-x-2">
+                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </a>
+                    <button class="text-gray-600">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Back to Home -->
-        <div class="mb-6">
-            <a href="../" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i>Back to Home
-            </a>
-        </div>
+    <main class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Get in touch with the AnimaID team. We're here to help!
+                </p>
+            </div>
 
-        <!-- Content -->
-        <div class="bg-white rounded-lg shadow-sm p-8">
-            <div id="content">
-                <!-- Markdown content will be inserted here -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                <div class="bg-white rounded-lg shadow-sm p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Get Started</h2>
+                    <p class="text-gray-700 mb-6">
+                        Ready to implement AnimaID in your animation center? Contact our team to discuss your needs and requirements.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4 mt-1">
+                                <i class="fas fa-envelope text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Email</h3>
+                                <p class="text-gray-600">info@animaid.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4 mt-1">
+                                <i class="fas fa-phone text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Phone</h3>
+                                <p class="text-gray-600">+1 (555) 123-4567</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4 mt-1">
+                                <i class="fab fa-github text-orange-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">GitHub</h3>
+                                <p class="text-gray-600">
+                                    <a href="https://github.com/CoderXYZ7/AnimaID" class="text-blue-600 hover:text-blue-800">
+                                        github.com/CoderXYZ7/AnimaID
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Support & Feedback</h2>
+                    <p class="text-gray-700 mb-6">
+                        Have questions, feedback, or need technical support? Reach out to our support team.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4 mt-1">
+                                <i class="fas fa-life-ring text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Technical Support</h3>
+                                <p class="text-gray-600">support@animaid.com</p>
+                                <p class="text-sm text-gray-500 mt-1">Response time: Within 24 hours</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-4 mt-1">
+                                <i class="fas fa-bug text-red-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Bug Reports</h3>
+                                <p class="text-gray-600">
+                                    <a href="https://github.com/CoderXYZ7/AnimaID/issues" class="text-blue-600 hover:text-blue-800">
+                                        GitHub Issues
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
+                <form class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                            <input type="text" id="name" name="name" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" id="email" name="email" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                        <input type="text" id="subject" name="subject" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                        <textarea id="message" name="message" rows="6" required
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>Send Message
+                    </button>
+                </form>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12 mt-16">
+    <footer class="bg-gray-900 text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h4 class="text-xl font-bold">AnimaID</h4>
-                    </div>
-                    <p class="text-gray-400 mb-4">
-                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
-                    </p>
-                </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4">Platform</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
-                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
-                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
-                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4">Support</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
-                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
-                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <div class="text-center text-gray-400">
                 <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
             </div>
         </div>
     </footer>
-
-    <script>
-        const markdownContent = `🔗 AnimaID API Endpoints
-
-## Overview
-
-The AnimaID API provides RESTful endpoints for authentication, user management, and system administration. All endpoints return JSON responses and use JWT tokens for authentication (except login/register).
-
-## Authentication Endpoints
-
-### POST /api/auth/login
-Authenticate a user and return JWT token.
-
-**Request Body:**
-\`\`\`json
-{
-  "username": "string",
-  "password": "string"
-}
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "token": "jwt_token_here",
-  "user": {
-    "id": 1,
-    "username": "admin",
-    "email": "admin@example.com",
-    "roles": [
-      {
-        "id": 1,
-        "name": "technical_admin",
-        "display_name": "Technical Admin",
-        "is_primary": true
-      }
-    ]
-  },
-  "expires_at": "2025-11-02T15:29:49Z"
-}
-\`\`\`
-
-**Response (Error - 401):**
-\`\`\`json
-{
-  "success": false,
-  "error": "Invalid credentials"
-}
-\`\`\`
-
-### POST /api/auth/logout
-Invalidate the current session token.
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "message": "Logged out successfully"
-}
-\`\`\`
-
-### POST /api/auth/refresh
-Refresh an expired JWT token using a valid refresh token.
-
-**Request Body:**
-\`\`\`json
-{
-  "refresh_token": "refresh_token_here"
-}
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "token": "new_jwt_token",
-  "expires_at": "2025-11-02T16:29:49Z"
-}
-\`\`\`
-
-### GET /api/auth/me
-Get current user information and roles.
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "user": {
-    "id": 1,
-    "username": "admin",
-    "email": "admin@example.com",
-    "roles": [
-      {
-        "id": 1,
-        "name": "technical_admin",
-        "display_name": "Technical Admin",
-        "is_primary": true
-      }
-    ],
-    "last_login": "2025-11-02T14:29:49Z"
-  }
-}
-\`\`\`
-
-## User Management Endpoints
-
-### GET /api/users
-Get paginated list of users (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Query Parameters:**
-- \`page\` (integer, default: 1)
-- \`limit\` (integer, default: 20)
-- \`search\` (string, optional)
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "users": [
-    {
-      "id": 1,
-      "username": "admin",
-      "email": "admin@example.com",
-      "is_active": true,
-      "roles": ["technical_admin"],
-      "created_at": "2025-11-01T10:00:00Z",
-      "last_login": "2025-11-02T14:29:49Z"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 1,
-    "pages": 1
-  }
-}
-\`\`\`
-
-### POST /api/users
-Create a new user (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Request Body:**
-\`\`\`json
-{
-  "username": "newuser",
-  "email": "user@example.com",
-  "password": "securepassword123",
-  "role_ids": [2, 3]  // Array of role IDs to assign
-}
-\`\`\`
-
-**Response (Success - 201):**
-\`\`\`json
-{
-  "success": true,
-  "user": {
-    "id": 2,
-    "username": "newuser",
-    "email": "user@example.com",
-    "roles": ["organizzatore"]
-  }
-}
-\`\`\`
-
-### GET /api/users/{id}
-Get specific user details (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "user": {
-    "id": 2,
-    "username": "newuser",
-    "email": "user@example.com",
-    "is_active": true,
-    "roles": [
-      {
-        "id": 2,
-        "name": "organizzatore",
-        "display_name": "Organizzatore",
-        "is_primary": false
-      }
-    ],
-    "created_at": "2025-11-02T10:00:00Z",
-    "last_login": null
-  }
-}
-\`\`\`
-
-### PUT /api/users/{id}
-Update user information (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Request Body:**
-\`\`\`json
-{
-  "email": "newemail@example.com",
-  "is_active": true,
-  "role_ids": [2, 4]  // Update roles
-}
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "user": {
-    "id": 2,
-    "username": "newuser",
-    "email": "newemail@example.com",
-    "roles": ["organizzatore", "animatore"]
-  }
-}
-\`\`\`
-
-### DELETE /api/users/{id}
-Deactivate a user (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "message": "User deactivated successfully"
-}
-\`\`\`
-
-## Role Management Endpoints
-
-### GET /api/roles
-Get all available roles.
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "roles": [
-    {
-      "id": 1,
-      "name": "technical_admin",
-      "display_name": "Technical Admin",
-      "description": "Full system access",
-      "is_system_role": true,
-      "permissions": ["admin.users", "admin.system", "admin.roles"]
-    }
-  ]
-}
-\`\`\`
-
-### POST /api/roles
-Create a new custom role (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Request Body:**
-\`\`\`json
-{
-  "name": "custom_role",
-  "display_name": "Custom Role",
-  "description": "A custom role for specific needs",
-  "permission_ids": [1, 2, 3]
-}
-\`\`\`
-
-**Response (Success - 201):**
-\`\`\`json
-{
-  "success": true,
-  "role": {
-    "id": 6,
-    "name": "custom_role",
-    "display_name": "Custom Role",
-    "permissions": ["registrations.view", "calendar.view"]
-  }
-}
-\`\`\`
-
-### PUT /api/roles/{id}
-Update role permissions (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Request Body:**
-\`\`\`json
-{
-  "permission_ids": [1, 2, 4, 5]
-}
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "role": {
-    "id": 6,
-    "name": "custom_role",
-    "permissions": ["registrations.view", "calendar.view", "attendance.view"]
-  }
-}
-\`\`\`
-
-## Permission Endpoints
-
-### GET /api/permissions
-Get all available permissions grouped by module.
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "permissions": {
-    "registrations": [
-      {
-        "id": 1,
-        "name": "registrations.view",
-        "display_name": "View Registrations",
-        "description": "Can view child registrations"
-      }
-    ],
-    "calendar": [
-      {
-        "id": 2,
-        "name": "calendar.view",
-        "display_name": "View Calendar",
-        "description": "Can view calendar events"
-      }
-    ]
-  }
-}
-\`\`\`
-
-## System Endpoints
-
-### GET /api/system/status
-Get system status and health check.
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "status": "healthy",
-  "version": "0.9",
-  "database": "connected",
-  "timestamp": "2025-11-02T15:29:49Z"
-}
-\`\`\`
-
-### POST /api/system/backup
-Trigger system backup (Admin only).
-
-**Headers:**
-\`\`\`
-Authorization: Bearer jwt_token_here
-\`\`\`
-
-**Response (Success - 200):**
-\`\`\`json
-{
-  "success": true,
-  "message": "Backup completed successfully",
-  "backup_file": "backup_20251102_152949.sql"
-}
-\`\`\`
-
-## Error Responses
-
-All endpoints may return the following error responses:
-
-**401 Unauthorized:**
-\`\`\`json
-{
-  "success": false,
-  "error": "Authentication required"
-}
-\`\`\`
-
-**403 Forbidden:**
-\`\`\`json
-{
-  "success": false,
-  "error": "Insufficient permissions"
-}
-\`\`\`
-
-**404 Not Found:**
-\`\`\`json
-{
-  "success": false,
-  "error": "Resource not found"
-}
-\`\`\`
-
-**422 Unprocessable Entity:**
-\`\`\`json
-{
-  "success": false,
-  "error": "Validation failed",
-  "details": {
-    "username": ["Username is required"],
-    "email": ["Invalid email format"]
-  }
-}
-\`\`\`
-
-**500 Internal Server Error:**
-\`\`\`json
-{
-  "success": false,
-  "error": "Internal server error"
-}
-\`\`\`
-
-## Rate Limiting
-
-- **Authenticated requests**: 1000 requests per hour per user
-- **Unauthenticated requests**: 100 requests per hour per IP
-- Rate limit headers are included in responses:
-  - \`X-RateLimit-Limit\`: Maximum requests per hour
-  - \`X-RateLimit-Remaining\`: Remaining requests
-  - \`X-RateLimit-Reset\`: Time when limit resets (Unix timestamp)
-
-## API Versioning
-
-All endpoints are prefixed with \`/api/\`. Future versions will use \`/api/v2/\`, \`/api/v3/\`, etc.
-
-## Content Types
-
-- **Request**: \`application/json\`
-- **Response**: \`application/json\`
-- **Charset**: UTF-8`;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const contentElement = document.getElementById('content');
-            contentElement.innerHTML = marked.parse(markdownContent);
-        });
-    </script>
 
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
     <script type="module" src="../js/themeLanguageSwitcher.js"></script>
