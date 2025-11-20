@@ -53,17 +53,16 @@ $publicFiles = [
     'admin/roles.html' => 'public/admin/roles.html',
     'admin/status.html' => 'public/admin/status.html',
     'admin/reports.html' => 'public/admin/reports.html',
-    // Info pages
-    'features.html' => 'public/info/features.html',
-    'modules.html' => 'public/info/modules.html',
-    'applets.html' => 'public/info/applets.html',
-    'api.html' => 'public/info/api.html',
-    'documentation.html' => 'public/info/documentation.html',
-    'help-center.html' => 'public/info/help-center.html',
-    'contact.html' => 'public/info/contact.html',
-    'privacy.html' => 'public/info/privacy.html',
     'styleguide.html' => 'docs/StyleGuide.md', // For demo purposes
     'config.js' => 'public/config.js.php', // Add config.js route
+    'info/features.php' => 'public/info/features.php',
+    'info/modules.php' => 'public/info/modules.php',
+    'info/applets.php' => 'public/info/applets.php',
+    'info/api.php' => 'public/info/api.php',
+    'info/documentation.php' => 'public/info/documentation.php',
+    'info/help-center.php' => 'public/info/help-center.php',
+    'info/contact.php' => 'public/info/contact.php',
+    'info/privacy.php' => 'public/info/privacy.php',
 ];
 
 // Check if requesting a public file
