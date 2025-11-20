@@ -3,169 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimaID - Applets</title>
+    <title data-i18n="index.title">AnimaID - Animation Center Management Platform</title>
     <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../src/css/output.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
-        .prose { font-family: 'Inter', sans-serif; }
-        .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-        }
-    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 text-gray-900">
 
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-2">
-                    <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                    <a href="../index.html" class="text-2xl font-bold text-gray-900">AnimaID</a>
+                    <a href="../index.html" class="flex items-center space-x-2 text-gray-900 hover:text-blue-600 transition-colors">
+                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                        <h1 class="text-2xl font-bold">AnimaID</h1>
+                    </a>
                 </div>
                 <nav class="hidden md:flex space-x-8">
-                    <a href="#features" class="text-gray-600 hover:text-blue-600 transition-colors" data-i18n="index.nav.features">Features</a>
-                    <a href="#about" class="text-gray-600 hover:text-blue-600 transition-colors" data-i18n="index.nav.about">About</a>
-                    <a href="#contact" class="text-gray-600 hover:text-blue-600 transition-colors" data-i18n="index.nav.contact">Contact</a>
-                    <!-- Unified Theme and Language Switcher -->
-                    <div class="flex items-center space-x-4">
-                        <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
-                            <i class="fas fa-sun"></i>
-                        </button>
-                        <div id="language-selector-container">
-                            <!-- Language selector will be dynamically inserted here by JavaScript -->
-                        </div>
-                    </div>
-                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-i18n="index.nav.login">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Login
-                    </a>
+                    <a href="../index.html#features" class="text-gray-600 hover:text-blue-600 transition-colors">Back Home</a>
                 </nav>
-                <div class="md:hidden flex items-center space-x-2">
-                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt"></i>
-                    </a>
-                    <button class="text-gray-600">
-                        <i class="fas fa-bars"></i>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-sun"></i>
                     </button>
+                    <div id="language-selector-container">
+                        <!-- Language selector will be dynamically inserted here by JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-blue-50 to-green-50 py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center mb-6">
-                <a href="../index.html" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors mr-4">
-                    <i class="fas fa-arrow-left mr-2"></i>Back to Home
-                </a>
-            </div>
-            <div class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Applets</h1>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Discover the extensible applets system and plugin architecture of AnimaID
-                </p>
-            </div>
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Applets System</h1>
+            <p class="text-xl text-gray-600">
+                Extensible modular architecture for custom features and integrations
+            </p>
         </div>
-    </section>
 
-    <!-- Content Section -->
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div id="markdown-content" class="prose prose-lg max-w-none mx-auto">
-                <div class="text-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p class="text-gray-600">Loading content...</p>
-                </div>
+        <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+            <div id="markdown-content" class="prose prose-lg max-w-none">
+                <!-- Markdown content will be loaded here -->
             </div>
         </div>
-    </section>
+
+        <div class="text-center">
+            <a href="../index.html" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fas fa-home mr-2"></i>
+                <span data-i18n="common.backToDashboard">Back to Home</span>
+            </a>
+        </div>
+    </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h4 class="text-xl font-bold">AnimaID</h4>
-                    </div>
-                    <p class="text-gray-400 mb-4" data-i18n="index.footer.description">
-                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4" data-i18n="index.footer.platform.title">Platform</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="features.html" class="hover:text-white transition-colors" data-i18n="index.footer.platform.features">Features</a></li>
-                        <li><a href="modules.html" class="hover:text-white transition-colors" data-i18n="index.footer.platform.modules">Modules</a></li>
-                        <li><a href="applets.html" class="hover:text-white transition-colors" data-i18n="index.footer.platform.applets">Applets</a></li>
-                        <li><a href="api.html" class="hover:text-white transition-colors" data-i18n="index.footer.platform.api">API</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4" data-i18n="index.footer.support.title">Support</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="documentation.html" class="hover:text-white transition-colors" data-i18n="index.footer.support.documentation">Documentation</a></li>
-                        <li><a href="help-center.html" class="hover:text-white transition-colors" data-i18n="index.footer.support.helpCenter">Help Center</a></li>
-                        <li><a href="contact.html" class="hover:text-white transition-colors" data-i18n="index.footer.support.contact">Contact</a></li>
-                        <li><a href="privacy.html" class="hover:text-white transition-colors" data-i18n="index.footer.support.privacy">Privacy</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p data-i18n="index.footer.copyright">&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
-            </div>
+    <footer class="bg-gray-900 text-white py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
+            <p data-i18n="footer.version">&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
         </div>
     </footer>
 
+    <script src="https://unpkg.com/marked@12.0.0/marked.min.js"></script>
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="../js/themeLanguageSwitcher.js"></script>
     <script>
-        // Load and render markdown content
-        async function loadMarkdownContent() {
+        // Load and render markdown
+        async function loadMarkdown() {
             try {
-                const response = await fetch('../docs/Readme.md');
+                const response = await fetch('../../docs/Readme.md');
+                if (!response.ok) {
+                    throw new Error('Failed to load markdown');
+                }
                 const markdown = await response.text();
-                const html = marked.parse(markdown);
+
+                // Extract applets related content starting from "Two-Layer Architecture"
+                const lines = markdown.split('\n');
+
+                // Find applets sections
+                const startIndex = lines.findIndex(line => line.includes('## 🧱 8. Two-Layer Architecture'));
+                const endIndex = lines.length; // Include everything after that
+
+                let appletsContent = lines.slice(startIndex, endIndex).join('\n');
+
+                const html = marked.parse(appletsContent);
                 document.getElementById('markdown-content').innerHTML = html;
             } catch (error) {
-                console.error('Failed to load markdown content:', error);
-                document.getElementById('markdown-content').innerHTML = `
-                    <div class="text-center py-12">
-                        <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Content Not Available</h3>
-                        <p class="text-gray-600">Unable to load the documentation content at this time.</p>
-                    </div>
-                `;
+                console.error('Error loading markdown:', error);
+                document.getElementById('markdown-content').innerHTML = '<p class="text-red-600">Error loading content. Please try again later.</p>';
             }
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            loadMarkdownContent();
-        });
+        document.addEventListener('DOMContentLoaded', loadMarkdown);
     </script>
-
-    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
-    <script type="module" src="../js/themeLanguageSwitcher.js"></script>
 </body>
 </html>
