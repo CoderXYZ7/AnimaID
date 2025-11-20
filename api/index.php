@@ -285,11 +285,11 @@ function handleReportsRequest(?string $reportType, string $method, ?string $toke
                 SELECT
                     e.title as event_title,
                     e.event_date,
-                    COUNT(CASE WHEN a.checkin_time IS NOT NULL THEN 1 END) as checked_in,
-                    COUNT(CASE WHEN a.checkout_time IS NOT NULL THEN 1 END) as checked_out,
-                    COUNT(a.id) as total_registered
+                    COUNT(CASE WHEN ar.check_in_time IS NOT NULL THEN 1 END) as checked_in,
+                    COUNT(CASE WHEN ar.check_out_time IS NOT NULL THEN 1 END) as checked_out,
+                    COUNT(ar.id) as total_registered
                 FROM calendar_events e
-                LEFT JOIN attendance a ON e.id = a.event_id
+                LEFT JOIN attendance_records ar ON e.id = ar.event_id
                 WHERE e.event_date BETWEEN ? AND ?
                 GROUP BY e.id, e.title, e.event_date
                 ORDER BY e.event_date DESC
