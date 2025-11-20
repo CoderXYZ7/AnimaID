@@ -710,6 +710,16 @@
 
         // Populate form for editing
         function populateCommunicationForm(communication) {
+            document.getElementById('communication-title').value = communication.title;
+            document.getElementById('communication-content').value = communication.content;
+            document.getElementById('communication-type').value = communication.communication_type;
+            document.getElementById('communication-priority').value = communication.priority;
+            document.getElementById('communication-audience').value = communication.target_audience;
+            document.getElementById('communication-status').value = communication.status;
+            document.getElementById('communication-public').checked = communication.is_public == 1;
+            document.getElementById('communication-expires').value = communication.expires_at ?
+                new Date(communication.expires_at).toISOString().slice(0, 16) : '';
+        }
 
         // Utility functions
         function showLoading() {
