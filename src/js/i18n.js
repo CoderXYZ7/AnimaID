@@ -144,6 +144,95 @@ const resources = {
             "index.footer.support.privacy": "Privacy",
             "index.footer.copyright": "© 2025 AnimaID. All rights reserved. Version 0.9 - Draft",
 
+            // Info Pages
+            "info.home": "Home",
+
+            // Features Page
+            "info.features.title": "AnimaID Features",
+            "info.features.subtitle": "Discover the powerful capabilities that make AnimaID the ultimate management platform for animation centers.",
+
+            // Modules Page
+            "info.modules.title": "AnimaID Modules",
+            "info.modules.subtitle": "Explore the core modules that power AnimaID's comprehensive management capabilities.",
+
+            // Applets Page
+            "info.applets.title": "Modular Applets System",
+            "info.applets.subtitle": "Extensible architecture allowing custom plugins and integrations to enhance AnimaID's functionality.",
+            "info.applets.what.title": "What are Applets?",
+            "info.applets.what.description": "Applets are self-contained modules that can be plugged into AnimaID to add new features, integrations, or customize existing functionality. They are designed to be:",
+            "info.applets.benefits.hotpluggable": "Hot-pluggable without system downtime",
+            "info.applets.benefits.secure": "Secure and sandboxed execution",
+            "info.applets.benefits.versioned": "Version-controlled for stability",
+            "info.applets.benefits.multideploy": "Multi-deployment capable",
+            "info.applets.benefits.easy": "Easy to develop and maintain",
+            "info.applets.benefits.container": "Compatible with containerized deployments",
+            "info.applets.framework.title": "Core Applet Framework",
+            "info.applets.framework.description": "Standard interfaces for consistent functionality",
+            "info.applets.security.title": "Security & Permissions",
+            "info.applets.security.description": "Controlled access and secure execution environment",
+            "info.applets.available.title": "Available Applets",
+            "info.applets.available.description": "Featured applets and integrations",
+            "info.applets.payment.title": "Payment Integration",
+            "info.applets.payment.description": "Connect with payment processors for seamless registration fees.",
+            "info.applets.notification.title": "Notification Services",
+            "info.applets.notification.description": "SMS, email, and push notification integrations.",
+            "info.applets.calendar.title": "External Calendar Sync",
+            "info.applets.calendar.description": "Sync with Google Calendar, Outlook, and other services.",
+            "info.applets.reporting.title": "Advanced Reporting",
+            "info.applets.reporting.description": "Custom report generation and business intelligence.",
+
+            // API Page
+            "info.api.title": "AnimaID API",
+            "info.api.subtitle": "Comprehensive RESTful API for integrating with AnimaID's data and functionality.",
+            "info.api.authentication": "Authentication",
+            "info.api.authentication.desc": "JWT-based authentication system with role-based access control.",
+            "info.api.restful": "RESTful Design",
+            "info.api.restful.desc": "Standard HTTP methods with JSON responses for predictable integration.",
+            "info.api.security": "Security",
+            "info.api.security.desc": "HTTPS encryption, input validation, and rate limiting.",
+            "info.api.baseUrl": "Base URL",
+            "info.api.endpoints": "Available Endpoints",
+            "info.api.example": "Authentication Example",
+            "info.api.rateLimiting": "Rate Limiting",
+            "info.api.rateLimits": "API requests are rate-limited to prevent abuse. Standard limits:",
+
+            // Documentation Page
+            "info.documentation.title": "Documentation",
+            "info.documentation.subtitle": "Comprehensive guides and resources to help you get the most out of AnimaID.",
+            "info.documentation.userManuals": "User Manuals",
+            "info.documentation.userManuals.desc": "Step-by-step guides for administrators, staff, and families to effectively use AnimaID.",
+            "info.documentation.technical": "Technical Documentation",
+            "info.documentation.technical.desc": "Detailed technical information for developers and system administrators.",
+            "info.documentation.knowledgeBase": "Knowledge Base",
+            "info.documentation.knowledgeBase.desc": "Browse our internal wiki for frequently asked questions and detailed procedures.",
+            "info.documentation.resources": "Additional Resources",
+
+            // Help Center Page
+            "info.help.title": "Help Center",
+            "info.help.subtitle": "Find answers to common questions and get assistance with AnimaID.",
+            "info.help.search": "Search Help",
+            "info.help.browse": "Browse Topics",
+            "info.help.contact": "Contact Support",
+            "info.help.faq": "Frequently Asked Questions",
+            "info.help.more": "Need More Help?",
+            "info.help.tutorials": "Video Tutorials",
+            "info.help.tutorials.desc": "Watch step-by-step video guides for common tasks in AnimaID.",
+            "info.help.forum": "Community Forum",
+            "info.help.forum.desc": "Join our community forum to ask questions and share tips with other AnimaID users.",
+
+            // Contact Page
+            "info.contact.title": "Contact Us",
+            "info.contact.subtitle": "Get in touch with the AnimaID team. We're here to help!",
+            "info.contact.started": "Get Started",
+            "info.contact.started.desc": "Ready to implement AnimaID in your animation center? Contact our team to discuss your needs and requirements.",
+            "info.contact.support": "Support & Feedback",
+            "info.contact.support.desc": "Have questions, feedback, or need technical support? Reach out to our support team.",
+            "info.contact.message": "Send Us a Message",
+
+            // Privacy Page
+            "info.privacy.title": "Privacy Policy",
+            "info.privacy.lastUpdated": "Last updated: November 20, 2025",
+
             // Animators Management
             "animators.loading": "Loading animators management...",
             "animators.title": "Animators Management",
@@ -377,6 +466,95 @@ const resources = {
             "index.footer.support.contact": "Contatti",
             "index.footer.support.privacy": "Privacy",
             "index.footer.copyright": "© 2025 AnimaID. Tutti i diritti riservati. Versione 0.9 - Bozza",
+
+            // Info Pages - Italian
+            "info.home": "Casa",
+
+            // Features Page - Italian
+            "info.features.title": "Funzionalità AnimaID",
+            "info.features.subtitle": "Scopri le potenti capacità che rendono AnimaID la piattaforma di gestione definitiva per i centri di animazione.",
+
+            // Modules Page - Italian
+            "info.modules.title": "Moduli AnimaID",
+            "info.modules.subtitle": "Esplora i moduli principali che alimentano le capacità di gestione complete di AnimaID.",
+
+            // Applets Page - Italian
+            "info.applets.title": "Sistema Applet Modulare",
+            "info.applets.subtitle": "Architettura estensibile che permette plugin e integrazioni personalizzati per migliorare la funzionalità di AnimaID.",
+            "info.applets.what.title": "Cosa sono gli Applet?",
+            "info.applets.what.description": "Gli applets sono moduli autonomi che possono essere collegati ad AnimaID per aggiungere nuove funzionalità, integrazioni o personalizzare funzionalità esistenti. Sono progettati per essere:",
+            "info.applets.benefits.hotpluggable": "Hot-pluggable senza downtime del sistema",
+            "info.applets.benefits.secure": "Esecuzione sicura e sandboxed",
+            "info.applets.benefits.versioned": "Controllo versione per stabilità",
+            "info.applets.benefits.multideploy": "Capabile di deploy multipli",
+            "info.applets.benefits.easy": "Facile da sviluppare e mantenere",
+            "info.applets.benefits.container": "Compatibile con deployment containerizzati",
+            "info.applets.framework.title": "Framework Applet Core",
+            "info.applets.framework.description": "Interfacce standard per funzionalità consistenti",
+            "info.applets.security.title": "Sicurezza e Permessi",
+            "info.applets.security.description": "Accesso controllato e ambiente di esecuzione sicuro",
+            "info.applets.available.title": "Applet Disponibili",
+            "info.applets.available.description": "Applet e integrazioni in primo piano",
+            "info.applets.payment.title": "Integrazione Pagamenti",
+            "info.applets.payment.description": "Connetti con processori di pagamento per commissioni di registrazione senza interruzioni.",
+            "info.applets.notification.title": "Servizi Notifica",
+            "info.applets.notification.description": "Integrazioni SMS, email e notifiche push.",
+            "info.applets.calendar.title": "Sincronizzazione Calendario Esterno",
+            "info.applets.calendar.description": "Sincronizza con Google Calendar, Outlook e altri servizi.",
+            "info.applets.reporting.title": "Reportistica Avanzata",
+            "info.applets.reporting.description": "Generazione report personalizzati e business intelligence.",
+
+            // API Page - Italian
+            "info.api.title": "API AnimaID",
+            "info.api.subtitle": "API RESTful completa per integrare dati e funzionalità di AnimaID.",
+            "info.api.authentication": "Autenticazione",
+            "info.api.authentication.desc": "Sistema di autenticazione basato su JWT con controllo accessi basato sui ruoli.",
+            "info.api.restful": "Design RESTful",
+            "info.api.restful.desc": "Metodi HTTP standard con risposte JSON per integrazione prevedibile.",
+            "info.api.security": "Sicurezza",
+            "info.api.security.desc": "Crittografia HTTPS, validazione input e rate limiting.",
+            "info.api.baseUrl": "URL Base",
+            "info.api.endpoints": "Endpoint Disponibili",
+            "info.api.example": "Esempio Autenticazione",
+            "info.api.rateLimiting": "Rate Limiting",
+            "info.api.rateLimits": "Le richieste API sono rate-limited per evitare abusi. Limiti standard:",
+
+            // Documentation Page - Italian
+            "info.documentation.title": "Documentazione",
+            "info.documentation.subtitle": "Guide e risorse complete per aiutarti a ottenere il massimo da AnimaID.",
+            "info.documentation.userManuals": "Manuali Utente",
+            "info.documentation.userManuals.desc": "Guide passo-passo per amministratori, staff e famiglie per utilizzare efficacemente AnimaID.",
+            "info.documentation.technical": "Documentazione Tecnica",
+            "info.documentation.technical.desc": "Informazioni tecniche dettagliate per sviluppatori e amministratori di sistema.",
+            "info.documentation.knowledgeBase": "Base di Conoscenza",
+            "info.documentation.knowledgeBase.desc": "Naviga nel nostro wiki interno per domande frequenti e procedure dettagliate.",
+            "info.documentation.resources": "Risorse Aggiuntive",
+
+            // Help Center Page - Italian
+            "info.help.title": "Centro Assistenza",
+            "info.help.subtitle": "Trova risposte a domande comuni e ottieni assistenza per AnimaID.",
+            "info.help.search": "Cerca Assistenza",
+            "info.help.browse": "Sfoglia Argomenti",
+            "info.help.contact": "Contatta Supporto",
+            "info.help.faq": "Domande Frequenti",
+            "info.help.more": "Servono Altri Aiuti?",
+            "info.help.tutorials": "Tutorial Video",
+            "info.help.tutorials.desc": "Guarda guide video passo-passo per compiti comuni in AnimaID.",
+            "info.help.forum": "Forum della Comunità",
+            "info.help.forum.desc": "Unisciti al nostro forum della comunità per porre domande e condividere consigli con altri utenti AnimaID.",
+
+            // Contact Page - Italian
+            "info.contact.title": "Contattaci",
+            "info.contact.subtitle": "Mettiti in contatto con il team AnimaID. Siamo qui per aiutare!",
+            "info.contact.started": "Iniziamo",
+            "info.contact.started.desc": "Pronto ad implementare AnimaID nel tuo centro di animazione? Contatta il nostro team per discutere esigenze e requisiti.",
+            "info.contact.support": "Supporto e Feedback",
+            "info.contact.support.desc": "Domande, feedback o bisogno di supporto tecnico? Rivolgiti al nostro team di supporto.",
+            "info.contact.message": "Inviaci un Messaggio",
+
+            // Privacy Page - Italian
+            "info.privacy.title": "Informativa Privacy",
+            "info.privacy.lastUpdated": "Ultimo aggiornamento: 20 novembre 2025",
 
             // Animators Management - Italian
             "animators.loading": "Caricamento gestione animatori...",
