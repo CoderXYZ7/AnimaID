@@ -3,100 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="index.title">AnimaID - Animation Center Management Platform</title>
+    <title>AnimaID - API Documentation</title>
     <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../src/css/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
-<body class="bg-gray-50 text-gray-900">
-
+<body class="bg-gray-50 min-h-screen">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-2">
-                    <a href="../index.html" class="flex items-center space-x-2 text-gray-900 hover:text-blue-600 transition-colors">
+                    <a href="../" class="flex items-center space-x-2">
                         <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h1 class="text-2xl font-bold">AnimaID</h1>
+                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                     </a>
                 </div>
                 <nav class="hidden md:flex space-x-8">
-                    <a href="../index.html#features" class="text-gray-600 hover:text-blue-600 transition-colors">Back Home</a>
-                </nav>
-                <div class="flex items-center space-x-4">
-                    <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
-                        <i class="fas fa-sun"></i>
-                    </button>
-                    <div id="language-selector-container">
-                        <!-- Language selector will be dynamically inserted here by JavaScript -->
+                    <a href="../#features" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
+                    <a href="../#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
+                    <a href="../#contact" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+                    <!-- Unified Theme and Language Switcher -->
+                    <div class="flex items-center space-x-4">
+                        <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <div id="language-selector-container">
+                            <!-- Language selector will be dynamically inserted here by JavaScript -->
+                        </div>
                     </div>
-                </div>
+                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
+                </nav>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4" data-i18n="index.features.title">Core Features</h1>
-            <p class="text-xl text-gray-600" data-i18n="index.features.subtitle">
-                Everything you need to manage animation centers efficiently with a focus on user experience and extensibility.
-            </p>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-md p-8 mb-8">
-            <div id="markdown-content" class="prose prose-lg max-w-none">
-                <!-- Markdown content will be loaded here -->
-            </div>
-        </div>
-
-        <div class="text-center">
-            <a href="../index.html" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-                <i class="fas fa-home mr-2"></i>
-                <span data-i18n="common.backToDashboard">Back to Home</span>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Back to Home -->
+        <div class="mb-6">
+            <a href="../" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Home
             </a>
         </div>
-    </main>
+
+        <!-- Content -->
+        <div class="bg-white rounded-lg shadow-sm p-8">
+            <div id="content">
+                <!-- Markdown content will be inserted here -->
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
-            <p data-i18n="footer.version">&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                        <h4 class="text-xl font-bold">AnimaID</h4>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
+                    </p>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Platform</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
+                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
+                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Support</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
+                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
+            </div>
         </div>
     </footer>
 
-    <script src="https://unpkg.com/marked@12.0.0/marked.min.js"></script>
+    <script>
+        const markdownContent = `# AnimaID Features
+
+## Core Platform Features
+
+AnimaID is a comprehensive management platform designed specifically for animation centers, educational labs, and recreational activity organizations. It provides a unified digital environment to coordinate staff, organize activities, manage attendance, and facilitate communication between staff, parents, and families.
+
+### Key Benefits
+
+- **Centralized Management**: All operations in one platform
+- **Multi-language Support**: Available in English and Italian
+- **Role-based Access**: Progressive permissions system
+- **Mobile-friendly**: Responsive design works on all devices
+- **Extensible**: Modular architecture with applet system
+
+### Core Modules
+
+#### Staff Coordination
+- Manage roles, permissions, and shifts with cumulative tags for progressive access
+- Support different user types: Technical Admins, AnimaID Staff, and Parents & Families
+- Progressive role system from basic assistants to full administrators
+
+#### Activity Management
+- Comprehensive calendar system for scheduling activities and events
+- Registration management for children and families
+- Attendance tracking with real-time monitoring
+- Resource and room booking capabilities
+
+#### Communication Hub
+- Internal messaging system between staff members
+- Public announcements and notices for families
+- Communication threads and discussions
+- Media sharing and file attachments
+
+#### Child Management
+- Complete child profile management including medical information
+- Parent/guardian contact details
+- Activity enrollment and tracking
+- Emergency contact protocols
+
+#### Media Management
+- Photo, video, and document organization
+- Activity galleries and portfolios
+- Access control and sharing permissions
+- Integration with communication features
+
+### Technical Architecture
+
+#### Modern Web Stack
+- **Backend**: PHP 8.1+ with SQLite database
+- **Frontend**: HTML5, TailwindCSS, vanilla JavaScript
+- **APIs**: RESTful JSON endpoints with JWT authentication
+- **Mobile**: Responsive design with PWA capabilities
+
+#### Security & Permissions
+- Role-based access control (RBAC)
+- JWT token authentication
+- Cumulative permission tags
+- Input validation and sanitization
+
+#### Deployment & Scalability
+- Container-ready with Docker
+- Single-file SQLite deployment
+- Multi-instance support
+- Portable and distributable
+
+### Extensibility
+
+#### Applet System
+- Hot-pluggable modules for custom features
+- Third-party integration capabilities
+- API-first design for extensibility
+
+#### Multi-deployment Support
+- Designed for deployment across multiple animation centers
+- Centralized or distributed management options
+- Configuration flexibility
+
+### User Experience
+
+#### Responsive Design
+- Works seamlessly on desktop, tablet, and mobile devices
+- Touch-friendly interfaces for staff on the go
+- Adaptive layouts for different screen sizes
+
+#### Accessibility
+- Multilingual support (currently English and Italian)
+- Keyboard navigation support
+- Screen reader compatibility
+- High contrast theme options
+
+## Version Information
+
+Current version: 0.9 (Draft)
+Planned features for future versions include enhanced reporting, advanced analytics, and expanded mobile capabilities.`;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentElement = document.getElementById('content');
+            contentElement.innerHTML = marked.parse(markdownContent);
+        });
+    </script>
+
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
     <script type="module" src="../js/themeLanguageSwitcher.js"></script>
-    <script>
-        // Load and render markdown
-        async function loadMarkdown() {
-            try {
-                const response = await fetch('../../docs/UserManual.md');
-                if (!response.ok) {
-                    throw new Error('Failed to load markdown');
-                }
-                const markdown = await response.text();
-
-                // Extract the "Core Features" section
-                const lines = markdown.split('\n');
-                const startIndex = lines.findIndex(line => line.includes('## Core Features'));
-                const nextHeadingIndex = lines.findIndex((line, index) => index > startIndex && line.startsWith('## ') && line !== lines[startIndex]);
-
-                let featuresContent = lines.slice(startIndex, nextHeadingIndex > 0 ? nextHeadingIndex : undefined).join('\n');
-
-                const html = marked.parse(featuresContent);
-                document.getElementById('markdown-content').innerHTML = html;
-            } catch (error) {
-                console.error('Error loading markdown:', error);
-                document.getElementById('markdown-content').innerHTML = '<p class="text-red-600">Error loading content. Please try again later.</p>';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', loadMarkdown);
-    </script>
 </body>
 </html>

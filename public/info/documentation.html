@@ -3,92 +3,435 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="index.title">AnimaID - Animation Center Management Platform</title>
+    <title>AnimaID - Documentation</title>
     <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../src/css/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
-<body class="bg-gray-50 text-gray-900">
-
+<body class="bg-gray-50 min-h-screen">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-2">
-                    <a href="../index.html" class="flex items-center space-x-2 text-gray-900 hover:text-blue-600 transition-colors">
+                    <a href="../" class="flex items-center space-x-2">
                         <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h1 class="text-2xl font-bold">AnimaID</h1>
+                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                     </a>
                 </div>
                 <nav class="hidden md:flex space-x-8">
-                    <a href="../index.html#features" class="text-gray-600 hover:text-blue-600 transition-colors">Back Home</a>
-                </nav>
-                <div class="flex items-center space-x-4">
-                    <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
-                        <i class="fas fa-sun"></i>
-                    </button>
-                    <div id="language-selector-container">
-                        <!-- Language selector will be dynamically inserted here by JavaScript -->
+                    <a href="../#features" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
+                    <a href="../#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
+                    <a href="../#contact" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+                    <!-- Unified Theme and Language Switcher -->
+                    <div class="flex items-center space-x-4">
+                        <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <div id="language-selector-container">
+                            <!-- Language selector will be dynamically inserted here by JavaScript -->
+                        </div>
                     </div>
-                </div>
+                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
+                </nav>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">User Manual</h1>
-            <p class="text-xl text-gray-600">
-                Complete guide to using AnimaID platform
-            </p>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-md p-8 mb-8">
-            <div id="markdown-content" class="prose prose-lg max-w-none">
-                <!-- Markdown content will be loaded here -->
-            </div>
-        </div>
-
-        <div class="text-center">
-            <a href="../index.html" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-                <i class="fas fa-home mr-2"></i>
-                <span data-i18n="common.backToDashboard">Back to Home</span>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Back to Home -->
+        <div class="mb-6">
+            <a href="../" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Home
             </a>
         </div>
-    </main>
+
+        <!-- Content -->
+        <div class="bg-white rounded-lg shadow-sm p-8">
+            <div id="content">
+                <!-- Markdown content will be inserted here -->
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
-            <p data-i18n="footer.version">&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                        <h4 class="text-xl font-bold">AnimaID</h4>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
+                    </p>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Platform</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
+                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
+                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Support</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
+                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
+            </div>
         </div>
     </footer>
 
-    <script src="https://unpkg.com/marked@12.0.0/marked.min.js"></script>
+    <script>
+        const markdownContent = `# AnimaID User Manual
+
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Getting Started](#getting-started)
+3. [User Roles and Permissions](#user-roles-and-permissions)
+4. [Core Features](#core-features)
+5. [Module Guides](#module-guides)
+6. [System Administration](#system-administration)
+7. [Troubleshooting](#troubleshooting)
+
+## Introduction
+
+### What is AnimaID?
+AnimaID is a comprehensive management platform designed specifically for animation centers, educational labs, and recreational activity organizations. It provides a unified digital environment to coordinate staff, organize activities, manage attendance, and facilitate communication between staff, parents, and families.
+
+### Key Benefits
+- **Centralized Management**: All operations in one platform
+- **Multi-language Support**: Available in English and Italian
+- **Role-based Access**: Progressive permissions system
+- **Mobile-friendly**: Responsive design works on all devices
+- **Extensible**: Modular architecture with applet system
+
+## Getting Started
+
+### System Requirements
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Internet connection
+- For staff: Valid login credentials
+
+### Accessing the Platform
+
+#### Public Access
+1. Navigate to your organization's AnimaID URL
+2. Browse the public portal without login
+3. View calendars, events, and public communications
+
+#### Staff Login
+1. Go to the login page (\`/login.html\`)
+2. Enter your username and password
+3. Click "Sign in" to access the dashboard
+
+**Demo Credentials** (if available):
+- Username: \`admin\`
+- Password: \`Admin123!@#\`
+
+### First Time Setup
+1. **Change Default Password**: After first login, change your password
+2. **Configure Profile**: Update your user information
+3. **Set Preferences**: Choose your preferred language and theme
+
+## User Roles and Permissions
+
+### Role Hierarchy
+AnimaID uses cumulative role tags that provide progressive access:
+
+1. **@aiutoanimatore** (Assistant Animator)
+   - Basic activity assistance
+   - View assigned schedules
+
+2. **@animatore** (Animator)
+   - All assistant permissions
+   - Manage activity groups
+   - Record attendance
+
+3. **@responsabile** (Manager)
+   - All animator permissions
+   - Staff coordination
+   - Activity planning
+
+4. **@organizzatore** (Organizer)
+   - All manager permissions
+   - System configuration
+   - User management
+
+5. **Technical Admin**
+   - Full system access
+   - Center configuration
+   - Backup and maintenance
+
+### Permission Levels
+Each role has access to specific modules and functions based on their cumulative tags.
+
+## Core Features
+
+### Dashboard
+The dashboard is your central workspace after login:
+
+- **Welcome Section**: Personalized greeting and quick overview
+- **Statistics Cards**: Real-time data on users, activities, children, and reports
+- **Quick Actions**: Direct links to frequently used modules
+- **Permissions Display**: Shows your current access levels
+
+### Navigation
+- Use the Quick Actions grid for one-click access to modules
+- Breadcrumb navigation shows your current location
+- Sidebar navigation (if implemented) for detailed menu structure
+
+## Module Guides
+
+### Calendar Management
+**Purpose**: Schedule and manage activities, events, and staff shifts
+
+**Key Functions**:
+- View daily, weekly, and monthly calendars
+- Create new activities and events
+- Assign staff to activities
+- Set up recurring events
+- Manage room and resource bookings
+
+**User Access**:
+- All staff: View assigned activities
+- Animators+: Create and edit activities
+- Managers+: Schedule staff and resources
+
+### Attendance Tracking
+**Purpose**: Record and monitor participant attendance
+
+**Key Functions**:
+- Check-in/check-out system
+- Real-time attendance monitoring
+- Attendance reports and statistics
+- Absence tracking and notifications
+
+**User Access**:
+- Animators+: Record attendance for their activities
+- Managers+: View all attendance data
+
+### Children Management
+**Purpose**: Manage child profiles, registrations, and information
+
+**Key Functions**:
+- Child profile creation and maintenance
+- Registration management
+- Medical and emergency information
+- Parent/guardian contacts
+- Activity enrollment
+
+**User Access**:
+- Animators+: View assigned children
+- Managers+: Full child management
+
+### Animators Management
+**Purpose**: Coordinate and manage staff members
+
+**Key Functions**:
+- Staff profile management
+- Role and permission assignment
+- Availability scheduling
+- Performance tracking
+- Communication with staff
+
+**User Access**:
+- Managers+: View and manage staff
+- Organizers+: Role and permission management
+
+### Communications
+**Purpose**: Internal and external communication hub
+
+**Key Functions**:
+- Internal messaging system
+- Public announcements
+- Notice boards
+- Email and notification system
+- Media sharing
+
+**User Access**:
+- All staff: Send/receive messages
+- Managers+: Create public announcements
+- Organizers+: System-wide communications
+
+### Media Manager
+**Purpose**: Organize and share photos, videos, and documents
+
+**Key Functions**:
+- File upload and organization
+- Media categorization
+- Access control
+- Public gallery management
+- Document sharing
+
+**User Access**:
+- Animators+: Upload media for their activities
+- Managers+: Organize and categorize media
+- Organizers+: Media approval and publishing
+
+### Wiki / Knowledge Base
+**Purpose**: Central repository for activities, games, and procedures
+
+**Key Functions**:
+- Activity and game database
+- Search and filter capabilities
+- Category organization
+- User feedback and ratings
+- Procedure documentation
+
+**User Access**:
+- All staff: Browse and search
+- Animators+: Contribute content
+- Managers+: Content approval and organization
+
+## System Administration
+
+### User Management
+**Access**: Admin and Organizer roles
+
+**Functions**:
+- Create and manage user accounts
+- Assign roles and permissions
+- Reset passwords
+- Manage user groups
+- Monitor user activity
+
+### Role Management
+**Access**: Admin role only
+
+**Functions**:
+- Define role hierarchies
+- Set permission levels
+- Configure cumulative tags
+- Manage access policies
+
+### System Status
+**Access**: Admin and Organizer roles
+
+**Functions**:
+- Monitor system health
+- View performance metrics
+- Check database status
+- Review system logs
+- Backup management
+
+### Reports and Analytics
+**Access**: Managers+
+
+**Functions**:
+- Generate activity reports
+- Attendance statistics
+- Financial reports (if applicable)
+- Export data to various formats
+- Custom report creation
+
+## Multi-language and Theme Support
+
+### Language Selection
+AnimaID supports multiple languages:
+
+1. **Automatic Detection**: System detects your browser language
+2. **Manual Selection**: Use the language selector in the header
+3. **Persistent Preference**: Your choice is saved for future sessions
+
+**Available Languages**:
+- English (en)
+- Italian (it)
+
+### Theme Selection
+Choose between light and dark themes:
+
+1. Click the theme switcher button (sun/moon icon)
+2. Theme preference is saved automatically
+3. System respects device dark mode settings
+
+## Troubleshooting
+
+### Common Issues
+
+#### Login Problems
+- **Forgot Password**: Use "Forgot your password?" link (if implemented)
+- **Account Locked**: Contact system administrator
+- **Invalid Credentials**: Verify username and password
+
+#### Access Denied
+- Check your role permissions
+- Contact administrator for access requests
+- Verify you're logged into the correct account
+
+#### System Errors
+- Refresh the page
+- Clear browser cache and cookies
+- Check internet connection
+- Contact technical support if issue persists
+
+### Getting Help
+
+#### Internal Support
+- Contact your system administrator
+- Check the internal wiki for documentation
+- Use the communications module to reach support staff
+
+#### Technical Support
+- System logs available to administrators
+- Backup and restore procedures
+- Update and maintenance schedules
+
+## Best Practices
+
+### Data Management
+- Regular backups of important information
+- Keep child and staff information up to date
+- Use consistent naming conventions
+
+### Security
+- Use strong, unique passwords
+- Log out when not using the system
+- Report suspicious activity immediately
+- Keep system updated
+
+### Communication
+- Use appropriate channels for different types of communication
+- Keep announcements clear and concise
+- Regular updates to parents and staff
+
+## Version Information
+
+This manual applies to AnimaID version 0.9. Features and functionality may change in future updates. Check the system documentation for the most current information.
+
+---
+
+*Last Updated: November 2025*  
+*AnimaID Version: 0.9*`;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentElement = document.getElementById('content');
+            contentElement.innerHTML = marked.parse(markdownContent);
+        });
+    </script>
+
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
     <script type="module" src="../js/themeLanguageSwitcher.js"></script>
-    <script>
-        // Load and render markdown
-        async function loadMarkdown() {
-            try {
-                const response = await fetch('../../docs/UserManual.md');
-                if (!response.ok) {
-                    throw new Error('Failed to load markdown');
-                }
-                const markdown = await response.text();
-                const html = marked.parse(markdown);
-                document.getElementById('markdown-content').innerHTML = html;
-            } catch (error) {
-                console.error('Error loading markdown:', error);
-                document.getElementById('markdown-content').innerHTML = '<p class="text-red-600">Error loading content. Please try again later.</p>';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', loadMarkdown);
-    </script>
 </body>
+</html>
 </html>
