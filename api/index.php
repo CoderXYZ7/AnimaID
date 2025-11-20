@@ -332,7 +332,7 @@ function handleReportsRequest(?string $reportType, string $method, ?string $toke
                     COUNT(*) as total_animators,
                     COUNT(CASE WHEN status = 'active' THEN 1 END) as active_animators,
                     AVG(CASE WHEN experience_years IS NOT NULL THEN experience_years END) as avg_experience,
-                    COUNT(CASE WHEN availability_status = 'available' THEN 1 END) as available_now
+                    COUNT(CASE WHEN status = 'active' THEN 1 END) as available_now
                 FROM animators
             ");
 
