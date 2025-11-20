@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (logoutBtn) {
                     logoutBtn.addEventListener('click', () => {
                         const userToken = localStorage.getItem('animaid_token');
-                        
+
                         // We don't really care about the response of the logout endpoint
                         // as we are redirecting the user anyway.
                         fetch('/api/auth/logout', {
@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                     });
                 }
+
+                // Dispatch event to signal header is loaded
+                document.dispatchEvent(new CustomEvent('headerLoaded'));
             })
             .catch(error => {
                 console.error('Error loading header:', error);

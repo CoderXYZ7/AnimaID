@@ -2,7 +2,8 @@
 
 import { initI18n, changeLanguage, getCurrentLanguage, availableLanguages } from '../../src/js/i18n.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
+// Function to initialize theme and language switcher
+async function initializeUISwitcher() {
     // Initialize i18n
     await initI18n();
     applyTranslations();
@@ -69,3 +70,23 @@ function applyTranslations() {
         }
     });
 }
+
+// Initialize after header is loaded - check periodically for UI elements
+function checkAndInitializeSwitchers() {
+    if (document.getElementById('theme-switcher') && document.getElementById('language-selector-container')) {
+        initializeUISwitcher();
+    } else {
+        // Check again in a short timeout
+        setTimeout(checkAndInitializeSwitchers, 100);
+    }
+}
+
+// Start checking when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    checkAndInitializeSwitchers();
+});
+
+// Also check when header.js has finished loading
+document.addEventListener('headerLoaded', () => {
+    checkAndInitializeSwitchers();
+});
