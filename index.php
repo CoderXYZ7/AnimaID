@@ -53,6 +53,14 @@ $publicFiles = [
     'admin/roles.html' => 'public/admin/roles.html',
     'admin/status.html' => 'public/admin/status.html',
     'admin/reports.html' => 'public/admin/reports.html',
+    'info/features.html' => 'public/info/features.html',
+    'info/modules.html' => 'public/info/modules.html',
+    'info/applets.html' => 'public/info/applets.html',
+    'info/api.html' => 'public/info/api.html',
+    'info/documentation.html' => 'public/info/documentation.html',
+    'info/help-center.html' => 'public/info/help-center.html',
+    'info/contact.html' => 'public/info/contact.html',
+    'info/privacy.html' => 'public/info/privacy.html',
     'styleguide.html' => 'docs/StyleGuide.md', // For demo purposes
     'config.js' => 'public/config.js.php', // Add config.js route
 ];

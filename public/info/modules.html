@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - Modules</title>
+    <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../src/css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                    <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
+                    <a href="features.html" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
+                    <a href="../index.html#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
+                    <a href="contact.html" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+                    <!-- Unified Theme and Language Switcher -->
+                    <div class="flex items-center space-x-4">
+                        <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <div id="language-selector-container">
+                            <!-- Language selector will be dynamically inserted here by JavaScript -->
+                        </div>
+                    </div>
+                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
+                </nav>
+                <div class="md:hidden flex items-center space-x-2">
+                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </a>
+                    <button class="text-gray-600">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-green-50 to-blue-50 py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Platform Modules
+            </h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                Explore the comprehensive modules that power AnimaID's functionality across multiple centers.
+            </p>
+        </div>
+    </section>
+
+    <!-- Modules Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h3 class="text-3xl font-bold text-gray-900 mb-4">Core Modules</h3>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Specialized modules that address every aspect of animation center management.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Staff Module -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mr-6">
+                            <i class="fas fa-users text-blue-600 text-3xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Staff Coordination</h4>
+                            <p class="text-gray-600">Comprehensive staff management and coordination tools</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Role-based access control</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Shift scheduling and management</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Performance tracking</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Training records</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Children Module -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mr-6">
+                            <i class="fas fa-child text-green-600 text-3xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Children Management</h4>
+                            <p class="text-gray-600">Complete child registration and profile management</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Family registration system</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Medical records and allergy tracking</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Emergency contacts</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Progress reports</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Module -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mr-6">
+                            <i class="fas fa-clipboard-check text-purple-600 text-3xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Attendance Tracking</h4>
+                            <p class="text-gray-600">Streamlined check-in/check-out and attendance monitoring</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Digital check-in/check-out</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Real-time attendance reports</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Parent notifications</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Hours tracking for billing</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar Module -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mr-6">
+                            <i class="fas fa-calendar-alt text-orange-600 text-3xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Calendar & Events</h4>
+                            <p class="text-gray-600">Comprehensive activity scheduling and event management</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Event creation and management</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Activity registration</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Reservation system</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Public calendar sharing</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Communications Module -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center mr-6">
+                            <i class="fas fa-comments text-red-600 text-3xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Communications</h4>
+                            <p class="text-gray-600">Internal and external communication tools</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Internal messaging system</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Public announcement board</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Email notifications</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Media sharing platform</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Module -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mr-6">
+                            <i class="fas fa-chart-bar text-indigo-600 text-3xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Analytics & Reports</h4>
+                            <p class="text-gray-600">Data-driven insights for better decision making</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>KPI dashboards</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Custom reporting tools</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Financial analytics</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span>Performance metrics</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                        <h4 class="text-xl font-bold">AnimaID</h4>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Platform</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
+                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
+                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Support</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
+                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="../js/themeLanguageSwitcher.js"></script>
+</body>
+</html>

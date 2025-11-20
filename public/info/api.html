@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - API Reference</title>
+    <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../src/css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                    <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
+                    <a href="features.html" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
+                    <a href="../index.html#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
+                    <a href="contact.html" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+                    <!-- Unified Theme and Language Switcher -->
+                    <div class="flex items-center space-x-4">
+                        <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <div id="language-selector-container">
+                            <!-- Language selector will be dynamically inserted here by JavaScript -->
+                        </div>
+                    </div>
+                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
+                </nav>
+                <div class="md:hidden flex items-center space-x-2">
+                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </a>
+                    <button class="text-gray-600">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-teal-50 to-blue-50 py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                API Reference
+            </h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                Comprehensive API documentation for integrating with AnimaID's data and services.
+            </p>
+        </div>
+    </section>
+
+    <!-- API Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h3 class="text-3xl font-bold text-gray-900 mb-4">RESTful API</h3>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Access AnimaID data programmatically through our secure REST API endpoints.
+                </p>
+            </div>
+
+            <!-- Base URL -->
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 mb-8">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Base URL</h4>
+                <code class="bg-gray-800 text-green-400 px-3 py-2 rounded text-sm">https://your-domain.com/api</code>
+            </div>
+
+            <!-- Authentication -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-key text-green-600 text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Authentication</h4>
+                    </div>
+                    <p class="text-gray-600 mb-4">Secure your API requests with JWT tokens obtained from the login endpoint.</p>
+                    <div class="bg-gray-100 p-4 rounded">
+                        <p class="text-sm"><strong>Header:</strong> <code>Authorization: Bearer <token></code></p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-shield-alt text-blue-600 text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Security</h4>
+                    </div>
+                    <p class="text-gray-600 mb-4">All API communication is encrypted via HTTPS. Rate limiting and authentication are enforced.</p>
+                    <ul class="space-y-1 text-sm text-gray-600">
+                        <li>• HTTPS required</li>
+                        <li>• Rate limiting: 1000 req/hour</li>
+                        <li>• CORS enabled for web apps</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- API Endpoints -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold text-gray-900 text-center mb-8">Available Endpoints</h3>
+                <div class="space-y-6">
+
+                    <!-- Auth Endpoints -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-blue-600 text-white px-6 py-3 rounded-t-lg">
+                            <h5 class="font-semibold">Authentication</h5>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div class="flex items-start space-x-4">
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">POST</span>
+                                    <div class="flex-1">
+                                        <code class="text-sm bg-gray-100 px-2 py-1 rounded">/auth/login</code>
+                                        <p class="text-sm text-gray-600 mt-1">Login with username/password and receive JWT token</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-4">
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">GET</span>
+                                    <div class="flex-1">
+                                        <code class="text-sm bg-gray-100 px-2 py-1 rounded">/auth/me</code>
+                                        <p class="text-sm text-gray-600 mt-1">Get current user information</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-4">
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-medium">POST</span>
+                                    <div class="flex-1">
+                                        <code class="text-sm bg-gray-100 px-2 py-1 rounded">/auth/logout</code>
+                                        <p class="text-sm text-gray-600 mt-1">Invalidate current session</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Endpoints -->
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div class="bg-green-600 text-white px-6 py-3 rounded-t-lg">
+                            <h5 class="font-semibold">Data Access</h5>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div class="flex items-start space-x-4">
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">GET</span>
+                                    <div class="flex-1">
+                                        <code class="text-sm bg-gray-100 px-2 py-1 rounded">/children</code>
+                                        <p class="text-sm text-gray-600 mt-1">Retrieve children data with filtering and pagination</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-4">
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">GET</span>
+                                    <div class="flex-1">
+                                        <code class="text-sm bg-gray-100 px-2 py-1 rounded">/animators</code>
+                                        <p class="text-sm text-gray-600 mt-1">Access animator profiles and information</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-4">
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">GET</span>
+                                    <div class="flex-1">
+                                        <code class="text-sm bg-gray-100 px-2 py-1 rounded">/calendar</code>
+                                        <p class="text-sm text-gray-600 mt-1">Fetch events, activities, and schedules</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-4">
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">GET</span>
+                                    <div class="flex-1">
+                                        <code class="text-sm bg-gray-100 px-2 py-1 rounded">/attendance</code>
+                                        <p class="text-sm text-gray-600 mt-1">Access attendance records and statistics</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Getting Started -->
+            <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Getting Started</h3>
+                    <p class="text-lg text-gray-600">Follow these steps to start using the AnimaID API</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-plus text-blue-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">1. Get API Access</h4>
+                        <p class="text-sm text-gray-600">Contact your administrator to obtain API credentials for your organization</p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-code text-green-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">2. Authenticate</h4>
+                        <p class="text-sm text-gray-600">Use the login endpoint to obtain a JWT token for API authentication</p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-rocket text-purple-600 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">3. Start Building</h4>
+                        <p class="text-sm text-gray-600">Use the comprehensive documentation to integrate AnimaID into your applications</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-8">
+                    <a href="documentation.html" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors">
+                        <i class="fas fa-book mr-2"></i>View Full Documentation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                        <h4 class="text-xl font-bold">AnimaID</h4>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Platform</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
+                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
+                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Support</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
+                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="../js/themeLanguageSwitcher.js"></script>
+</body>
+</html>

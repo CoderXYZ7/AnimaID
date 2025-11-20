@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimaID - Documentation</title>
+    <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../src/css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                    <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
+                    <a href="features.html" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
+                    <a href="../index.html#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
+                    <a href="contact.html" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+                    <!-- Unified Theme and Language Switcher -->
+                    <div class="flex items-center space-x-4">
+                        <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-sun"></i>
+                        </button>
+                        <div id="language-selector-container">
+                            <!-- Language selector will be dynamically inserted here by JavaScript -->
+                        </div>
+                    </div>
+                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
+                </nav>
+                <div class="md:hidden flex items-center space-x-2">
+                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </a>
+                    <button class="text-gray-600">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-indigo-50 to-purple-50 py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Documentation Center
+            </h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                Complete documentation for AnimaID platform, including installation, configuration, and API reference.
+            </p>
+        </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h3 class="text-3xl font-bold text-gray-900 mb-4">Available Documentation</h3>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Explore our comprehensive documentation to get the most out of AnimaID.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+
+                <!-- Installation Guide -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-download text-blue-600 text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Installation</h4>
+                    </div>
+                    <p class="text-gray-600 mb-6">Step-by-step guides for installing and setting up AnimaID on various platforms including Docker, traditional hosting, and cloud deployments.</p>
+                    <a href="../styleguide.html" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center">
+                        <i class="fas fa-external-link-alt mr-2 text-sm"></i>View Installation Guide
+                    </a>
+                </div>
+
+                <!-- User Manuals -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-book text-green-600 text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">User Manuals</h4>
+                    </div>
+                    <p class="text-gray-600 mb-6">Comprehensive user guides for staff members, administrators, and parents. Learn how to navigate and utilize all platform features.</p>
+                    <div class="space-y-2">
+                        <a href="../docs/UserManual.md" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center text-sm">
+                            <i class="fas fa-external-link-alt mr-2 text-xs"></i>Staff Manual (English)
+                        </a>
+                        <br>
+                        <a href="../docs/UserManual_IT.md" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center text-sm">
+                            <i class="fas fa-external-link-alt mr-2 text-xs"></i>Manuale Staff (Italiano)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- API Documentation -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-code text-purple-600 text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">API Reference</h4>
+                    </div>
+                    <p class="text-gray-600 mb-6">Complete REST API documentation including endpoints, authentication, and example code for integrating with AnimaID.</p>
+                    <a href="api.html" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center">
+                        <i class="fas fa-external-link-alt mr-2 text-sm"></i>View API Docs
+                    </a>
+                </div>
+
+                <!-- Style Guide -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-palette text-orange-600 text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Style Guide</h4>
+                    </div>
+                    <p class="text-gray-600 mb-6">Development guidelines and coding standards for maintaining consistent UI/UX across the platform.</p>
+                    <a href="../styleguide.html" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center">
+                        <i class="fas fa-external-link-alt mr-2 text-sm"></i>View Style Guide
+                    </a>
+                </div>
+
+                <!-- Tech Stack -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-cogs text-red-600 text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Technical Overview</h4>
+                    </div>
+                    <p class="text-gray-600 mb-6">Detailed information about the technical architecture, technologies used, and system requirements.</p>
+                    <a href="../docs/TechStack.md" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center">
+                        <i class="fas fa-external-link-alt mr-2 text-sm"></i>View Tech Stack
+                    </a>
+                </div>
+
+                <!-- Permissions -->
+                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-shield-alt text-teal-600 text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-900">Permissions Guide</h4>
+                    </div>
+                    <p class="text-gray-600 mb-6">Comprehensive guide to user roles, permissions, and access control mechanisms within AnimaID.</p>
+                    <a href="../docs/permissions_list.md" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center">
+                        <i class="fas fa-external-link-alt mr-2 text-sm"></i>View Permissions
+                    </a>
+                </div>
+            </div>
+
+            <!-- Getting Help -->
+            <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Need Additional Help?</h3>
+                    <p class="text-lg text-gray-600">Can't find what you're looking for? Our support team is here to help.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-question-circle text-blue-600 text-3xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Help Center</h4>
+                        <p class="text-sm text-gray-600 mb-4">Find answers to common questions and troubleshooting guides.</p>
+                        <a href="help-center.html" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                            Visit Help Center
+                        </a>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-envelope text-green-600 text-3xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Contact Support</h4>
+                        <p class="text-sm text-gray-600 mb-4">Get direct assistance from our technical support team.</p>
+                        <a href="contact.html" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                            Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
+                        <h4 class="text-xl font-bold">AnimaID</h4>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Platform</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
+                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
+                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="font-semibold mb-4">Support</h5>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
+                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="../js/themeLanguageSwitcher.js"></script>
+</body>
+</html>
