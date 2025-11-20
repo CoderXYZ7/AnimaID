@@ -111,7 +111,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.activities">Activities</p>
-                            <p class="text-2xl font-bold text-gray-900">-</p>
+                            <p class="text-2xl font-bold text-gray-900" id="stats-activities">-</p>
                         </div>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.children">Children</p>
-                            <p class="text-2xl font-bold text-gray-900">-</p>
+                            <p class="text-2xl font-bold text-gray-900" id="stats-children">-</p>
                         </div>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.reports">Reports</p>
-                            <p class="text-2xl font-bold text-gray-900">-</p>
+                            <p class="text-2xl font-bold text-gray-900" id="stats-reports">-</p>
                         </div>
                     </div>
                 </div>
@@ -335,22 +335,55 @@
             `).join('');
         }
 
-        // Load stats (mock data)
+        // Load stats from API endpoints
         async function loadStats() {
             try {
-                // Try to get real user count
-                const response = await fetch(`${API_BASE_URL}/users?page=1&limit=1`, {
-                    headers: {
-                        'Authorization': `Bearer ${userToken}`
+                // Load all stats in parallel
+                const endpoints = [
+                    { url: '/users?page=1&limit=1', elementId: 'stats-users' },
+                    { url: '/children?page=1&limit=1', elementId: 'stats-children' },
+                    { url: '/calendar?page=1&limit=1', elementId: 'stats-activities' },
+                    { url: '/reports', elementId: 'stats-reports', isReports: true }
+                ];
+
+                // Fetch all counts simultaneously
+                const promises = endpoints.map(async (endpoint) => {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}${endpoint.url}`, {
+                            headers: {
+                                'Authorization': `Bearer ${userToken}`
+                            }
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.success) {
+                                if (endpoint.isReports) {
+                                    // For reports, count the number of available report types
+                                    return { elementId: endpoint.elementId, count: data.reports ? data.reports.length : 0 };
+                                } else if (data.pagination) {
+                                    return { elementId: endpoint.elementId, count: data.pagination.total };
+                                }
+                            }
+                        }
+                        return { elementId: endpoint.elementId, count: '-' };
+                    } catch (error) {
+                        console.error(`Error loading stats for ${endpoint.elementId}:`, error);
+                        return { elementId: endpoint.elementId, count: '-' };
                     }
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        document.getElementById('stats-users').textContent = data.pagination.total;
+                // Wait for all requests to complete
+                const results = await Promise.all(promises);
+
+                // Update the DOM with the results
+                results.forEach(result => {
+                    const element = document.getElementById(result.elementId);
+                    if (element) {
+                        element.textContent = result.count;
                     }
-                }
+                });
+
             } catch (error) {
                 console.error('Error loading stats:', error);
                 // Keep default values
