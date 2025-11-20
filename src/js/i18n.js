@@ -556,6 +556,33 @@ const resources = {
             "info.privacy.title": "Informativa Privacy",
             "info.privacy.lastUpdated": "Ultimo aggiornamento: 20 novembre 2025",
 
+            // Content translations for applets page
+            "info.applets.what.title": "Cosa sono gli Applet?",
+            "info.applets.what.description": "Gli applets sono moduli autonomi che possono essere collegati ad AnimaID per aggiungere nuove funzionalità, integrazioni o personalizzare funzionalità esistenti. Sono progettati per essere:",
+            "info.applets.benefits.hotpluggable": "Hot-pluggable senza downtime del sistema",
+            "info.applets.benefits.secure": "Esecuzione sicura e sandboxed",
+            "info.applets.benefits.versioned": "Controllo versione per stabilità",
+            "info.applets.benefits.multideploy": "Capabile di deploy multipli",
+            "info.applets.benefits.easy": "Facile da sviluppare e mantenere",
+            "info.applets.benefits.container": "Compatibile con deployment containerizzati",
+            "info.applets.framework.title": "Framework Applet Core",
+            "info.applets.framework.description": "Interfacce standard per funzionalità consistenti",
+            "info.applets.security.title": "Sicurezza e Permessi",
+            "info.applets.security.description": "Accesso controllato e ambiente di esecuzione sicuro",
+            "info.applets.available.title": "Applet Disponibili",
+            "info.applets.available.description": "Applet e integrazioni in primo piano",
+            "info.applets.future.title": "Applet Futuri",
+            "info.applets.future.description": "Applet e integrazioni che tenteremo di implementare in futuro",
+            "info.applets.payment.title": "Integrazione Pagamenti",
+            "info.applets.payment.description": "Connetti con processori di pagamento per commissioni di registrazione senza interruzioni.",
+            "info.applets.notification.title": "Servizi Notifica",
+            "info.applets.notification.description": "Integrazioni SMS, email e notifiche push.",
+            "info.applets.calendar.title": "Sincronizzazione Calendario Esterno",
+            "info.applets.calendar.description": "Sincronizza con Google Calendar, Outlook e altri servizi.",
+            "info.applets.reporting.title": "Reportistica Avanzata",
+            "info.applets.reporting.description": "Generazione report personalizzati e business intelligence.",
+            // Add more content translations here as needed
+
             // Animators Management - Italian
             "animators.loading": "Caricamento gestione animatori...",
             "animators.title": "Gestione Animatori",
