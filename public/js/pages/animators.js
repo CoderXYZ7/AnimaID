@@ -73,16 +73,6 @@ async function loadAnimators(page = 1, filters = {}) {
 
 // Event Listeners
 function addEventListeners() {
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-        try {
-            await apiService.logout();
-        } catch (error) {
-            console.error('Logout error:', error);
-        }
-        localStorage.removeItem('animaid_token');
-        localStorage.removeItem('animaid_user');
-        window.location.href = '../login.html';
-    });
 
     document.getElementById('add-animator-btn').addEventListener('click', () => {
         openAnimatorModal();

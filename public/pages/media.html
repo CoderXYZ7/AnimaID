@@ -22,35 +22,7 @@
     <!-- Main Content -->
     <div id="main-content" class="hidden">
 
-        <!-- Header -->
-        <header class="bg-white shadow-sm border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center py-4">
-                    <div class="flex items-center space-x-2">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
-                    </div>
-
-                    <div class="flex items-center space-x-4">
-                        <a href="../dashboard.html" class="text-gray-600 hover:text-blue-600 transition-colors">
-                            <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
-                        </a>
-                        <button id="logout-btn" class="text-gray-600 hover:text-gray-900 transition-colors">
-                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
-                        </button>
-                        <!-- Unified Theme and Language Switcher -->
-                        <div class="flex items-center space-x-4">
-                            <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
-                                <i class="fas fa-sun"></i>
-                            </button>
-                            <div id="language-selector-container">
-                                <!-- Language selector will be dynamically inserted here by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <div id="main-header"></div>
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -1156,13 +1128,6 @@
         function handleSearch() {
             const searchTerm = document.getElementById('search-input').value.trim();
             // TODO: Implement search
-        }
-
-        // Logout function
-        function logout() {
-            localStorage.removeItem('animaid_token');
-            localStorage.removeItem('animaid_user');
-            window.location.href = '../login.html';
         }
 
         // Utility functions

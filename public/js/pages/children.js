@@ -521,22 +521,6 @@ function addEventListeners() {
             loadChildren(currentPage + 1, currentFilters);
         }
     });
-
-    // Logout
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-        try {
-            await fetch(`${API_BASE_URL}/auth/logout`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${userToken}` }
-            });
-        } catch (error) {
-            console.error('Logout error:', error);
-        }
-
-        localStorage.removeItem('animaid_token');
-        localStorage.removeItem('animaid_user');
-        window.location.href = '../login.html';
-    });
 }
 
 // Utility functions
