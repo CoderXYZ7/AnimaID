@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimaID - Contact</title>
+    <title data-i18n="info.contact.title">AnimaID - Contact Us</title>
     <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../src/css/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gray-50 min-h-screen">
 
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
@@ -21,11 +21,14 @@
                     <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
                     <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                 </div>
-                <nav class="hidden md:flex space-x-8">
-                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
-                    <a href="features.html" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
-                    <a href="../index.html#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
-                    <a href="contact.html" class="text-blue-600 font-medium">Contact</a>
+
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <i class="fas fa-home mr-1"></i>Back to Home
+                    </a>
+                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-i18n="index.nav.login">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
                     <!-- Unified Theme and Language Switcher -->
                     <div class="flex items-center space-x-4">
                         <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
@@ -35,262 +38,229 @@
                             <!-- Language selector will be dynamically inserted here by JavaScript -->
                         </div>
                     </div>
-                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Login
-                    </a>
-                </nav>
-                <div class="md:hidden flex items-center space-x-2">
-                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt"></i>
-                    </a>
-                    <button class="text-gray-600">
-                        <i class="fas fa-bars"></i>
-                    </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-cyan-50 to-blue-50 py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Contact Us
-            </h2>
-            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                Get in touch with our team for support, inquiries, or partnership opportunities.
-            </p>
-        </div>
-    </section>
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Contact Section -->
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
-
-                <!-- Contact Form -->
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-3 mb-4">
+                <button onclick="history.back()" class="text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
                 <div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h3>
-
-                    <form class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="first-name" class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
-                                <input
-                                    type="text"
-                                    id="first-name"
-                                    name="first_name"
-                                    required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                >
-                            </div>
-                            <div>
-                                <label for="last-name" class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
-                                <input
-                                    type="text"
-                                    id="last-name"
-                                    name="last_name"
-                                    required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                >
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            >
-                        </div>
-
-                        <div>
-                            <label for="organization" class="block text-sm font-medium text-gray-700 mb-2">Organization/Center Name</label>
-                            <input
-                                type="text"
-                                id="organization"
-                                name="organization"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            >
-                        </div>
-
-                        <div>
-                            <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">Subject *</label>
-                            <select
-                                id="subject"
-                                name="subject"
-                                required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            >
-                                <option value="">Select a subject</option>
-                                <option value="technical-support">Technical Support</option>
-                                <option value="account-help">Account Help</option>
-                                <option value="billing">Billing & Pricing</option>
-                                <option value="feature-request">Feature Request</option>
-                                <option value="partnership">Partnership Opportunities</option>
-                                <option value="general">General Inquiry</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Message *</label>
-                            <textarea
-                                id="message"
-                                name="message"
-                                rows="6"
-                                required
-                                placeholder="Please describe your inquiry in detail..."
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                            ></textarea>
-                        </div>
-
-                        <button
-                            type="submit"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-                        >
-                            <i class="fas fa-paper-plane mr-2"></i>Send Message
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Contact Information & FAQ -->
-                <div>
-                    <div class="mb-12">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h3>
-
-                        <div class="space-y-6">
-                            <div class="flex items-start">
-                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                                    <i class="fas fa-envelope text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 mb-1">Email Support</h4>
-                                    <p class="text-gray-600 mb-2">For technical support and general inquiries</p>
-                                    <a href="mailto:support@animaid.com" class="text-blue-600 hover:text-blue-700">support@animaid.com</a>
-                                </div>
-                            </div>
-
-                            <div class="flex items-start">
-                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                                    <i class="fas fa-phone text-green-600"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 mb-1">Phone Support</h4>
-                                    <p class="text-gray-600 mb-2">Available Monday-Friday, 9 AM - 6 PM CET</p>
-                                    <a href="tel:+393000000000" class="text-blue-600 hover:text-blue-700">+39 300 000 0000</a>
-                                </div>
-                            </div>
-
-                            <div class="flex items-start">
-                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                                    <i class="fas fa-map-marker-alt text-purple-600"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 mb-1">Office Location</h4>
-                                    <p class="text-gray-600">Milan, Italy</p>
-                                    <p class="text-gray-600 text-sm">Serving animation centers worldwide</p>
-                                </div>
-                            </div>
-
-                            <div class="flex items-start">
-                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                                    <i class="fas fa-clock text-orange-600"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 mb-1">Response Time</h4>
-                                    <p class="text-gray-600">We typically respond within 24-48 hours</p>
-                                    <p class="text-gray-600 text-sm">Emergency technical issues: within 4 hours</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Help Center Link -->
-                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                        <h4 class="font-semibold text-gray-900 mb-3">Looking for Quick Answers?</h4>
-                        <p class="text-gray-600 text-sm mb-4">Check out our comprehensive help center with FAQs and troubleshooting guides.</p>
-                        <a href="help-center.html" class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center text-sm">
-                            <i class="fas fa-question-circle mr-2"></i>Visit Help Center
-                        </a>
-                    </div>
-
-                    <!-- Social Links -->
-                    <div class="mt-8">
-                        <h4 class="font-semibold text-gray-900 mb-4">Follow Us</h4>
-                        <div class="flex space-x-4">
-                            <a href="#" class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors">
-                                <i class="fab fa-facebook-f text-gray-700"></i>
-                            </a>
-                            <a href="#" class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors">
-                                <i class="fab fa-twitter text-gray-700"></i>
-                            </a>
-                            <a href="#" class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors">
-                                <i class="fab fa-linkedin-in text-gray-700"></i>
-                            </a>
-                        </div>
-                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900" data-i18n="info.contact.title">Contact Us</h1>
+                    <p class="text-gray-600 mt-1" data-i18n="info.contact.subtitle">Get in touch with our support team</p>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h4 class="text-xl font-bold">AnimaID</h4>
+        <!-- Content -->
+        <div class="grid lg:grid-cols-2 gap-8">
+
+            <!-- Contact Form -->
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-envelope mr-2 text-blue-600"></i>Send us a Message</h2>
+
+                <form class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                            <input type="text" id="first-name" name="first-name" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="last-name" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                            <input type="text" id="last-name" name="last-name" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
                     </div>
-                    <p class="text-gray-400 mb-4">
-                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
-                    </p>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                        <input type="email" id="email" name="email" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
+                        <select id="subject" name="subject" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select a subject</option>
+                            <option value="technical">Technical Support</option>
+                            <option value="feature">Feature Request</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="billing">Billing Question</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="organization" class="block text-sm font-medium text-gray-700 mb-1">Organization (optional)</label>
+                        <input type="text" id="organization" name="organization"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                        <textarea id="message" name="message" rows="6" required
+                                  placeholder="Please provide details about your inquiry..."
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical"></textarea>
+                    </div>
+
+                    <div class="flex items-start">
+                        <input type="checkbox" id="newsletter" name="newsletter" class="mt-1">
+                        <label for="newsletter" class="ml-2 text-sm text-gray-600">
+                            I would like to receive updates about AnimaID and related services
+                        </label>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>Send Message
+                    </button>
+                </form>
+
+                <div id="form-message" class="mt-4 p-4 rounded-md hidden">
+                    <!-- Success or error messages will appear here -->
+                </div>
+            </div>
+
+            <!-- Contact Info & FAQ -->
+            <div class="space-y-6">
+
+                <!-- Contact Information -->
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-info-circle mr-2 text-green-600"></i>Contact Information</h2>
+
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-envelope text-blue-600 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Email Support</h3>
+                                <p class="text-gray-600">support@animaid.com</p>
+                                <p class="text-sm text-gray-500">We typically respond within 24 hours</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-globe text-purple-600 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Website</h3>
+                                <p class="text-gray-600">www.animaid.com</p>
+                                <p class="text-sm text-gray-500">Documentation and resources</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-clock text-orange-600 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Support Hours</h3>
+                                <p class="text-gray-600">Monday - Friday, 9:00 AM - 6:00 PM CET</p>
+                                <p class="text-sm text-gray-500">24/7 emergency support for critical issues</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick FAQ -->
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-question-circle mr-2 text-yellow-600"></i>Quick Answers</h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-1">How quickly will I get a response?</h3>
+                            <p class="text-sm text-gray-600">We aim to respond to all inquiries within 24 hours during business days.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibent text-gray-900 mb-1">Do you offer phone support?</h3>
+                            <p class="text-sm text-gray-600">Phone support is available for enterprise customers. Contact us to inquire about premium support options.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-1">Can I request new features?</h3>
+                            <p class="text-sm text-gray-600">Absolutely! We love feedback and feature requests. Please use the contact form above or check our documentation for more details.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Links -->
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-share-alt mr-2 text-blue-600"></i>Follow Us</h2>
+
                     <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-facebook-f"></i>
+                        <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors">
+                            <i class="fab fa-twitter text-2xl"></i>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-twitter"></i>
+                        <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors">
+                            <i class="fab fa-linkedin text-2xl"></i>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-linkedin-in"></i>
+                        <a href="#" class="text-gray-400 hover:text-blue-700 transition-colors">
+                            <i class="fab fa-facebook text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-red-600 transition-colors">
+                            <i class="fab fa-youtube text-2xl"></i>
                         </a>
                     </div>
+
+                    <p class="text-sm text-gray-600 mt-4">Stay updated with the latest AnimaID news and updates</p>
                 </div>
 
-                <div>
-                    <h5 class="font-semibold mb-4">Platform</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
-                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
-                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
-                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4">Support</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
-                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
-                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
-                    </ul>
-                </div>
             </div>
 
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-12 flex justify-between items-center">
+            <div class="flex space-x-3">
+                <a href="help-center.html" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Previous: Help Center
+                </a>
+            </div>
+
+            <div class="flex space-x-3">
+                <a href="privacy.html" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    Next: Privacy <i class="fas fa-arrow-right ml-2"></i>
+                </a>
             </div>
         </div>
-    </footer>
+
+    </main>
 
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
     <script type="module" src="../js/themeLanguageSwitcher.js"></script>
-</body>
+
+    <script>
+        // Basic form handling (for demo purposes)
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+            submitBtn.disabled = true;
+
+            // Simulate form submission
+            setTimeout(() => {
+                const messageDiv = document.getElementById('form-message');
+                messageDiv.className = 'mt-4 p-4 rounded-md bg-green-50 border border-green-200';
+                messageDiv.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-2"></i><span class="text-green-800">Thank you! Your message has been sent successfully. We will get back to you soon.</span>';
+                messageDiv.classList.remove('hidden');
+
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+
+                // Reset form
+                e.target.reset();
+            }, 2000);
+        });
+    </script>
 </body>
 </html>

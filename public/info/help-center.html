@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimaID - Help Center</title>
+    <title data-i18n="info.helpcenter.title">AnimaID - Help Center</title>
     <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../src/css/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gray-50 min-h-screen">
 
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
@@ -21,11 +21,14 @@
                     <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
                     <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                 </div>
-                <nav class="hidden md:flex space-x-8">
-                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
-                    <a href="features.html" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
-                    <a href="../index.html#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
-                    <a href="contact.html" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <i class="fas fa-home mr-1"></i>Back to Home
+                    </a>
+                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-i18n="index.nav.login">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
                     <!-- Unified Theme and Language Switcher -->
                     <div class="flex items-center space-x-4">
                         <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
@@ -35,255 +38,139 @@
                             <!-- Language selector will be dynamically inserted here by JavaScript -->
                         </div>
                     </div>
-                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Login
-                    </a>
-                </nav>
-                <div class="md:hidden flex items-center space-x-2">
-                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt"></i>
-                    </a>
-                    <button class="text-gray-600">
-                        <i class="fas fa-bars"></i>
-                    </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-yellow-50 to-orange-50 py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Help Center
-            </h2>
-            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                Find answers to common questions about AnimaID and get the help you need.
-            </p>
-        </div>
-    </section>
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- FAQ Section -->
-    <section class="py-20 bg-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h3 class="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h3>
-                <p class="text-lg text-gray-600">Common questions and answers about using AnimaID</p>
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-3 mb-4">
+                <button onclick="history.back()" class="text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900" data-i18n="info.helpcenter.title">Help Center</h1>
+                    <p class="text-gray-600 mt-1" data-i18n="info.helpcenter.subtitle">Find answers to common questions and get support</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="space-y-8">
+
+            <!-- FAQ Sections -->
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-question-circle mr-2 text-blue-600"></i>Frequently Asked Questions</h2>
+
+                <div class="space-y-6">
+
+                    <div class="border-b border-gray-200 pb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3">How do I reset my password?</h3>
+                        <p class="text-gray-700">If you've forgotten your password, contact your system administrator or use the "Forgot Password" link on the login page (if available).</p>
+                    </div>
+
+                    <div class="border-b border-gray-200 pb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3">What are my access permissions?</h3>
+                        <p class="text-gray-700">Your access level depends on your assigned role. Check the dashboard or contact your administrator to see which modules you can access.</p>
+                    </div>
+
+                    <div class="border-b border-gray-200 pb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3">How do I report an issue?</h3>
+                        <p class="text-gray-700">Use the contact form below or reach out to your system administrator directly with details about the problem.</p>
+                    </div>
+
+                    <div class="border-b border-gray-200 pb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3">Can I access AnimaID on mobile devices?</h3>
+                        <p class="text-gray-700">Yes! AnimaID is fully responsive and works on smartphones and tablets. Staff can also use dedicated mobile apps for certain features like attendance tracking.</p>
+                    </div>
+
+                    <div class="pb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3">How do I change my language preferences?</h3>
+                        <p class="text-gray-700">Use the language selector in the header area. Your preference will be saved automatically for future sessions.</p>
+                    </div>
+
+                </div>
             </div>
 
-            <div class="space-y-6">
-                <!-- Getting Started -->
-                <div class="bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="bg-blue-600 text-white px-6 py-4 rounded-t-lg">
-                        <h4 class="font-semibold flex items-center">
-                            <i class="fas fa-rocket mr-3"></i>Getting Started
-                        </h4>
+            <!-- Getting Started -->
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-rocket mr-2 text-green-600"></i>Getting Started</h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-3">For Parents & Families</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li><i class="fas fa-check text-green-600 mr-2"></i>View public events calendar</li>
+                            <li><i class="fas fa-check text-green-600 mr-2"></i>Online child registration</li>
+                            <li><i class="fas fa-check text-green-600 mr-2"></i>Access public announcements</li>
+                            <li><i class="fas fa-check text-green-600 mr-2"></i>Browse media gallery</li>
+                        </ul>
                     </div>
-                    <div class="p-6 space-y-4">
 
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I access AnimaID?</h5>
-                            <p class="text-gray-600">Go to the login page and enter your credentials provided by your center administrator. If you don't have credentials, contact your center's management team.</p>
-                        </div>
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">What browsers are supported?</h5>
-                            <p class="text-gray-600">AnimaID works best with modern browsers including Chrome, Firefox, Safari, and Edge. We recommend keeping your browser updated for the best experience.</p>
-                        </div>
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I reset my password?</h5>
-                            <p class="text-gray-600">Contact your center administrator to reset your password. They will verify your identity and provide you with new login credentials.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Managing Children -->
-                <div class="bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="bg-green-600 text-white px-6 py-4 rounded-t-lg">
-                        <h4 class="font-semibold flex items-center">
-                            <i class="fas fa-child mr-3"></i>Managing Children
-                        </h4>
-                    </div>
-                    <div class="p-6 space-y-4">
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I check in a child?</h5>
-                            <p class="text-gray-600">Go to the Attendance section, select an event, search for the child by name or registration number, and click the check-in button.</p>
-                        </div>
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I view attendance records?</h5>
-                            <p class="text-gray-600">In the Attendance section, click "View Records" to see historical attendance data with filtering and search capabilities.</p>
-                        </div>
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I add a new child?</h5>
-                            <p class="text-gray-600">Navigate to the Children section and click "Add Child". Fill in all required information including parent contact details and emergency contacts.</p>
-                        </div>
+                    <div>
+                        <h3 class="font-semibold text-lg mb-3">For Staff Members</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li><i class="fas fa-check text-blue-600 mr-2"></i>Login with your credentials</li>
+                            <li><i class="fas fa-check text-blue-600 mr-2"></i>Access your dashboard</li>
+                            <li><i class="fas fa-check text-blue-600 mr-2"></i>Use assigned modules</li>
+                            <li><i class="fas fa-check text-blue-600 mr-2"></i>Check system notifications</li>
+                        </ul>
                     </div>
                 </div>
-
-                <!-- Scheduling and Events -->
-                <div class="bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="bg-purple-600 text-white px-6 py-4 rounded-t-lg">
-                        <h4 class="font-semibold flex items-center">
-                            <i class="fas fa-calendar-alt mr-3"></i>Scheduling and Events
-                        </h4>
-                    </div>
-                    <div class="p-6 space-y-4">
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I create an event?</h5>
-                            <p class="text-gray-600">Go to the Calendar section, click "Add Event", and fill in all the event details including date, time, location, and participant limits.</p>
-                        </div>
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do children register for activities?</h5>
-                            <p class="text-gray-600">Parents can view available activities through the public portal and register their children. Staff members can also register children directly in the system.</p>
-                        </div>
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I edit an existing event?</h5>
-                            <p class="text-gray-600">In the Calendar section, find the event you want to modify, click the edit button (pencil icon), make your changes, and save.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Staff Management -->
-                <div class="bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="bg-orange-600 text-white px-6 py-4 rounded-t-lg">
-                        <h4 class="font-semibold flex items-center">
-                            <i class="fas fa-users mr-3"></i>Staff Management
-                        </h4>
-                    </div>
-                    <div class="p-6 space-y-4">
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I manage staff roles?</h5>
-                            <p class="text-gray-600">Administrators can manage staff roles and permissions through the user management section in the admin panel.</p>
-                        </div>
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I assign shifts to staff?</h5>
-                            <p class="text-gray-600">Use the staff coordination features to assign and manage work shifts, ensuring proper coverage for all activities.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Communications -->
-                <div class="bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="bg-red-600 text-white px-6 py-4 rounded-t-lg">
-                        <h4 class="font-semibold flex items-center">
-                            <i class="fas fa-comments mr-3"></i>Communications
-                        </h4>
-                    </div>
-                    <div class="p-6 space-y-4">
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I send messages to parents?</h5>
-                            <p class="text-gray-600">Use the Communications section to send individual messages or broadcast announcements to parents and families.</p>
-                        </div>
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">How do I share media with parents?</h5>
-                            <p class="text-gray-600">Upload photos and videos in the Media Manager and share them through the public portal or direct parent communication.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Technical Issues -->
-                <div class="bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="bg-indigo-600 text-white px-6 py-4 rounded-t-lg">
-                        <h4 class="font-semibold flex items-center">
-                            <i class="fas fa-cog mr-3"></i>Technical Issues
-                        </h4>
-                    </div>
-                    <div class="p-6 space-y-4">
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">The system is running slow</h5>
-                            <p class="text-gray-600">Try clearing your browser cache, close unused tabs, or try a different browser. If the problem persists, contact technical support.</p>
-                        </div>
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">I can't access certain features</h5>
-                            <p class="text-gray-600">Check with your administrator to ensure you have the proper permissions. Some features are restricted based on your role.</p>
-                        </div>
-
-                        <div class="border-b border-gray-200 pb-4 last:border-b-0">
-                            <h5 class="font-semibold text-gray-900 mb-2">My session expired</h5>
-                            <p class="text-gray-600">Log back in with your credentials. Sessions automatically expire after a period of inactivity for security.</p>
-                        </div>
-                    </div>
-                </div>
-
             </div>
 
             <!-- Contact Support -->
-            <div class="mt-16 text-center">
-                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Still Need Help?</h3>
-                    <p class="text-gray-600 mb-8">Can't find the answer you're looking for? Contact our support team.</p>
-                    <a href="contact.html" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors inline-flex items-center">
-                        <i class="fas fa-envelope mr-2"></i>Contact Support
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6"><i class="fas fa-life-ring mr-2 text-red-600"></i>Need More Help?</h2>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h4 class="text-xl font-bold">AnimaID</h4>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="font-semibold text-lg mb-3">Contact Your Administrator</h3>
+                        <p class="text-gray-700 mb-4">For technical issues, access problems, or system-related questions, contact your organization's AnimaID administrator.</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-blue-800 text-sm"><strong>Internal Support:</strong><br>Contact your system administrator.</p>
+                        </div>
                     </div>
-                    <p class="text-gray-400 mb-4">
-                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
+
+                    <div>
+                        <h3 class="font-semibold text-lg mb-3">Technical Support</h3>
+                        <p class="text-gray-700 mb-4">For development questions, feature requests, or general technical support.</p>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <p class="text-green-800 text-sm"><strong>External Support:</strong><br><a href="contact.html" class="text-green-600 hover:underline">Contact Form</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <p class="text-yellow-800">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Emergency:</strong> If you're experiencing a critical system outage or data emergency, contact your administrator immediately.
                     </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4">Platform</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
-                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
-                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
-                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4">Support</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
-                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
-                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
-                    </ul>
                 </div>
             </div>
 
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-12 flex justify-between items-center">
+            <div class="flex space-x-3">
+                <a href="documentation.html" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Previous: Documentation
+                </a>
+            </div>
+
+            <div class="flex space-x-3">
+                <a href="contact.html" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    Next: Contact <i class="fas fa-arrow-right ml-2"></i>
+                </a>
             </div>
         </div>
-    </footer>
+
+    </main>
 
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
     <script type="module" src="../js/themeLanguageSwitcher.js"></script>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimaID - Applets</title>
+    <title data-i18n="info.applets.title">AnimaID - Applets & Extensibility</title>
     <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../src/css/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gray-50 min-h-screen">
 
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
@@ -21,11 +21,14 @@
                     <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
                     <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                 </div>
-                <nav class="hidden md:flex space-x-8">
-                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
-                    <a href="features.html" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
-                    <a href="../index.html#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
-                    <a href="contact.html" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <i class="fas fa-home mr-1"></i>Back to Home
+                    </a>
+                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-i18n="index.nav.login">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
                     <!-- Unified Theme and Language Switcher -->
                     <div class="flex items-center space-x-4">
                         <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
@@ -35,259 +38,196 @@
                             <!-- Language selector will be dynamically inserted here by JavaScript -->
                         </div>
                     </div>
-                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Login
-                    </a>
-                </nav>
-                <div class="md:hidden flex items-center space-x-2">
-                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt"></i>
-                    </a>
-                    <button class="text-gray-600">
-                        <i class="fas fa-bars"></i>
-                    </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-purple-50 to-pink-50 py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Modular Applets System
-            </h2>
-            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                Extend AnimaID's functionality with hot-pluggable applets that adapt to your specific center's needs.
-            </p>
-        </div>
-    </section>
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Applets Section -->
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h3 class="text-3xl font-bold text-gray-900 mb-4">System Extensibility</h3>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                    Our modular architecture allows seamless integration of custom features and third-party services.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-                <!-- Core Architecture -->
-                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
-                            <i class="fas fa-puzzle-piece text-purple-600 text-xl"></i>
-                        </div>
-                        <h4 class="text-xl font-bold text-gray-900">Plugin Architecture</h4>
-                    </div>
-                    <p class="text-gray-600 mb-4">Our extensible system is built on a robust plugin framework that allows developers and organizations to add custom functionality without modifying core code.</p>
-                    <ul class="space-y-2">
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-600 text-sm mr-2"></i>
-                            <span class="text-sm">Hot-pluggable modules</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-600 text-sm mr-2"></i>
-                            <span class="text-sm">Sandboxed execution</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-600 text-sm mr-2"></i>
-                            <span class="text-sm">Version compatibility</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-600 text-sm mr-2"></i>
-                            <span class="text-sm">Security sandboxed</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- API Integration -->
-                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                            <i class="fas fa-plug text-blue-600 text-xl"></i>
-                        </div>
-                        <h4 class="text-xl font-bold text-gray-900">Seamless Integration</h4>
-                    </div>
-                    <p class="text-gray-600 mb-4">Connect with external services, payment processors, educational platforms, and more through our comprehensive API system.</p>
-                    <ul class="space-y-2">
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-600 text-sm mr-2"></i>
-                            <span class="text-sm">RESTful API endpoints</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-600 text-sm mr-2"></i>
-                            <span class="text-sm">Webhooks support</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-600 text-sm mr-2"></i>
-                            <span class="text-sm">OAuth2 authentication</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-600 text-sm mr-2"></i>
-                            <span class="text-sm">Third-party connectors</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Popular Applets -->
-            <div class="mb-16">
-                <h3 class="text-2xl font-bold text-gray-900 text-center mb-8">Popular Applets</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Payment Integration -->
-                    <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
-                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                            <i class="fas fa-credit-card text-green-600"></i>
-                        </div>
-                        <h5 class="font-semibold text-gray-900 mb-2">Payment Processing</h5>
-                        <p class="text-sm text-gray-600">Integrate payment gateways for fees and registrations</p>
-                    </div>
-
-                    <!-- Learning Management -->
-                    <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
-                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                            <i class="fas fa-graduation-cap text-blue-600"></i>
-                        </div>
-                        <h5 class="font-semibold text-gray-900 mb-2">Learning Management</h5>
-                        <p class="text-sm text-gray-600">Connect with educational platforms for curriculum tracking</p>
-                    </div>
-
-                    <!-- Parent Portal -->
-                    <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
-                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                            <i class="fas fa-house-user text-orange-600"></i>
-                        </div>
-                        <h5 class="font-semibold text-gray-900 mb-2">Enhanced Parent Portal</h5>
-                        <p class="text-sm text-gray-600">Custom parent communication and engagement tools</p>
-                    </div>
-
-                    <!-- Health Tracking -->
-                    <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
-                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                            <i class="fas fa-heart text-red-600"></i>
-                        </div>
-                        <h5 class="font-semibold text-gray-900 mb-2">Health & Safety</h5>
-                        <p class="text-sm text-gray-600">Advanced health monitoring and incident reporting</p>
-                    </div>
-
-                    <!-- Custom Reports -->
-                    <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
-                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                            <i class="fas fa-chart-pie text-purple-600"></i>
-                        </div>
-                        <h5 class="font-semibold text-gray-900 mb-2">Advanced Analytics</h5>
-                        <p class="text-sm text-gray-600">Custom dashboard widgets and reporting tools</p>
-                    </div>
-
-                    <!-- Equipment Management -->
-                    <div class="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
-                        <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
-                            <i class="fas fa-tools text-teal-600"></i>
-                        </div>
-                        <h5 class="font-semibold text-gray-900 mb-2">Equipment Tracking</h5>
-                        <p class="text-sm text-gray-600">Inventory management for center resources and materials</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Development Info -->
-            <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
-                <div class="text-center mb-8">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Develop Your Own Applets</h3>
-                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-                        Our extensive developer documentation and SDK make it easy to create custom applets that perfectly match your center's unique needs.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-code text-purple-600 text-2xl"></i>
-                        </div>
-                        <h4 class="font-semibold text-gray-900 mb-2">Easy Development</h4>
-                        <p class="text-sm text-gray-600">Simple API and comprehensive documentation for rapid development</p>
-                    </div>
-
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-share-alt text-green-600 text-2xl"></i>
-                        </div>
-                        <h4 class="font-semibold text-gray-900 mb-2">Community Sharing</h4>
-                        <p class="text-sm text-gray-600">Share your applets with the community and benefit from others' work</p>
-                    </div>
-
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-certificate text-blue-600 text-2xl"></i>
-                        </div>
-                        <h4 class="font-semibold text-gray-900 mb-2">Official Certification</h4>
-                        <p class="text-sm text-gray-600">Get your applets certified for marketplace distribution</p>
-                    </div>
-                </div>
-
-                <div class="text-center mt-8">
-                    <a href="documentation.html" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-8 rounded-lg transition-colors">
-                        <i class="fas fa-book mr-2"></i>View Developer Documentation
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h4 class="text-xl font-bold">AnimaID</h4>
-                    </div>
-                    <p class="text-gray-400 mb-4">
-                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                    </div>
-                </div>
-
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-3 mb-4">
+                <button onclick="history.back()" class="text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
                 <div>
-                    <h5 class="font-semibold mb-4">Platform</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
-                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
-                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
-                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
-                    </ul>
+                    <h1 class="text-3xl font-bold text-gray-900" data-i18n="info.applets.title">Applets & Extensibility</h1>
+                    <p class="text-gray-600 mt-1" data-i18n="info.applets.subtitle">AnimaID's modular architecture and hot-pluggable extensions</p>
                 </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4">Support</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
-                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
-                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
             </div>
         </div>
-    </footer>
+
+        <!-- Content -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
+            <div class="prose prose-lg max-w-none">
+
+                <h2><i class="fas fa-puzzle-piece mr-2 text-purple-600"></i>Introduction to AnimaID</h2>
+                <p>AnimaID is a management and coordination platform for <strong>animation centers</strong>, <strong>educational labs</strong>, and <strong>recreational activities</strong>. Its goal is to provide a <strong>unified digital environment</strong> to coordinate staff, organize activities, manage attendance, registrations, and communications, while also offering a public window accessible to parents and families.</p>
+                <p>The system is designed to be:</p>
+                <ul>
+                    <li><strong>Scalable</strong> and easily adaptable to multiple centers (multi-deployment)</li>
+                    <li><strong>Extensible</strong> through a modular Applets system</li>
+                    <li><strong>Accessible</strong> from web and mobile devices</li>
+                    <li><strong>Containerizable and portable</strong> in cloud or on-premise environments</li>
+                </ul>
+
+                <h2><i class="fas fa-users mr-2 text-blue-600"></i>User Types</h2>
+
+                <h3><i class="fas fa-cog mr-2 text-orange-600"></i>Technical Admins</h3>
+                <p>Manage the platform at a systemic level: center instance creation, role management, permissions, backups, and updates.</p>
+
+                <h3><i class="fas fa-user-tie mr-2 text-green-600"></i>AnimaID Staff</h3>
+                <p>Operational center personnel organized in progressive responsibility levels with cumulative tags: @organizzatore, @responsabile, @animatore, @aiutoanimatore.</p>
+
+                <h3><i class="fas fa-users mr-2 text-teal-600"></i>Parents & External Users</h3>
+                <p>Access the public portal for calendar consultation, child registration, and approved communications/media without permanent login.</p>
+
+                <h2><i class="fas fa-layer-group mr-2 text-indigo-600"></i>Two-Layer Architecture: Modules and Applets</h2>
+
+                <div class="bg-gray-50 p-6 rounded-lg my-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-3"><i class="fas fa-database mr-2"></i>Base Layer - Core Modules</h4>
+                            <ul class="space-y-2">
+                                <li><i class="fas fa-check text-green-600 mr-2"></i>Registrations and Records</li>
+                                <li><i class="fas fa-check text-green-600 mr-2"></i>Public and Operational Calendar</li>
+                                <li><i class="fas fa-check text-green-600 mr-2"></i>Attendance and Shifts</li>
+                                <li><i class="fas fa-check text-green-600 mr-2"></i>Communications (internal/public)</li>
+                                <li><i class="fas fa-check text-green-600 mr-2"></i>Wiki / Games Database</li>
+                                <li><i class="fas fa-check text-green-600 mr-2"></i>Media & Document Explorer</li>
+                                <li><i class="fas fa-check text-green-600 mr-2"></i>Space Booking and Map</li>
+                                <li><i class="fas fa-check text-green-600 mr-2"></i>Reporting and KPIs</li>
+                                <li><i class="fas fa-check text-green-600 mr-2"></i>Role and Permission Management</li>
+                                <li><i class="fas fa-check text-green-600 mr-2"></i>Center Configuration and Setup</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="font-semibold text-lg mb-3"><i class="fas fa-plug mr-2"></i>Upper Layer - Applets</h4>
+                            <ul class="space-y-2">
+                                <li><i class="fas fa-plus text-purple-600 mr-2"></i>Advanced Planner</li>
+                                <li><i class="fas fa-plus text-purple-600 mr-2"></i>Child Card+</li>
+                                <li><i class="fas fa-plus text-purple-600 mr-2"></i>Digital Signatures Module</li>
+                                <li><i class="fas fa-plus text-purple-600 mr-2"></i>Interactive 3D Map</li>
+                                <li><i class="fas fa-plus text-purple-600 mr-2"></i>Photo Day Manager</li>
+                                <li><i class="fas fa-plus text-purple-600 mr-2"></i>Feedback Center</li>
+                                <li><i class="fas fa-plus text-purple-600 mr-2"></i>Event Trigger Bot</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-lg mb-3"><i class="fas fa-shopping-basket mr-2"></i>Applet Catalog / Extension Manager</h4>
+                        <p>Centralized management of applets with version control, permissions, and hot-pluggable capabilities.</p>
+                    </div>
+                </div>
+
+                <h2><i class="fas fa-cogs mr-2 text-red-600"></i>Applets Catalog and Extension Logics</h2>
+
+                <h3>Example Applet Manifest</h3>
+                <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto"><code>id: applet.feedback_center
+name: Feedback Center
+description: Collection of feedback from parents and staff
+dependencies:
+  - module: communications
+  - module: wiki
+permissions:
+  - read: communications
+  - write: feedback
+entrypoint: /applets/feedback</code></pre>
+
+                <h3>Key Features</h3>
+                <ul>
+                    <li><strong>Centralized management</strong> in the Applets Catalog</li>
+                    <li>Each applet defines <strong>dependencies on modules</strong> and <strong>required permissions</strong></li>
+                    <li><strong>Hot-pluggable system</strong>: applets can be activated/deactivated without interrupting service</li>
+                    <li>Possibility of <strong>external catalog (marketplace)</strong> for distribution</li>
+                </ul>
+
+                <h2><i class="fab fa-connectdevelop mr-2 text-blue-600"></i>Interfaces</h2>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-300 rounded-lg">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-semibold">Interface</th>
+                                <th class="px-4 py-2 text-left font-semibold">Platform</th>
+                                <th class="px-4 py-2 text-left font-semibold">User Type</th>
+                                <th class="px-4 py-2 text-left font-semibold">Key Features</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-4 py-3">Administrative Console</td>
+                                <td class="px-4 py-3">Web</td>
+                                <td class="px-4 py-3">Technical Admin</td>
+                                <td class="px-4 py-3">Configuration Dashboard, System Monitoring</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3">Staff Web App</td>
+                                <td class="px-4 py-3">Web</td>
+                                <td class="px-4 py-3">Staff</td>
+                                <td class="px-4 py-3">Daily Dashboard, Registration Management, Operational Calendar</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3">Staff Mobile App</td>
+                                <td class="px-4 py-3">Android</td>
+                                <td class="px-4 py-3">Staff</td>
+                                <td class="px-4 py-3">Check-in/Check-out, Internal Chat, Push Notifications</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3">Public Portal</td>
+                                <td class="px-4 py-3">Web</td>
+                                <td class="px-4 py-3">Parents</td>
+                                <td class="px-4 py-3">Online Registration, Public Events Calendar, Media Gallery</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3">API Gateway</td>
+                                <td class="px-4 py-3">API</td>
+                                <td class="px-4 py-3">All</td>
+                                <td class="px-4 py-3">Authentication, Operational Data, Media, Notifications</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2><i class="fas fa-eye mr-2 text-green-600"></i>Future Vision</h2>
+                <p>AnimaID is not just a management system, but a <strong>modular ecosystem</strong> designed to grow with the needs of animation centers. The division between <strong>core modules</strong> and <strong>applets</strong> allows for high customization, agile feature management, and technological evolution without invasive migrations.</p>
+
+                <h3>Possible Evolutions</h3>
+                <ul>
+                    <li><strong>Internal App Store system</strong></li>
+                    <li><strong>Integration with educational platforms and digital payments</strong></li>
+                    <li><strong>Support for public APIs for external partners</strong></li>
+                    <li><strong>Automations via event triggers</strong></li>
+                    <li><strong>Predictive analytics to optimize planning</strong></li>
+                </ul>
+
+                <div class="bg-purple-50 border-l-4 border-purple-400 p-4 my-6">
+                    <p class="text-purple-700"><i class="fas fa-lightbulb mr-2"></i>The applets system enables AnimaID to evolve rapidly while maintaining a stable, reliable core platform that centers can depend on for their daily operations.</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-8 flex justify-between items-center">
+            <div class="flex space-x-3">
+                <a href="modules.html" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Previous: Modules
+                </a>
+            </div>
+
+            <div class="flex space-x-3">
+                <a href="api.html" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    Next: API <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+
+    </main>
 
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
     <script type="module" src="../js/themeLanguageSwitcher.js"></script>

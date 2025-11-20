@@ -144,6 +144,24 @@ const resources = {
             "index.footer.support.privacy": "Privacy",
             "index.footer.copyright": "© 2025 AnimaID. All rights reserved. Version 0.9 - Draft",
 
+            // Info Pages
+            "info.features.title": "Core Features",
+            "info.features.subtitle": "Everything you need to know about AnimaID's comprehensive features",
+            "info.modules.title": "Tech Stack & Modules",
+            "info.modules.subtitle": "AnimaID's technical architecture and modular system",
+            "info.applets.title": "Applets & Extensibility",
+            "info.applets.subtitle": "AnimaID's modular architecture and hot-pluggable extensions",
+            "info.api.title": "API Documentation",
+            "info.api.subtitle": "RESTful API endpoints for authentication and system management",
+            "info.documentation.title": "User Manual",
+            "info.documentation.subtitle": "Comprehensive guide for using AnimaID platform",
+            "info.helpcenter.title": "Help Center",
+            "info.helpcenter.subtitle": "Find answers to common questions and get support",
+            "info.contact.title": "Contact Us",
+            "info.contact.subtitle": "Get in touch with our support team",
+            "info.privacy.title": "Privacy Policy",
+            "info.privacy.subtitle": "How we collect, use, and protect your personal information",
+
             // Animators Management
             "animators.loading": "Loading animators management...",
             "animators.title": "Animators Management",
@@ -377,6 +395,24 @@ const resources = {
             "index.footer.support.contact": "Contatti",
             "index.footer.support.privacy": "Privacy",
             "index.footer.copyright": "© 2025 AnimaID. Tutti i diritti riservati. Versione 0.9 - Bozza",
+
+            // Info Pages - Italian
+            "info.features.title": "Funzionalità Principali",
+            "info.features.subtitle": "Tutto ciò che devi sapere sulle funzionalità complete di AnimaID",
+            "info.modules.title": "Stack Tecnologico e Moduli",
+            "info.modules.subtitle": "Architettura tecnica e sistema modulare di AnimaID",
+            "info.applets.title": "Applet ed Estensibilità",
+            "info.applets.subtitle": "Architettura modulare e estensioni hot-pluggable di AnimaID",
+            "info.api.title": "Documentazione API",
+            "info.api.subtitle": "Endpoint API RESTful per autenticazione e gestione sistema",
+            "info.documentation.title": "Manuale Utente",
+            "info.documentation.subtitle": "Guida completa per utilizzare la piattaforma AnimaID",
+            "info.helpcenter.title": "Centro Assistenza",
+            "info.helpcenter.subtitle": "Trova risposte alle domande comuni e ottieni supporto",
+            "info.contact.title": "Contattaci",
+            "info.contact.subtitle": "Mettiti in contatto con il nostro team di supporto",
+            "info.privacy.title": "Politica sulla Privacy",
+            "info.privacy.subtitle": "Come raccogliamo, utilizziamo e proteggiamo le tue informazioni personali",
 
             // Animators Management - Italian
             "animators.loading": "Caricamento gestione animatori...",

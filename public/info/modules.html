@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimaID - Modules</title>
+    <title data-i18n="info.modules.title">AnimaID - Tech Stack & Modules</title>
     <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../src/css/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gray-50 min-h-screen">
 
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
@@ -21,11 +21,14 @@
                     <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
                     <h1 class="text-2xl font-bold text-gray-900">AnimaID</h1>
                 </div>
-                <nav class="hidden md:flex space-x-8">
-                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
-                    <a href="features.html" class="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
-                    <a href="../index.html#about" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
-                    <a href="contact.html" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <i class="fas fa-home mr-1"></i>Back to Home
+                    </a>
+                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-i18n="index.nav.login">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
                     <!-- Unified Theme and Language Switcher -->
                     <div class="flex items-center space-x-4">
                         <button id="theme-switcher" class="text-gray-600 hover:text-gray-900 transition-colors">
@@ -35,285 +38,213 @@
                             <!-- Language selector will be dynamically inserted here by JavaScript -->
                         </div>
                     </div>
-                    <a href="../login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt mr-1"></i>Login
-                    </a>
-                </nav>
-                <div class="md:hidden flex items-center space-x-2">
-                    <a href="../login.html" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-sign-in-alt"></i>
-                    </a>
-                    <button class="text-gray-600">
-                        <i class="fas fa-bars"></i>
-                    </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-green-50 to-blue-50 py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Platform Modules
-            </h2>
-            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                Explore the comprehensive modules that power AnimaID's functionality across multiple centers.
-            </p>
-        </div>
-    </section>
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Modules Section -->
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h3 class="text-3xl font-bold text-gray-900 mb-4">Core Modules</h3>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                    Specialized modules that address every aspect of animation center management.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Staff Module -->
-                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mr-6">
-                            <i class="fas fa-users text-blue-600 text-3xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Staff Coordination</h4>
-                            <p class="text-gray-600">Comprehensive staff management and coordination tools</p>
-                        </div>
-                    </div>
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Role-based access control</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Shift scheduling and management</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Performance tracking</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Training records</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Children Module -->
-                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mr-6">
-                            <i class="fas fa-child text-green-600 text-3xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Children Management</h4>
-                            <p class="text-gray-600">Complete child registration and profile management</p>
-                        </div>
-                    </div>
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Family registration system</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Medical records and allergy tracking</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Emergency contacts</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Progress reports</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Attendance Module -->
-                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mr-6">
-                            <i class="fas fa-clipboard-check text-purple-600 text-3xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Attendance Tracking</h4>
-                            <p class="text-gray-600">Streamlined check-in/check-out and attendance monitoring</p>
-                        </div>
-                    </div>
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Digital check-in/check-out</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Real-time attendance reports</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Parent notifications</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Hours tracking for billing</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Calendar Module -->
-                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mr-6">
-                            <i class="fas fa-calendar-alt text-orange-600 text-3xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Calendar & Events</h4>
-                            <p class="text-gray-600">Comprehensive activity scheduling and event management</p>
-                        </div>
-                    </div>
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Event creation and management</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Activity registration</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Reservation system</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Public calendar sharing</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Communications Module -->
-                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center mr-6">
-                            <i class="fas fa-comments text-red-600 text-3xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Communications</h4>
-                            <p class="text-gray-600">Internal and external communication tools</p>
-                        </div>
-                    </div>
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Internal messaging system</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Public announcement board</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Email notifications</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Media sharing platform</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Analytics Module -->
-                <div class="bg-gray-50 rounded-lg p-8 border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mr-6">
-                            <i class="fas fa-chart-bar text-indigo-600 text-3xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-2xl font-bold text-gray-900 mb-2">Analytics & Reports</h4>
-                            <p class="text-gray-600">Data-driven insights for better decision making</p>
-                        </div>
-                    </div>
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>KPI dashboards</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Custom reporting tools</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Financial analytics</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-check text-green-600 mr-3"></i>
-                            <span>Performance metrics</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="../assets/logo/logoHighRes.png" alt="AnimaID Logo" width="32" height="32">
-                        <h4 class="text-xl font-bold">AnimaID</h4>
-                    </div>
-                    <p class="text-gray-400 mb-4">
-                        A comprehensive management platform for animation centers, connecting staff, activities, and families.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                    </div>
-                </div>
-
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-3 mb-4">
+                <button onclick="history.back()" class="text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
                 <div>
-                    <h5 class="font-semibold mb-4">Platform</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="features.html" class="hover:text-white transition-colors">Features</a></li>
-                        <li><a href="modules.html" class="hover:text-white transition-colors">Modules</a></li>
-                        <li><a href="applets.html" class="hover:text-white transition-colors">Applets</a></li>
-                        <li><a href="api.html" class="hover:text-white transition-colors">API</a></li>
-                    </ul>
+                    <h1 class="text-3xl font-bold text-gray-900" data-i18n="info.modules.title">Tech Stack & Modules</h1>
+                    <p class="text-gray-600 mt-1" data-i18n="info.modules.subtitle">AnimaID's technical architecture and modular system</p>
                 </div>
-
-                <div>
-                    <h5 class="font-semibold mb-4">Support</h5>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="documentation.html" class="hover:text-white transition-colors">Documentation</a></li>
-                        <li><a href="help-center.html" class="hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
-                        <li><a href="privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2025 AnimaID. All rights reserved. Version 0.9 - Draft</p>
             </div>
         </div>
-    </footer>
+
+        <!-- Content -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
+            <div class="prose prose-lg max-w-none">
+
+                <h2><i class="fab fa-stack-overflow mr-2 text-purple-600"></i>Overview</h2>
+                <p>AnimaID is built using a lightweight, portable tech stack optimized for multi-deployment scenarios across animation centers. The stack prioritizes simplicity, maintainability, and extensibility while supporting the modular architecture described in the functional specification.</p>
+
+                <h2>Core Technologies</h2>
+
+                <h3><i class="fas fa-database mr-2 text-green-600"></i>Database</h3>
+                <ul>
+                    <li><strong>SQLite</strong>: File-based relational database
+                        <ul>
+                            <li>Zero-configuration setup</li>
+                            <li>ACID compliance</li>
+                            <li>Suitable for single-file deployments</li>
+                            <li>Cross-platform compatibility</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3><i class="fab fa-php mr-2 text-indigo-600"></i>Backend</h3>
+                <ul>
+                    <li><strong>PHP 8.1+</strong>: Server-side scripting language
+                        <ul>
+                            <li>Native support for web development</li>
+                            <li>Extensive ecosystem of libraries</li>
+                            <li>Good performance for CRUD operations</li>
+                            <li>Easy integration with SQLite</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3><i class="fas fa-desktop mr-2 text-blue-600"></i>Frontend</h3>
+                <ul>
+                    <li><strong>HTML5</strong>: Semantic markup and structure</li>
+                    <li><strong>TailwindCSS</strong>: Utility-first CSS framework
+                        <ul>
+                            <li>Rapid UI development</li>
+                            <li>Responsive design utilities</li>
+                            <li>Small bundle size when purged</li>
+                        </ul>
+                    </li>
+                    <li><strong>FontAwesome</strong>: Icon library
+                        <ul>
+                            <li>Consistent iconography</li>
+                            <li>CDN or local hosting options</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3><i class="fab fa-js-square mr-2 text-yellow-600"></i>Client-side Scripting</h3>
+                <ul>
+                    <li><strong>Vanilla JavaScript (ES6+)</strong>: Core interactivity
+                        <ul>
+                            <li>No framework overhead for simple interactions</li>
+                            <li>Native browser APIs</li>
+                            <li>Progressive enhancement approach</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h2>Optional Extensions</h2>
+
+                <h3><i class="fas fa-code-branch mr-2 text-purple-600"></i>JavaScript Frameworks</h3>
+                <ul>
+                    <li><strong>Vue.js or React</strong>: For complex UI components in applets
+                        <ul>
+                            <li>Component-based architecture</li>
+                            <li>Reactive data binding</li>
+                            <li>Ecosystem of UI libraries</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3><i class="fas fa-server mr-2 text-red-600"></i>PHP Libraries & Frameworks</h3>
+                <ul>
+                    <li><strong>Composer</strong>: Dependency management</li>
+                    <li><strong>Slim Framework or Laravel</strong>: API routing and structure
+                        <ul>
+                            <li>RESTful API development</li>
+                            <li>Middleware support</li>
+                            <li>Dependency injection</li>
+                        </ul>
+                    </li>
+                    <li><strong>PDO</strong>: Database abstraction layer</li>
+                    <li><strong>JWT (JSON Web Tokens)</strong>: Authentication tokens</li>
+                    <li><strong>PHPMailer</strong>: Email notifications</li>
+                </ul>
+
+                <h2>Infrastructure & Deployment</h2>
+
+                <h3><i class="fab fa-docker mr-2 text-blue-600"></i>Containerization</h3>
+                <ul>
+                    <li><strong>Docker</strong>: Application containerization
+                        <ul>
+                            <li>Consistent environments</li>
+                            <li>Easy scaling</li>
+                            <li>Multi-deployment support</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3><i class="fas fa-globe mr-2 text-green-600"></i>Web Server</h3>
+                <ul>
+                    <li><strong>Nginx or Apache</strong>: HTTP server
+                        <ul>
+                            <li>Static asset serving</li>
+                            <li>PHP-FPM proxy</li>
+                            <li>SSL/TLS termination</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3><i class="fab fa-git-alt mr-2 text-orange-600"></i>Version Control</h3>
+                <ul>
+                    <li><strong>Git</strong>: Source code management
+                        <ul>
+                            <li>Branching for features/modules</li>
+                            <li>Collaborative development</li>
+                            <li>Deployment automation</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h2>Mobile Development</h2>
+
+                <h3><i class="fas fa-mobile-alt mr-2 text-teal-600"></i>Hybrid Mobile App</h3>
+                <ul>
+                    <li><strong>Capacitor or Cordova</strong>: Web-to-mobile bridge
+                        <ul>
+                            <li>Single codebase for web and mobile</li>
+                            <li>Native device APIs access</li>
+                            <li>App store distribution</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3><i class="fas fa-mobile mr-2 text-cyan-600"></i>Progressive Web App (PWA)</h3>
+                <ul>
+                    <li><strong>Service Workers</strong>: Offline functionality</li>
+                    <li><strong>Web App Manifest</strong>: Installable web app</li>
+                    <li><strong>Push Notifications</strong>: Real-time updates</li>
+                </ul>
+
+                <h2>Benefits of This Stack</h2>
+                <ul>
+                    <li><strong>Lightweight</strong>: Minimal dependencies, fast deployment</li>
+                    <li><strong>Portable</strong>: SQLite enables file-based distribution</li>
+                    <li><strong>Maintainable</strong>: Familiar technologies, large community</li>
+                    <li><strong>Extensible</strong>: Framework-optional approach for applets</li>
+                    <li><strong>Cost-effective</strong>: Open-source tools, no licensing fees</li>
+                    <li><strong>Scalable</strong>: Container-ready for cloud deployments</li>
+                </ul>
+
+                <h2>Version Requirements</h2>
+                <ul>
+                    <li>PHP: 8.1 or higher</li>
+                    <li>SQLite: 3.7 or higher</li>
+                    <li>Node.js: 16+ (for build tools)</li>
+                    <li>Composer: 2.0+</li>
+                </ul>
+
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 my-6">
+                    <p class="text-blue-700"><i class="fas fa-info-circle mr-2"></i>This tech stack provides the foundation for AnimaID's modular architecture, enabling efficient development and deployment across multiple animation centers.</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-8 flex justify-between items-center">
+            <div class="flex space-x-3">
+                <a href="features.html" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Previous: Features
+                </a>
+            </div>
+
+            <div class="flex space-x-3">
+                <a href="applets.html" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                    Next: Applets <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+
+    </main>
 
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
     <script type="module" src="../js/themeLanguageSwitcher.js"></script>
