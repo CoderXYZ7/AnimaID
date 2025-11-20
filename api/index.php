@@ -757,13 +757,10 @@ function handleUsersRequest(?string $userId, string $method, array $body, ?strin
 
         switch ($method) {
             case 'GET':
-                $users = $auth->getUsers(1, 1)['users'];
-                if (empty($users)) {
+                $user = $auth->getUserById($userId);
+                if (!$user) {
                     throw new Exception('User not found');
                 }
-
-                $user = $users[0];
-                $user['roles'] = $auth->getUserRoles($userId);
                 return ['user' => $user];
 
             case 'PUT':
@@ -771,8 +768,8 @@ function handleUsersRequest(?string $userId, string $method, array $body, ?strin
                 return ['message' => 'User updated successfully'];
 
             case 'DELETE':
-                $auth->updateUser($userId, ['is_active' => false]);
-                return ['message' => 'User deactivated successfully'];
+                $auth->deleteUser($userId);
+                return ['message' => 'User deleted successfully'];
 
             default:
                 throw new Exception('Method not allowed');
@@ -2075,6 +2072,14 @@ function handleSystemRequest(?string $action, string $method, ?string $token, Au
     }
 
     switch ($action) {
+        case 'config':
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+            // Only return a subset of the config for security reasons
+            return [
+                'config' => [
+                    'features' => $auth->getConfig()['features']
+                ]
+            ];
         case 'status':
             if ($method !== 'GET') throw new Exception('Method not allowed');
 

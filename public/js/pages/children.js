@@ -49,6 +49,17 @@ async function initPage() {
             return;
         }
 
+        // Fetch config
+        const configResponse = await fetch(`${API_BASE_URL}/system/config`, {
+            headers: { 'Authorization': `Bearer ${userToken}` }
+        });
+        if (configResponse.ok) {
+            const configData = await configResponse.json();
+            if (configData.success && configData.config && configData.config.features && configData.config.features.show_medical_data === false) {
+                document.getElementById('tab-medical').style.display = 'none';
+            }
+        }
+
         // Check if user has children permissions
         const hasPermission = await checkChildrenPermission();
         if (!hasPermission) {

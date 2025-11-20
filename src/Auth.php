@@ -25,6 +25,13 @@ class Auth {
     }
 
     /**
+     * Get config
+     */
+    public function getConfig(): array {
+        return $this->config;
+    }
+
+    /**
      * Authenticate user and return JWT token
      */
     public function login(string $username, string $password): array {
@@ -341,6 +348,19 @@ class Auth {
     }
 
     /**
+     * Delete a user
+     */
+    public function deleteUser(int $userId): void {
+        // You might want to add more checks here, like not deleting the main admin
+        $user = $this->getUserById($userId);
+        if ($user && $user['username'] === 'admin') {
+            throw new Exception("Cannot delete the main admin user.");
+        }
+
+        $this->db->delete('users', 'id = ?', [$userId]);
+    }
+
+    /**
      * Assign roles to user
      */
     public function assignRolesToUser(int $userId, array $roleIds, int $assignedBy): void {
@@ -398,6 +418,19 @@ class Auth {
                 'pages' => ceil($total / $limit)
             ]
         ];
+    }
+
+    /**
+     * Get a single user by ID
+     */
+    public function getUserById(int $userId): ?array {
+        $user = $this->db->fetchOne("SELECT id, username, email, is_active, created_at, last_login FROM users WHERE id = ?", [$userId]);
+
+        if ($user) {
+            $user['roles'] = $this->getUserRoles($userId);
+        }
+
+        return $user;
     }
 
     /**

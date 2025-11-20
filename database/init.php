@@ -264,8 +264,8 @@ function createTables(PDO $pdo) {
             updated_by INTEGER,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (created_by) REFERENCES users(id),
-            FOREIGN KEY (updated_by) REFERENCES users(id)
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -336,8 +336,8 @@ function createTables(PDO $pdo) {
             notes TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE,
-            FOREIGN KEY (uploaded_by) REFERENCES users(id),
-            FOREIGN KEY (verified_by) REFERENCES users(id)
+            FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (verified_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -354,7 +354,7 @@ function createTables(PDO $pdo) {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (child_id) REFERENCES children(id) ON DELETE CASCADE,
-            FOREIGN KEY (created_by) REFERENCES users(id)
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -398,8 +398,8 @@ function createTables(PDO $pdo) {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (event_id) REFERENCES calendar_events(id) ON DELETE SET NULL,
-            FOREIGN KEY (created_by) REFERENCES users(id),
-            FOREIGN KEY (published_by) REFERENCES users(id)
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (published_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -416,7 +416,7 @@ function createTables(PDO $pdo) {
             uploaded_by INTEGER NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (communication_id) REFERENCES communications(id) ON DELETE CASCADE,
-            FOREIGN KEY (uploaded_by) REFERENCES users(id)
+            FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -453,7 +453,7 @@ function createTables(PDO $pdo) {
             FOREIGN KEY (communication_id) REFERENCES communications(id) ON DELETE CASCADE,
             FOREIGN KEY (parent_comment_id) REFERENCES communication_comments(id) ON DELETE CASCADE,
             FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
-            FOREIGN KEY (moderated_by) REFERENCES users(id)
+            FOREIGN KEY (moderated_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -486,7 +486,7 @@ function createTables(PDO $pdo) {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (parent_id) REFERENCES media_folders(id) ON DELETE CASCADE,
-            FOREIGN KEY (created_by) REFERENCES users(id)
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -508,7 +508,7 @@ function createTables(PDO $pdo) {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (folder_id) REFERENCES media_folders(id) ON DELETE SET NULL,
-            FOREIGN KEY (uploaded_by) REFERENCES users(id)
+            FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -525,7 +525,7 @@ function createTables(PDO $pdo) {
             expires_at DATETIME,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (shared_with_user_id) REFERENCES users(id) ON DELETE CASCADE,
-            FOREIGN KEY (shared_by_user_id) REFERENCES users(id)
+            FOREIGN KEY (shared_by_user_id) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -542,7 +542,7 @@ function createTables(PDO $pdo) {
             change_description TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (file_id) REFERENCES media_files(id) ON DELETE CASCADE,
-            FOREIGN KEY (uploaded_by) REFERENCES users(id)
+            FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -568,8 +568,8 @@ function createTables(PDO $pdo) {
             updated_by INTEGER,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (created_by) REFERENCES users(id),
-            FOREIGN KEY (updated_by) REFERENCES users(id)
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -586,7 +586,7 @@ function createTables(PDO $pdo) {
             notes TEXT,
             FOREIGN KEY (animator_id) REFERENCES animators(id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-            FOREIGN KEY (assigned_by) REFERENCES users(id),
+            FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL,
             UNIQUE(animator_id, user_id)
         )
     ");
@@ -610,8 +610,8 @@ function createTables(PDO $pdo) {
             notes TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (animator_id) REFERENCES animators(id) ON DELETE CASCADE,
-            FOREIGN KEY (uploaded_by) REFERENCES users(id),
-            FOREIGN KEY (verified_by) REFERENCES users(id)
+            FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (verified_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -628,7 +628,7 @@ function createTables(PDO $pdo) {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (animator_id) REFERENCES animators(id) ON DELETE CASCADE,
-            FOREIGN KEY (created_by) REFERENCES users(id)
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -667,8 +667,8 @@ function createTables(PDO $pdo) {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (category_id) REFERENCES wiki_categories(id) ON DELETE SET NULL,
-            FOREIGN KEY (created_by) REFERENCES users(id),
-            FOREIGN KEY (updated_by) REFERENCES users(id)
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -688,7 +688,7 @@ function createTables(PDO $pdo) {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (parent_id) REFERENCES wiki_categories(id) ON DELETE CASCADE,
-            FOREIGN KEY (created_by) REFERENCES users(id)
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -731,7 +731,7 @@ function createTables(PDO $pdo) {
             word_count INTEGER DEFAULT 0,
             char_count INTEGER DEFAULT 0,
             FOREIGN KEY (page_id) REFERENCES wiki_pages(id) ON DELETE CASCADE,
-            FOREIGN KEY (edited_by) REFERENCES users(id)
+            FOREIGN KEY (edited_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 
@@ -763,7 +763,7 @@ function createTables(PDO $pdo) {
             uploaded_by INTEGER NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (page_id) REFERENCES wiki_pages(id) ON DELETE CASCADE,
-            FOREIGN KEY (uploaded_by) REFERENCES users(id)
+            FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
         )
     ");
 

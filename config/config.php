@@ -106,6 +106,7 @@ return [
         'two_factor_auth' => false,
         'audit_logging' => true,
         'api_documentation' => true,
+        'show_medical_data' => false,
     ],
 
     // External Services (for future integrations)
