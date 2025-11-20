@@ -587,6 +587,18 @@ const resources = {
             "info.contact.support": "Supporto e Feedback",
             "info.contact.support.desc": "Domande, feedback o bisogno di supporto tecnico? Rivolgiti al nostro team di supporto.",
             "info.contact.message": "Inviaci un Messaggio",
+            "info.contact.technicalSupport": "Supporto Tecnico",
+            "info.contact.bugReports": "Segnalazione Bug",
+            "info.contact.email": "Email",
+            "info.contact.phone": "Telefono",
+            "info.contact.github": "GitHub",
+            "info.contact.name": "Nome",
+            "info.contact.emailField": "Email",
+            "info.contact.subject": "Oggetto",
+            "info.contact.messageInput": "Messaggio",
+            "info.contact.sendMessage": "Invia Messaggio",
+            "info.contact.githubLink": "github.com/CoderXYZ7/AnimaID",
+            "info.contact.responseTime": "Tempo di risposta: Entro 24 ore",
 
             // Privacy Page - Italian
             "info.privacy.title": "Informativa Privacy",
