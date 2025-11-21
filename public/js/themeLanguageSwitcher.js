@@ -30,6 +30,12 @@ async function initI18n() {
         return;
     }
 
+    // Check if i18next is already initialized (e.g., by another script)
+    if (window.i18next.isInitialized) {
+        console.log('i18next already initialized by another script');
+        return;
+    }
+
     await window.i18next.init({
         lng: getCurrentLanguage(),
         fallbackLng: 'en',
