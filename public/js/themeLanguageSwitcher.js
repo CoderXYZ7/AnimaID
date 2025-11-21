@@ -53,7 +53,33 @@ async function initI18n() {
                     "auth.login.demo.title": "Demo Credentials",
                     "auth.login.demo.username": "Username:",
                     "auth.login.demo.password": "Password:",
-                    "auth.login.demo.note": "Change password after first login"
+                    "auth.login.demo.note": "Change password after first login",
+
+                    // Common
+                    "common.loading": "Loading...",
+                    "common.error": "Error",
+                    "common.success": "Success",
+                    "common.cancel": "Cancel",
+                    "common.save": "Save",
+                    "common.backToDashboard": "Back to Dashboard",
+
+                    // Status messages
+                    "status.denied": "Access Denied",
+                    "status.denied.message": "You need to be logged in to access this page.",
+                    "status.denied.button": "Go to Login",
+
+                    // Dashboard
+                    "dashboard.welcome": "Welcome to AnimaID",
+                    "dashboard.subtitle": "Manage your animation center efficiently with our comprehensive platform.",
+                    "dashboard.quick_actions": "Quick Actions",
+                    "dashboard.stats.users": "Total Users",
+                    "dashboard.stats.activities": "Activities",
+                    "dashboard.stats.children": "Children",
+                    "dashboard.stats.reports": "Reports",
+                    "dashboard.permissions": "Your Permissions",
+
+                    // Footer
+                    "footer.version": "AnimaID v0.9 - Animation Center Management Platform"
                 }
             },
             it: {
@@ -68,7 +94,33 @@ async function initI18n() {
                     "auth.login.demo.title": "Credenziali Demo",
                     "auth.login.demo.username": "Nome utente:",
                     "auth.login.demo.password": "Password:",
-                    "auth.login.demo.note": "Cambia la password dopo il primo accesso"
+                    "auth.login.demo.note": "Cambia la password dopo il primo accesso",
+
+                    // Common
+                    "common.loading": "Caricamento...",
+                    "common.error": "Errore",
+                    "common.success": "Successo",
+                    "common.cancel": "Annulla",
+                    "common.save": "Salva",
+                    "common.backToDashboard": "Torna alla Dashboard",
+
+                    // Status messages
+                    "status.denied": "Accesso Negato",
+                    "status.denied.message": "Devi essere loggato per accedere a questa pagina.",
+                    "status.denied.button": "Vai al Login",
+
+                    // Dashboard
+                    "dashboard.welcome": "Benvenuto in AnimaID",
+                    "dashboard.subtitle": "Gestisci il tuo centro di animazione in modo efficiente con la nostra piattaforma completa.",
+                    "dashboard.quick_actions": "Azioni Rapide",
+                    "dashboard.stats.users": "Utenti Totali",
+                    "dashboard.stats.activities": "Attività",
+                    "dashboard.stats.children": "Bambini",
+                    "dashboard.stats.reports": "Rapporti",
+                    "dashboard.permissions": "I Tuoi Permessi",
+
+                    // Footer
+                    "footer.version": "AnimaID v0.9 - Piattaforma di Gestione Centro di Animazione"
                 }
             }
         },
