@@ -107,6 +107,7 @@ return [
         'audit_logging' => true,
         'api_documentation' => true,
         'show_medical_data' => false,
+        'show_demo_credentials' => false, // Show demo credentials on login page
     ],
 
     // External Services (for future integrations)

@@ -37,6 +37,9 @@ echo "    system: {\n";
 echo "        name: '" . ($config['system']['name'] ?? 'AnimaID') . "',\n";
 echo "        version: '" . ($config['system']['version'] ?? '0.9') . "',\n";
 echo "        locale: '" . ($config['system']['locale'] ?? 'it_IT') . "'\n";
+echo "    },\n";
+echo "    features: {\n";
+echo "        show_demo_credentials: " . (isset($config['features']['show_demo_credentials']) ? ($config['features']['show_demo_credentials'] ? 'true' : 'false') : 'true') . "\n";
 echo "    }\n";
 echo "};\n";
 

@@ -141,7 +141,7 @@
             </form>
 
             <!-- Demo Credentials -->
-            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+            <div id="demo-credentials" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
                 <div class="flex">
                     <i class="fas fa-info-circle text-blue-400 mr-2"></i>
                     <div class="text-sm text-blue-700">
@@ -165,22 +165,7 @@
     </div>
 
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
-    <script>
-        // Static configuration for AnimaID
-        window.ANIMAID_CONFIG = {
-            api: {
-                baseUrl: 'https://animaidsgn.mywire.org/api',
-                port: 443
-            },
-            system: {
-                name: 'AnimaID',
-                version: '0.9',
-                locale: 'it_IT'
-            }
-        };
-        // Backward compatibility
-        window.API_BASE_URL = window.ANIMAID_CONFIG.api.baseUrl;
-    </script>
+    <script src="config.js.php"></script>
     <script type="module" src="js/themeLanguageSwitcher.js"></script>
     <script type="module">
         // Configuration
@@ -295,6 +280,12 @@
         function hideMessages() {
             errorMessage.classList.add('hidden');
             successMessage.classList.add('hidden');
+        }
+
+        // Hide demo credentials if disabled in config
+        const demoCredentials = document.getElementById('demo-credentials');
+        if (demoCredentials && window.ANIMAID_CONFIG?.features?.show_demo_credentials === false) {
+            demoCredentials.style.display = 'none';
         }
 
         // Auto-focus username field
