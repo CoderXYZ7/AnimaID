@@ -78,6 +78,17 @@ async function initI18n() {
                     "dashboard.stats.reports": "Reports",
                     "dashboard.permissions": "Your Permissions",
 
+                    // Navigation
+                    "nav.dashboard": "Dashboard",
+                    "nav.calendar": "Calendar",
+                    "nav.attendance": "Attendance",
+                    "nav.children": "Children",
+                    "nav.animators": "Animators",
+                    "nav.communications": "Communications",
+                    "nav.media": "Media Manager",
+                    "nav.wiki": "Wiki",
+                    "nav.reports": "Reports",
+
                     // Footer
                     "footer.version": "AnimaID v0.9 - Animation Center Management Platform"
                 }
@@ -118,6 +129,17 @@ async function initI18n() {
                     "dashboard.stats.children": "Bambini",
                     "dashboard.stats.reports": "Rapporti",
                     "dashboard.permissions": "I Tuoi Permessi",
+
+                    // Navigation
+                    "nav.dashboard": "Dashboard",
+                    "nav.calendar": "Calendario",
+                    "nav.attendance": "Presenze",
+                    "nav.children": "Bambini",
+                    "nav.animators": "Animatori",
+                    "nav.communications": "Comunicazioni",
+                    "nav.media": "Gestore Media",
+                    "nav.wiki": "Wiki",
+                    "nav.reports": "Rapporti",
 
                     // Footer
                     "footer.version": "AnimaID v0.9 - Piattaforma di Gestione Centro di Animazione"
