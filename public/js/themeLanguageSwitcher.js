@@ -1,6 +1,76 @@
 // public/js/themeLanguageSwitcher.js
 
-import { initI18n, changeLanguage, getCurrentLanguage, availableLanguages } from '../../src/js/i18n.js';
+// Language and i18n utilities (simplified inline implementation)
+const availableLanguages = {
+    en: { name: 'English', code: 'en', flag: '🇺🇸' },
+    it: { name: 'Italiano', code: 'it', flag: '🇮🇹' }
+};
+
+function getCurrentLanguage() {
+    const stored = localStorage.getItem('animaid_language');
+    const browserLang = navigator.language.split('-')[0];
+    const defaultLang = 'it';
+    return stored || (availableLanguages[browserLang] ? browserLang : defaultLang);
+}
+
+async function changeLanguage(lng) {
+    try {
+        await window.i18next.changeLanguage(lng);
+        localStorage.setItem('animaid_language', lng);
+        return true;
+    } catch (error) {
+        console.error('Failed to change language:', error);
+        return false;
+    }
+}
+
+async function initI18n() {
+    if (!window.i18next) {
+        console.error('i18next library not loaded');
+        return;
+    }
+
+    await window.i18next.init({
+        lng: getCurrentLanguage(),
+        fallbackLng: 'en',
+        debug: false,
+        resources: {
+            en: {
+                translation: {
+                    "auth.login.title": "Sign in to your account",
+                    "auth.login.subtitle": "Access the AnimaID management platform",
+                    "auth.login.username": "Username or Email",
+                    "auth.login.password": "Password",
+                    "auth.login.button": "Sign in",
+                    "auth.login.remember": "Remember me",
+                    "auth.login.forgot": "Forgot your password?",
+                    "auth.login.demo.title": "Demo Credentials",
+                    "auth.login.demo.username": "Username:",
+                    "auth.login.demo.password": "Password:",
+                    "auth.login.demo.note": "Change password after first login"
+                }
+            },
+            it: {
+                translation: {
+                    "auth.login.title": "Accedi al tuo account",
+                    "auth.login.subtitle": "Accedi alla piattaforma di gestione AnimaID",
+                    "auth.login.username": "Nome utente o Email",
+                    "auth.login.password": "Password",
+                    "auth.login.button": "Accedi",
+                    "auth.login.remember": "Ricordami",
+                    "auth.login.forgot": "Password dimenticata?",
+                    "auth.login.demo.title": "Credenziali Demo",
+                    "auth.login.demo.username": "Nome utente:",
+                    "auth.login.demo.password": "Password:",
+                    "auth.login.demo.note": "Cambia la password dopo il primo accesso"
+                }
+            }
+        },
+        interpolation: {
+            escapeValue: false
+        }
+    });
+}
 
 // Function to initialize theme and language switcher
 async function initializeUISwitcher() {
@@ -58,13 +128,12 @@ async function initializeUISwitcher() {
 
         languageSelectorContainer.appendChild(select);
     }
-});
+}
 
 // Function to apply translations to elements with data-i18n attribute
 function applyTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.dataset.i18n;
-        // Assuming i18next is globally available after initI18n()
         if (window.i18next) {
             element.textContent = window.i18next.t(key);
         }
