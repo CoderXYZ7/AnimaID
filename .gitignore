@@ -3,6 +3,8 @@ uploads/
 database/*.db
 database/*.sqlite
 database/*.sqlite3
+animaid.db
+database/animaid.db.old
 *.log
 .ottotime
 config/config.php
