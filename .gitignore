@@ -5,3 +5,4 @@ database/*.sqlite
 database/*.sqlite3
 *.log
 .ottotime
+config/config.php
