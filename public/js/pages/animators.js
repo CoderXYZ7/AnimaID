@@ -13,43 +13,58 @@ let state = {
     tempNotes: [],
 };
 
-// Initialization
-document.addEventListener('DOMContentLoaded', initPage);
+// Initialization flags
+let domReady = false;
+let i18nReady = false;
 
-async function initPage() {
-    ui.showLoadingScreen();
-    try {
-        await initI18n(); // Initialize i18n
-        applyTranslations(); // Apply translations after i18n is initialized
-        document.documentElement.lang = getCurrentLanguage(); // Set HTML lang attribute
+// Initialization when both DOM and i18n are ready
+async function initializePageWhenReady() {
+    if (domReady && i18nReady) {
+        ui.showLoadingScreen();
+        try {
+            // initI18n is now handled globally by themeLanguageSwitcher.js
+            applyTranslations(); // Apply translations after i18n is initialized
+            document.documentElement.lang = getCurrentLanguage(); // Set HTML lang attribute
 
-        const userData = localStorage.getItem('animaid_user');
-        if (!userData) {
+            const userData = localStorage.getItem('animaid_user');
+            if (!userData) {
+                window.location.href = '../login.html';
+                return;
+            }
+            state.currentUser = JSON.parse(userData);
+
+            await apiService.getSelf(); // Verify token
+
+            const hasPermission = await checkAnimatorsPermission();
+            if (!hasPermission) {
+                ui.showErrorScreen();
+                return;
+            }
+
+            await loadAnimators();
+            addEventListeners();
+            ui.showMainContent();
+        } catch (error) {
+            console.error('Page initialization error:', error);
+            localStorage.removeItem('animaid_token');
+            localStorage.removeItem('animaid_user');
             window.location.href = '../login.html';
-            return;
+        } finally {
+            ui.hideLoadingScreen();
         }
-        state.currentUser = JSON.parse(userData);
-
-        await apiService.getSelf(); // Verify token
-
-        const hasPermission = await checkAnimatorsPermission();
-        if (!hasPermission) {
-            ui.showErrorScreen();
-            return;
-        }
-
-        await loadAnimators();
-        addEventListeners();
-        ui.showMainContent();
-    } catch (error) {
-        console.error('Page initialization error:', error);
-        localStorage.removeItem('animaid_token');
-        localStorage.removeItem('animaid_user');
-        window.location.href = '../login.html';
-    } finally {
-        ui.hideLoadingScreen();
     }
 }
+
+// Set up listeners for DOM ready and i18n ready events
+document.addEventListener('DOMContentLoaded', () => {
+    domReady = true;
+    initializePageWhenReady();
+});
+
+document.addEventListener('i18nInitialized', () => {
+    i18nReady = true;
+    initializePageWhenReady();
+});
 
 // Function to apply translations to elements with data-i18n attribute
 function applyTranslations() {

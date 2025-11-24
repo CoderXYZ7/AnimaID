@@ -8,6 +8,9 @@ async function initializeUISwitcher() {
     applyTranslations();
     document.documentElement.lang = getCurrentLanguage();
 
+    // Dispatch a custom event to signal that i18n is initialized and available globally
+    document.dispatchEvent(new CustomEvent('i18nInitialized'));
+
     // Theme Switcher Logic
     const themeSwitcher = document.getElementById('theme-switcher');
     const body = document.body;
