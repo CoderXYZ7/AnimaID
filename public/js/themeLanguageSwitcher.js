@@ -35,7 +35,7 @@ async function initializeUISwitcher() {
 
     // Language Switcher Logic
     const languageSelectorContainer = document.getElementById('language-selector-container');
-    if (languageSelectorContainer) {
+    if (languageSelectorContainer && !document.getElementById('language-select')) { // Check if select already exists
         const select = document.createElement('select');
         select.id = 'language-select';
         select.className = 'px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
