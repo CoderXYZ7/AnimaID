@@ -772,6 +772,15 @@ export const initI18n = async () => {
             lookupLocalStorage: 'animaid_language'
         }
     });
+
+    // Make i18n functions globally available
+    window.i18next = i18next;
+    window.t = i18next.t;
+    window.changeLanguage = changeLanguage;
+    window.getCurrentLanguage = getCurrentLanguage;
+    window.availableLanguages = availableLanguages;
+    window.initI18n = initI18n; // Expose initI18n globally as well
+
 };
 
 // Change language
