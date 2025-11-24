@@ -1,156 +1,5 @@
 // public/js/themeLanguageSwitcher.js
-
-// Language and i18n utilities (simplified inline implementation)
-const availableLanguages = {
-    en: { name: 'English', code: 'en', flag: '🇺🇸' },
-    it: { name: 'Italiano', code: 'it', flag: '🇮🇹' }
-};
-
-function getCurrentLanguage() {
-    const stored = localStorage.getItem('animaid_language');
-    const browserLang = navigator.language.split('-')[0];
-    const defaultLang = 'it';
-    return stored || (availableLanguages[browserLang] ? browserLang : defaultLang);
-}
-
-async function changeLanguage(lng) {
-    try {
-        await window.i18next.changeLanguage(lng);
-        localStorage.setItem('animaid_language', lng);
-        return true;
-    } catch (error) {
-        console.error('Failed to change language:', error);
-        return false;
-    }
-}
-
-async function initI18n() {
-    if (!window.i18next) {
-        console.error('i18next library not loaded');
-        return;
-    }
-
-    // Check if i18next is already initialized (e.g., by another script)
-    if (window.i18next.isInitialized) {
-        console.log('i18next already initialized by another script');
-        return;
-    }
-
-    await window.i18next.init({
-        lng: getCurrentLanguage(),
-        fallbackLng: 'en',
-        debug: false,
-        resources: {
-            en: {
-                translation: {
-                    "auth.login.title": "Sign in to your account",
-                    "auth.login.subtitle": "Access the AnimaID management platform",
-                    "auth.login.username": "Username or Email",
-                    "auth.login.password": "Password",
-                    "auth.login.button": "Sign in",
-                    "auth.login.remember": "Remember me",
-                    "auth.login.forgot": "Forgot your password?",
-                    "auth.login.demo.title": "Demo Credentials",
-                    "auth.login.demo.username": "Username:",
-                    "auth.login.demo.password": "Password:",
-                    "auth.login.demo.note": "Change password after first login",
-
-                    // Common
-                    "common.loading": "Loading...",
-                    "common.error": "Error",
-                    "common.success": "Success",
-                    "common.cancel": "Cancel",
-                    "common.save": "Save",
-                    "common.backToDashboard": "Back to Dashboard",
-
-                    // Status messages
-                    "status.denied": "Access Denied",
-                    "status.denied.message": "You need to be logged in to access this page.",
-                    "status.denied.button": "Go to Login",
-
-                    // Dashboard
-                    "dashboard.welcome": "Welcome to AnimaID",
-                    "dashboard.subtitle": "Manage your animation center efficiently with our comprehensive platform.",
-                    "dashboard.quick_actions": "Quick Actions",
-                    "dashboard.stats.users": "Total Users",
-                    "dashboard.stats.activities": "Activities",
-                    "dashboard.stats.children": "Children",
-                    "dashboard.stats.reports": "Reports",
-                    "dashboard.permissions": "Your Permissions",
-
-                    // Navigation
-                    "nav.dashboard": "Dashboard",
-                    "nav.calendar": "Calendar",
-                    "nav.attendance": "Attendance",
-                    "nav.children": "Children",
-                    "nav.animators": "Animators",
-                    "nav.communications": "Communications",
-                    "nav.media": "Media Manager",
-                    "nav.wiki": "Wiki",
-                    "nav.reports": "Reports",
-
-                    // Footer
-                    "footer.version": "AnimaID v0.9 - Animation Center Management Platform"
-                }
-            },
-            it: {
-                translation: {
-                    "auth.login.title": "Accedi al tuo account",
-                    "auth.login.subtitle": "Accedi alla piattaforma di gestione AnimaID",
-                    "auth.login.username": "Nome utente o Email",
-                    "auth.login.password": "Password",
-                    "auth.login.button": "Accedi",
-                    "auth.login.remember": "Ricordami",
-                    "auth.login.forgot": "Password dimenticata?",
-                    "auth.login.demo.title": "Credenziali Demo",
-                    "auth.login.demo.username": "Nome utente:",
-                    "auth.login.demo.password": "Password:",
-                    "auth.login.demo.note": "Cambia la password dopo il primo accesso",
-
-                    // Common
-                    "common.loading": "Caricamento...",
-                    "common.error": "Errore",
-                    "common.success": "Successo",
-                    "common.cancel": "Annulla",
-                    "common.save": "Salva",
-                    "common.backToDashboard": "Torna alla Dashboard",
-
-                    // Status messages
-                    "status.denied": "Accesso Negato",
-                    "status.denied.message": "Devi essere loggato per accedere a questa pagina.",
-                    "status.denied.button": "Vai al Login",
-
-                    // Dashboard
-                    "dashboard.welcome": "Benvenuto in AnimaID",
-                    "dashboard.subtitle": "Gestisci il tuo centro di animazione in modo efficiente con la nostra piattaforma completa.",
-                    "dashboard.quick_actions": "Azioni Rapide",
-                    "dashboard.stats.users": "Utenti Totali",
-                    "dashboard.stats.activities": "Attività",
-                    "dashboard.stats.children": "Bambini",
-                    "dashboard.stats.reports": "Rapporti",
-                    "dashboard.permissions": "I Tuoi Permessi",
-
-                    // Navigation
-                    "nav.dashboard": "Dashboard",
-                    "nav.calendar": "Calendario",
-                    "nav.attendance": "Presenze",
-                    "nav.children": "Bambini",
-                    "nav.animators": "Animatori",
-                    "nav.communications": "Comunicazioni",
-                    "nav.media": "Gestore Media",
-                    "nav.wiki": "Wiki",
-                    "nav.reports": "Rapporti",
-
-                    // Footer
-                    "footer.version": "AnimaID v0.9 - Piattaforma di Gestione Centro di Animazione"
-                }
-            }
-        },
-        interpolation: {
-            escapeValue: false
-        }
-    });
-}
+import { initI18n, changeLanguage, getCurrentLanguage, availableLanguages, t } from '../../src/js/i18n.js';
 
 // Function to initialize theme and language switcher
 async function initializeUISwitcher() {
@@ -214,9 +63,11 @@ async function initializeUISwitcher() {
 function applyTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.dataset.i18n;
-        if (window.i18next) {
-            element.textContent = window.i18next.t(key);
-        }
+        element.textContent = t(key);
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.dataset.i18nPlaceholder;
+        element.placeholder = t(key);
     });
 }
 

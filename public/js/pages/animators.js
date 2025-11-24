@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', initPage);
 async function initPage() {
     ui.showLoadingScreen();
     try {
+        await initI18n(); // Initialize i18n
+        applyTranslations(); // Apply translations after i18n is initialized
+        document.documentElement.lang = getCurrentLanguage(); // Set HTML lang attribute
+
         const userData = localStorage.getItem('animaid_user');
         if (!userData) {
             window.location.href = '../login.html';
@@ -46,6 +50,24 @@ async function initPage() {
         ui.hideLoadingScreen();
     }
 }
+
+// Function to apply translations to elements with data-i18n attribute
+function applyTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.dataset.i18n;
+        if (window.i18next) {
+            element.textContent = t(key);
+        }
+    });
+    // For placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.dataset.i18nPlaceholder;
+        if (window.i18next) {
+            element.placeholder = t(key);
+        }
+    });
+}
+
 
 async function checkAnimatorsPermission() {
     try {
