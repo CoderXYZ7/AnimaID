@@ -78,7 +78,7 @@ echo ""
 echo "Checking PHP extensions..."
 REQUIRED_EXTS=("pdo" "sqlite3" "mbstring" "openssl" "json")
 for ext in "${REQUIRED_EXTS[@]}"; do
-    if php -m 2>/dev/null | grep -q "^$ext$"; then
+    if php -m 2>/dev/null | grep -iq "^$ext$"; then
         echo -e "${GREEN}✓ $ext${NC}"
     else
         echo -e "${RED}✗ $ext (missing)${NC}"
