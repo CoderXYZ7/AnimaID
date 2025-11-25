@@ -30,6 +30,96 @@ echo "Project directory: $PROJECT_DIR"
 echo "Running as: $ACTUAL_USER"
 echo ""
 
+# Check dependencies
+echo -e "${YELLOW}Checking system dependencies...${NC}"
+echo ""
+
+MISSING_DEPS=0
+
+# Check PHP
+if command -v php &> /dev/null; then
+    PHP_VERSION=$(php -r "echo PHP_VERSION;")
+    echo -e "${GREEN}✓ PHP installed${NC} (version $PHP_VERSION)"
+    
+    # Check PHP version
+    PHP_MAJOR=$(php -r "echo PHP_MAJOR_VERSION;")
+    PHP_MINOR=$(php -r "echo PHP_MINOR_VERSION;")
+    if [ "$PHP_MAJOR" -lt 8 ] || ([ "$PHP_MAJOR" -eq 8 ] && [ "$PHP_MINOR" -lt 1 ]); then
+        echo -e "${RED}✗ PHP 8.1 or higher required (found $PHP_VERSION)${NC}"
+        MISSING_DEPS=1
+    fi
+else
+    echo -e "${RED}✗ PHP not installed${NC}"
+    MISSING_DEPS=1
+fi
+
+# Check Composer
+if command -v composer &> /dev/null; then
+    COMPOSER_VERSION=$(composer --version --no-ansi 2>/dev/null | head -n1)
+    echo -e "${GREEN}✓ Composer installed${NC} ($COMPOSER_VERSION)"
+else
+    echo -e "${RED}✗ Composer not installed${NC}"
+    MISSING_DEPS=1
+fi
+
+# Check Git
+if command -v git &> /dev/null; then
+    GIT_VERSION=$(git --version)
+    echo -e "${GREEN}✓ Git installed${NC} ($GIT_VERSION)"
+else
+    echo -e "${RED}✗ Git not installed${NC}"
+    MISSING_DEPS=1
+fi
+
+# Check required PHP extensions
+echo ""
+echo "Checking PHP extensions..."
+REQUIRED_EXTS=("pdo" "sqlite3" "mbstring" "openssl" "json")
+for ext in "${REQUIRED_EXTS[@]}"; do
+    if php -m 2>/dev/null | grep -q "^$ext$"; then
+        echo -e "${GREEN}✓ $ext${NC}"
+    else
+        echo -e "${RED}✗ $ext (missing)${NC}"
+        MISSING_DEPS=1
+    fi
+done
+
+echo ""
+
+# If dependencies are missing, show installation instructions
+if [ $MISSING_DEPS -eq 1 ]; then
+    echo -e "${RED}=========================================${NC}"
+    echo -e "${RED}Missing Dependencies Detected!${NC}"
+    echo -e "${RED}=========================================${NC}"
+    echo ""
+    echo "Please install the missing dependencies before continuing."
+    echo ""
+    echo -e "${YELLOW}For Ubuntu/Debian:${NC}"
+    echo "  sudo apt update"
+    echo "  sudo apt install -y php8.1 php8.1-cli php8.1-common php8.1-sqlite3 \\"
+    echo "                      php8.1-mbstring php8.1-xml php8.1-curl git"
+    echo ""
+    echo "  # Install Composer"
+    echo "  curl -sS https://getcomposer.org/installer | php"
+    echo "  sudo mv composer.phar /usr/local/bin/composer"
+    echo "  sudo chmod +x /usr/local/bin/composer"
+    echo ""
+    echo -e "${YELLOW}For CentOS/RHEL:${NC}"
+    echo "  sudo yum install -y php php-cli php-pdo php-mbstring php-xml git"
+    echo ""
+    echo "  # Install Composer"
+    echo "  curl -sS https://getcomposer.org/installer | php"
+    echo "  sudo mv composer.phar /usr/local/bin/composer"
+    echo "  sudo chmod +x /usr/local/bin/composer"
+    echo ""
+    echo -e "${YELLOW}After installing dependencies, run this script again.${NC}"
+    echo ""
+    exit 1
+fi
+
+echo -e "${GREEN}✓ All dependencies satisfied${NC}"
+echo ""
+
 # Step 1: Pull latest changes
 echo -e "${YELLOW}[1/7] Pulling latest changes...${NC}"
 sudo -u $ACTUAL_USER git pull origin master
