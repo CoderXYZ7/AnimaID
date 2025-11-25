@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,27 +13,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 </head>
+
 <body class="bg-gray-50 min-h-screen">
 
     <!-- i18next CDN -->
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
 
-    <!-- Configuration -->
-    <script>
-        // Static configuration for AnimaID
-        window.ANIMAID_CONFIG = {
-            api: {
-                baseUrl: 'https://animaidsgn.mywire.org/api',
-                port: 443
-            },
-            system: {
-                name: 'AnimaID',
-                version: '0.9',
-                locale: 'it_IT'
-            }
-        };
-        // Backward compatibility
-        window.API_BASE_URL = window.ANIMAID_CONFIG.api.baseUrl;
+    <!-- Configuration Loader -->
+    <script type="module">
+        // Import and initialize configuration
+        import { initConfig } from './js/config.js';
+
+        // Initialize config before page loads
+        await initConfig();
     </script>
 
     <!-- Loading Screen -->
@@ -87,7 +80,8 @@
             <!-- Welcome Section -->
             <div class="mb-8">
                 <h2 class="text-3xl font-bold text-gray-900 mb-2" data-i18n="dashboard.welcome">Welcome to AnimaID</h2>
-                <p class="text-gray-600" data-i18n="dashboard.subtitle">Manage your animation center efficiently with our comprehensive platform.</p>
+                <p class="text-gray-600" data-i18n="dashboard.subtitle">Manage your animation center efficiently with
+                    our comprehensive platform.</p>
             </div>
 
             <!-- Stats Cards -->
@@ -98,7 +92,8 @@
                             <i class="fas fa-users text-blue-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.users">Total Users</p>
+                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.users">Total Users
+                            </p>
                             <p class="text-2xl font-bold text-gray-900" id="stats-users">-</p>
                         </div>
                     </div>
@@ -110,7 +105,8 @@
                             <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.activities">Activities</p>
+                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.activities">
+                                Activities</p>
                             <p class="text-2xl font-bold text-gray-900" id="stats-activities">-</p>
                         </div>
                     </div>
@@ -122,7 +118,8 @@
                             <i class="fas fa-child text-orange-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.children">Children</p>
+                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.children">Children
+                            </p>
                             <p class="text-2xl font-bold text-gray-900" id="stats-children">-</p>
                         </div>
                     </div>
@@ -143,59 +140,71 @@
 
             <!-- Quick Actions -->
             <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4" data-i18n="dashboard.quick_actions">Quick Actions</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4" data-i18n="dashboard.quick_actions">Quick Actions
+                </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <a href="calendar.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="calendar.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-calendar-alt text-green-600 mr-3"></i>
                         <span class="text-sm font-medium" data-i18n="nav.calendar">Calendar</span>
                     </a>
 
-                    <a href="attendance.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="attendance.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-clipboard-check text-blue-600 mr-3"></i>
                         <span class="text-sm font-medium" data-i18n="nav.attendance">Attendance</span>
                     </a>
 
-                    <a href="children.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="children.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-child text-orange-600 mr-3"></i>
                         <span class="text-sm font-medium" data-i18n="nav.children">Children</span>
                     </a>
 
-                    <a href="animators.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="animators.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-user-tie text-purple-600 mr-3"></i>
                         <span class="text-sm font-medium" data-i18n="nav.animators">Animators</span>
                     </a>
 
-                    <a href="communications.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="communications.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-comments text-red-600 mr-3"></i>
                         <span class="text-sm font-medium" data-i18n="nav.communications">Communications</span>
                     </a>
 
-                    <a href="media.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="media.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-folder text-yellow-600 mr-3"></i>
                         <span class="text-sm font-medium" data-i18n="nav.media">Media Manager</span>
                     </a>
 
-                    <a href="pages/wiki.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="pages/wiki.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-book text-indigo-600 mr-3"></i>
                         <span class="text-sm font-medium" data-i18n="nav.wiki">Wiki</span>
                     </a>
 
-                    <a href="admin/users.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="admin/users.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-users text-purple-600 mr-3"></i>
                         <span class="text-sm font-medium">Manage Users</span>
                     </a>
 
-                    <a href="admin/roles.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="admin/roles.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-user-tag text-indigo-600 mr-3"></i>
                         <span class="text-sm font-medium">Manage Roles</span>
                     </a>
 
-                    <a href="admin/status.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="admin/status.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-cog text-orange-600 mr-3"></i>
                         <span class="text-sm font-medium">System Status</span>
                     </a>
 
-                    <a href="admin/reports.html" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="admin/reports.html"
+                        class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fas fa-chart-bar text-red-600 mr-3"></i>
                         <span class="text-sm font-medium" data-i18n="nav.reports">Reports</span>
                     </a>
@@ -204,7 +213,8 @@
 
             <!-- User Permissions -->
             <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4" data-i18n="dashboard.permissions">Your Permissions</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4" data-i18n="dashboard.permissions">Your Permissions
+                </h3>
                 <div id="permissions-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Permissions will be loaded here -->
                 </div>
@@ -217,8 +227,10 @@
         <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
             <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
             <h3 class="text-xl font-bold text-gray-900 mb-2" data-i18n="status.denied">Access Denied</h3>
-            <p class="text-gray-600 mb-6" data-i18n="status.denied.message">You need to be logged in to access this page.</p>
-            <a href="login.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+            <p class="text-gray-600 mb-6" data-i18n="status.denied.message">You need to be logged in to access this
+                page.</p>
+            <a href="login.html"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
                 <i class="fas fa-sign-in-alt mr-2"></i>
                 <span data-i18n="status.denied.button">Go to Login</span>
             </a>
@@ -391,7 +403,7 @@
         }
 
         // Logout functionality
-        logoutBtn.addEventListener('click', async function() {
+        logoutBtn.addEventListener('click', async function () {
             try {
                 await fetch(`${API_BASE_URL}/auth/logout`, {
                     method: 'POST',
@@ -413,7 +425,7 @@
         const viewCalendarBtn = document.getElementById('view-calendar');
 
         if (viewCalendarBtn) {
-            viewCalendarBtn.addEventListener('click', function() {
+            viewCalendarBtn.addEventListener('click', function () {
                 alert('Calendar feature coming soon!');
             });
         }
@@ -426,7 +438,7 @@
         }
 
         // Initialize i18n and handle DOM ready
-        window.addEventListener('DOMContentLoaded', async function() {
+        window.addEventListener('DOMContentLoaded', async function () {
             // Update HTML lang attribute
 
 
@@ -436,4 +448,5 @@
     </script>
 
 </body>
+
 </html>
