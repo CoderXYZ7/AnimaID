@@ -14,7 +14,7 @@ php -v
 **Install on Ubuntu/Debian:**
 ```bash
 sudo apt update
-sudo apt install -y php8.1 php8.1-cli php8.1-common
+sudo apt install -y php php-cli php-common
 ```
 
 **Install on CentOS/RHEL:**
@@ -40,7 +40,7 @@ php -m
 
 **Install on Ubuntu/Debian:**
 ```bash
-sudo apt install -y php8.1-sqlite3 php8.1-mbstring php8.1-xml php8.1-curl
+sudo apt install -y php-sqlite3 php-mbstring php-xml php-curl
 ```
 
 **Install on CentOS/RHEL:**
@@ -99,7 +99,7 @@ One of the following:
 
 **Install on Ubuntu/Debian:**
 ```bash
-sudo apt install -y apache2 libapache2-mod-php8.1
+sudo apt install -y apache2 libapache2-mod-php
 sudo a2enmod rewrite
 sudo systemctl enable apache2
 sudo systemctl start apache2
@@ -116,7 +116,7 @@ sudo systemctl start httpd
 
 **Install on Ubuntu/Debian:**
 ```bash
-sudo apt install -y nginx php8.1-fpm
+sudo apt install -y nginx php-fpm
 sudo systemctl enable nginx
 sudo systemctl start nginx
 ```
@@ -139,8 +139,8 @@ sudo systemctl start nginx
 sudo apt update
 
 # Install PHP and extensions
-sudo apt install -y php8.1 php8.1-cli php8.1-common php8.1-sqlite3 \
-                    php8.1-mbstring php8.1-xml php8.1-curl php8.1-zip
+sudo apt install -y php php-cli php-common php-sqlite3 \
+                    php-mbstring php-xml php-curl php-zip
 
 # Install Git
 sudo apt install -y git
@@ -151,7 +151,7 @@ sudo mv composer.phar /usr/local/bin/composer
 sudo chmod +x /usr/local/bin/composer
 
 # Install Apache
-sudo apt install -y apache2 libapache2-mod-php8.1
+sudo apt install -y apache2 libapache2-mod-php
 sudo a2enmod rewrite
 sudo systemctl enable apache2
 sudo systemctl start apache2
@@ -241,12 +241,12 @@ sudo chmod +x /usr/local/bin/composer
 
 ```bash
 # List available PHP packages
-apt search php8.1-  # Ubuntu/Debian
-yum search php-     # CentOS/RHEL
+apt search php-  # Ubuntu/Debian
+yum search php-  # CentOS/RHEL
 
 # Install missing extension
-sudo apt install php8.1-<extension>  # Ubuntu/Debian
-sudo yum install php-<extension>     # CentOS/RHEL
+sudo apt install php-<extension>  # Ubuntu/Debian
+sudo yum install php-<extension>  # CentOS/RHEL
 
 # Restart web server
 sudo systemctl restart apache2  # or nginx
