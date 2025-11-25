@@ -57,7 +57,7 @@ fi
 
 # Check Composer
 if command -v composer &> /dev/null; then
-    COMPOSER_VERSION=$(composer --version --no-ansi 2>/dev/null | head -n1)
+    COMPOSER_VERSION=$(composer --version --no-ansi --no-interaction 2>/dev/null | head -n1 || echo "Composer (version unknown)")
     echo -e "${GREEN}✓ Composer installed${NC} ($COMPOSER_VERSION)"
 else
     echo -e "${RED}✗ Composer not installed${NC}"
