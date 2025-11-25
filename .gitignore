@@ -1,10 +1,35 @@
-node_modules
-uploads/
-database/*.db
-database/*.sqlite
-database/*.sqlite3
-animaid.db
-database/animaid.db.old
-*.log
-.ottotime
+# Composer
+vendor/
+composer.lock
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Config files with sensitive data
+config/config.php
+
+# Logs
+logs/*.log
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Backups
+backups/*
+!backups/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.dbe
 config/config.php
