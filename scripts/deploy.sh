@@ -38,15 +38,17 @@ MISSING_DEPS=0
 
 # Check PHP
 if command -v php &> /dev/null; then
-    PHP_VERSION=$(php -r "echo PHP_VERSION;")
+    PHP_VERSION=$(php -r "echo PHP_VERSION;" 2>/dev/null || echo "unknown")
     echo -e "${GREEN}✓ PHP installed${NC} (version $PHP_VERSION)"
     
-    # Check PHP version
-    PHP_MAJOR=$(php -r "echo PHP_MAJOR_VERSION;")
-    PHP_MINOR=$(php -r "echo PHP_MINOR_VERSION;")
-    if [ "$PHP_MAJOR" -lt 8 ] || ([ "$PHP_MAJOR" -eq 8 ] && [ "$PHP_MINOR" -lt 1 ]); then
-        echo -e "${RED}✗ PHP 8.1 or higher required (found $PHP_VERSION)${NC}"
-        MISSING_DEPS=1
+    # Check PHP version (only if we got a valid version)
+    if [ "$PHP_VERSION" != "unknown" ]; then
+        PHP_MAJOR=$(php -r "echo PHP_MAJOR_VERSION;" 2>/dev/null || echo "0")
+        PHP_MINOR=$(php -r "echo PHP_MINOR_VERSION;" 2>/dev/null || echo "0")
+        if [ "$PHP_MAJOR" -lt 8 ] || ([ "$PHP_MAJOR" -eq 8 ] && [ "$PHP_MINOR" -lt 1 ]); then
+            echo -e "${RED}✗ PHP 8.1 or higher required (found $PHP_VERSION)${NC}"
+            MISSING_DEPS=1
+        fi
     fi
 else
     echo -e "${RED}✗ PHP not installed${NC}"
