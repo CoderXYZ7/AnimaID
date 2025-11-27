@@ -4,6 +4,7 @@
 # Database files (prevent overwriting production data)
 database/*.db
 database/*.db-*
+database/*.db.*
 database/*.sqlite
 database/*.sqlite3
 *.db
