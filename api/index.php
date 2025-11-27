@@ -332,8 +332,10 @@ function handleReportsRequest(?string $reportType, string $method, ?string $toke
                 SELECT
                     COUNT(*) as total_animators,
                     COUNT(CASE WHEN status = 'active' THEN 1 END) as active_animators,
-                    AVG(CASE WHEN experience_years IS NOT NULL THEN experience_years END) as avg_experience,
-                    COUNT(CASE WHEN status = 'active' THEN 1 END) as available_now
+                    COUNT(CASE WHEN hire_date IS NOT NULL THEN 1 END) as hired_animators,
+                    AVG(CASE WHEN hire_date IS NOT NULL 
+                        THEN (julianday('now') - julianday(hire_date)) / 365.25 
+                        END) as avg_years_service
                 FROM animators
             ");
 
