@@ -3,7 +3,22 @@
 // This file provides configuration values to the frontend JavaScript
 
 // Load the main configuration
-$config = require __DIR__ . '/../config/config.php';
+$configFile = __DIR__ . '/../config/config.php';
+if (file_exists($configFile)) {
+    $config = require $configFile;
+} else {
+    // Fallback to defaults if config doesn't exist
+    $config = [
+        'system' => [
+            'name' => 'AnimaID',
+            'version' => '0.9',
+            'locale' => 'it_IT'
+        ],
+        'features' => [
+            'show_demo_credentials' => false
+        ]
+    ];
+}
 
 // Set the content type to JavaScript
 header('Content-Type: application/javascript');
@@ -15,35 +30,30 @@ $host = $_SERVER['HTTP_HOST'];
 // Remove any existing port from the host
 $host = preg_replace('/:\d+$/', '', $host);
 
-// Get the configured API port
-$apiPort = $config['api']['port'] ?? 8000;
+// Build API URL
+$apiBaseUrl = $protocol . '://' . $host . '/api';
 
-// For HTTPS, don't include port in URL (standard HTTPS port 443)
-// For HTTP with non-standard ports, include the port
-if ($protocol === 'https') {
-    $apiBaseUrl = $protocol . '://' . $host . '/api';
-} else {
-    $apiBaseUrl = $protocol . '://' . $host . ':' . $apiPort . '/api';
-}
+// Determine environment
+$environment = ($config['system']['environment'] ?? 'production');
 
 // Output the JavaScript configuration
 echo "// AnimaID Frontend Configuration\n";
 echo "window.ANIMAID_CONFIG = {\n";
 echo "    api: {\n";
 echo "        baseUrl: '" . $apiBaseUrl . "',\n";
-echo "        port: " . $apiPort . "\n";
+echo "        port: " . ($protocol === 'https' ? 443 : 80) . "\n";
 echo "    },\n";
 echo "    system: {\n";
 echo "        name: '" . ($config['system']['name'] ?? 'AnimaID') . "',\n";
 echo "        version: '" . ($config['system']['version'] ?? '0.9') . "',\n";
+echo "        environment: '" . $environment . "',\n";
 echo "        locale: '" . ($config['system']['locale'] ?? 'it_IT') . "'\n";
 echo "    },\n";
 echo "    features: {\n";
-echo "        show_demo_credentials: " . (isset($config['features']['show_demo_credentials']) ? ($config['features']['show_demo_credentials'] ? 'true' : 'false') : 'true') . "\n";
+echo "        show_demo_credentials: " . (isset($config['features']['show_demo_credentials']) && $config['features']['show_demo_credentials'] ? 'true' : 'false') . "\n";
 echo "    }\n";
 echo "};\n";
-
-// Also provide a helper function for backward compatibility
+echo "\n";
 echo "// Backward compatibility\n";
-echo "const API_BASE_URL = window.ANIMAID_CONFIG.api.baseUrl;\n";
+echo "window.API_BASE_URL = window.ANIMAID_CONFIG.api.baseUrl;\n";
 ?>
