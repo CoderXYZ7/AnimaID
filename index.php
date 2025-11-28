@@ -9,6 +9,15 @@
 $requestUri = $_SERVER['REQUEST_URI'];
 $path = parse_url($requestUri, PHP_URL_PATH);
 
+// Special handling for config.js.php
+if ($path === '/config.js.php') {
+    $configFile = __DIR__ . '/public/config.js.php';
+    if (file_exists($configFile)) {
+        require $configFile;
+        exit;
+    }
+}
+
 // Serve static files directly if they exist in the public directory
 $staticFilePath = __DIR__ . '/public' . $path;
 if (file_exists($staticFilePath) && is_file($staticFilePath)) {
