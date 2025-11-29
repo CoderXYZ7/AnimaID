@@ -280,12 +280,6 @@
             successMessage.classList.add('hidden');
         }
 
-        // Hide demo credentials if disabled in config
-        const demoCredentials = document.getElementById('demo-credentials');
-        if (demoCredentials && window.ANIMAID_CONFIG?.features?.show_demo_credentials === false) {
-            demoCredentials.style.display = 'none';
-        }
-
         // Auto-focus username field
         usernameInput.focus();
     </script>
