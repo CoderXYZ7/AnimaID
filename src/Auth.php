@@ -651,10 +651,17 @@ class Auth {
     public function checkInOutChild(int $childId, int $eventId, string $action, int $staffId, string $notes = ''): void {
         $now = date('Y-m-d H:i:s');
 
-        // Check if child is already registered for this event, if not, add them
+        // Check if child is already registered for this event using child_id
+        // We also check by name/surname for legacy records that might not have child_id yet
         $existingParticipant = $this->db->fetchOne(
-            "SELECT id FROM event_participants WHERE event_id = ? AND child_name = (SELECT first_name FROM children WHERE id = ?) AND child_surname = (SELECT last_name FROM children WHERE id = ?)",
-            [$eventId, $childId, $childId]
+            "SELECT id FROM event_participants 
+             WHERE event_id = ? AND (
+                child_id = ? OR (
+                    child_name = (SELECT first_name FROM children WHERE id = ?) 
+                    AND child_surname = (SELECT last_name FROM children WHERE id = ?)
+                )
+             )",
+            [$eventId, $childId, $childId, $childId]
         );
 
         if (!$existingParticipant) {
@@ -669,8 +676,9 @@ class Auth {
 
             $participantId = $this->db->insert('event_participants', [
                 'event_id' => $eventId,
-                'child_name' => $child['first_name'],
-                'child_surname' => $child['last_name'],
+                'child_id' => $childId, // Link to the child
+                'child_name' => $child['first_name'], // Snapshot for history
+                'child_surname' => $child['last_name'], // Snapshot for history
                 'birth_date' => $child['birth_date'],
                 'parent_name' => $guardian ? $guardian['first_name'] . ' ' . $guardian['last_name'] : '',
                 'parent_email' => $guardian ? $guardian['email'] : '',
@@ -681,6 +689,10 @@ class Auth {
             ]);
         } else {
             $participantId = $existingParticipant['id'];
+            
+            // If the existing participant doesn't have child_id set (legacy), update it
+            // This "heals" the data as we go
+            $this->db->update('event_participants', ['child_id' => $childId], 'id = ? AND child_id IS NULL', [$participantId]);
         }
 
         // Now handle attendance
@@ -742,9 +754,14 @@ class Auth {
         }
 
         return $this->db->fetchAll("
-            SELECT ar.*, ep.child_name, ep.child_surname, ce.title as event_title
+            SELECT 
+                ar.*, 
+                COALESCE(c.first_name, ep.child_name) as child_name, 
+                COALESCE(c.last_name, ep.child_surname) as child_surname, 
+                ce.title as event_title
             FROM attendance_records ar
             JOIN event_participants ep ON ar.participant_id = ep.id
+            LEFT JOIN children c ON ep.child_id = c.id
             JOIN calendar_events ce ON ar.event_id = ce.id
             WHERE 1=1 {$whereClause}
             ORDER BY ar.check_in_time DESC
