@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body class="bg-gray-50 min-h-screen">
 
     <!-- Loading Screen -->
@@ -32,17 +34,25 @@
             <div class="mb-8">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h2 class="text-3xl font-bold text-gray-900" data-i18n="attendance.title">Attendance Management</h2>
-                        <p class="text-gray-600 mt-1" data-i18n="attendance.subtitle">Check-in/check-out children and view attendance records</p>
+                        <h2 class="text-3xl font-bold text-gray-900" data-i18n="attendance.title">Attendance Management
+                        </h2>
+                        <p class="text-gray-600 mt-1" data-i18n="attendance.subtitle">Check-in/check-out children and
+                            view attendance records</p>
                     </div>
                     <div class="flex space-x-3">
-                        <a href="children.html" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors" data-i18n="attendance.newChild">
+                        <a href="children.html"
+                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+                            data-i18n="attendance.newChild">
                             <i class="fas fa-plus"></i>
                         </a>
-                        <button id="quick-checkin-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors" data-i18n="attendance.quickCheckin">
+                        <button id="quick-checkin-btn"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                            data-i18n="attendance.quickCheckin">
                             <i class="fas fa-sign-in-alt"></i>
                         </button>
-                        <button id="view-records-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors" data-i18n="attendance.viewRecords">
+                        <button id="view-records-btn"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                            data-i18n="attendance.viewRecords">
                             <i class="fas fa-list"></i>
                         </button>
                     </div>
@@ -55,7 +65,8 @@
                 <!-- Today's Events -->
                 <div class="bg-white rounded-lg shadow-md border border-gray-200">
                     <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900 flex items-center" data-i18n="attendance.todaysEvents">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center"
+                            data-i18n="attendance.todaysEvents">
                             <i class="fas fa-calendar-day text-blue-600 mr-2"></i>
                             Today's Events
                         </h3>
@@ -70,31 +81,33 @@
                 <!-- Quick Check-in -->
                 <div class="bg-white rounded-lg shadow-md border border-gray-200 lg:col-span-2">
                     <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900 flex items-center" data-i18n="attendance.quickCheckin">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center"
+                            data-i18n="attendance.quickCheckin">
                             <i class="fas fa-search text-green-600 mr-2"></i>
                             Quick Check-in
                         </h3>
-                        <p class="text-sm text-gray-600 mt-1" data-i18n="attendance.quickCheckinDescription">Select an event, then search for children to check them in</p>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="attendance.quickCheckinDescription">Select an
+                            event, then search for children to check them in</p>
                     </div>
                     <div class="p-6">
                         <div id="quick-checkin-form" class="space-y-4">
                             <div>
-                                <label for="event-select" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="attendance.selectEvent">Select Event *</label>
-                                <select id="event-select" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="" data-i18n="attendance.chooseEvent">Choose an event first...</option>
+                                <label for="event-select" class="block text-sm font-medium text-gray-700 mb-1"
+                                    data-i18n="attendance.selectEvent">Select Event *</label>
+                                <select id="event-select"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="" data-i18n="attendance.chooseEvent">Choose an event first...
+                                    </option>
                                 </select>
-                                <p class="text-xs text-gray-500 mt-1" data-i18n="attendance.selectEventHelp">You must select an event before searching for children</p>
+                                <p class="text-xs text-gray-500 mt-1" data-i18n="attendance.selectEventHelp">You must
+                                    select an event before searching for children</p>
                             </div>
                             <div>
-                                <label for="child-search" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="attendance.searchChild">Search Child</label>
-                                <input
-                                    type="text"
-                                    id="child-search"
-                                    placeholder="Enter child name or registration #..."
+                                <label for="child-search" class="block text-sm font-medium text-gray-700 mb-1"
+                                    data-i18n="attendance.searchChild">Search Child</label>
+                                <input type="text" id="child-search" placeholder="Enter child name or registration #..."
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    disabled
-                                    data-i18n-placeholder="attendance.searchChildPlaceholder"
-                                >
+                                    disabled data-i18n-placeholder="attendance.searchChildPlaceholder">
                             </div>
                             <div id="child-results" class="space-y-2 max-h-40 overflow-y-auto">
                                 <div class="text-sm text-gray-500 text-center py-4">
@@ -111,14 +124,13 @@
             <div class="bg-white rounded-lg shadow-md border border-gray-200">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-gray-900" data-i18n="attendance.attendanceRecords">Attendance Records</h3>
+                        <h3 class="text-lg font-semibold text-gray-900" data-i18n="attendance.attendanceRecords">
+                            Attendance Records</h3>
                         <div class="flex space-x-2">
-                            <input
-                                type="date"
-                                id="records-date"
-                                class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            >
-                            <button id="filter-records-btn" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-md text-sm transition-colors">
+                            <input type="date" id="records-date"
+                                class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <button id="filter-records-btn"
+                                class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-md text-sm transition-colors">
                                 <i class="fas fa-filter"></i>
                             </button>
                         </div>
@@ -128,20 +140,28 @@
                 <div class="divide-y divide-gray-200" id="attendance-records">
                     <div class="px-6 py-8 text-center text-gray-500">
                         <i class="fas fa-list-ul text-3xl mb-2"></i>
-                        <p class="text-sm" data-i18n="attendance.clickViewRecords">Click "View Records" to load attendance records</p>
+                        <p class="text-sm" data-i18n="attendance.clickViewRecords">Click "View Records" to load
+                            attendance records</p>
                     </div>
                 </div>
 
                 <!-- Records Pagination -->
-                <div id="records-pagination" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                <div class="text-sm text-gray-700" data-i18n="attendance.pagination" data-i18n-options='{"showingFrom": "{{showingFrom}}", "showingTo": "{{showingTo}}", "totalRecords": "{{totalRecords}}"}'>
-                    Showing <span id="records-showing-from">1</span> to <span id="records-showing-to">10</span> of <span id="records-total">0</span> records
-                </div>
+                <div id="records-pagination"
+                    class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                    <div class="text-sm text-gray-700" data-i18n="attendance.pagination"
+                        data-i18n-options='{"showingFrom": "{{showingFrom}}", "showingTo": "{{showingTo}}", "totalRecords": "{{totalRecords}}"}'>
+                        Showing <span id="records-showing-from">1</span> to <span id="records-showing-to">10</span> of
+                        <span id="records-total">0</span> records
+                    </div>
                     <div class="flex space-x-2">
-                        <button id="records-prev-page" class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled data-i18n="common.previous">
+                        <button id="records-prev-page"
+                            class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled data-i18n="common.previous">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <button id="records-next-page" class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled data-i18n="common.next">
+                        <button id="records-next-page"
+                            class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled data-i18n="common.next">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
@@ -155,7 +175,8 @@
         <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 id="checkin-modal-title" class="text-lg font-semibold text-gray-900" data-i18n="attendance.checkinChild">Check-in Child</h3>
+                    <h3 id="checkin-modal-title" class="text-lg font-semibold text-gray-900"
+                        data-i18n="attendance.checkinChild">Check-in Child</h3>
                     <button id="close-checkin-modal" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times"></i>
                     </button>
@@ -166,10 +187,14 @@
                 </div>
 
                 <div class="flex justify-end space-x-3 mt-6">
-                    <button id="cancel-checkin-btn" class="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors" data-i18n="common.cancel">
+                    <button id="cancel-checkin-btn"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors"
+                        data-i18n="common.cancel">
                         Cancel
                     </button>
-                    <button id="confirm-checkin-btn" class="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors" data-i18n="attendance.confirmCheckin">
+                    <button id="confirm-checkin-btn"
+                        class="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors"
+                        data-i18n="attendance.confirmCheckin">
                         <i class="fas fa-check mr-1"></i>Confirm Check-in
                     </button>
                 </div>
@@ -182,8 +207,11 @@
         <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
             <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
             <h3 class="text-xl font-bold text-gray-900 mb-2" data-i18n="common.accessDenied">Access Denied</h3>
-            <p class="text-gray-600 mb-6" data-i18n="attendance.noPermission">You don't have permission to access attendance management.</p>
-            <a href="../dashboard.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors" data-i18n="common.backToDashboard">
+            <p class="text-gray-600 mb-6" data-i18n="attendance.noPermission">You don't have permission to access
+                attendance management.</p>
+            <a href="../dashboard.html"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                data-i18n="common.backToDashboard">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Back to Dashboard
             </a>
@@ -645,14 +673,14 @@
         }
 
         // Global functions for inline event handlers
-        window.selectEvent = function(eventId) {
+        window.selectEvent = function (eventId) {
             selectedEventId = eventId;
             document.getElementById('event-select').value = eventId;
             updateQuickCheckInUI();
             document.getElementById('child-search').focus();
         };
 
-        window.checkinChild = async function(childId) {
+        window.checkinChild = async function (childId) {
             selectedParticipantId = childId;
 
             console.log('API_BASE_URL:', API_BASE_URL);
@@ -782,9 +810,12 @@
 
                 if (response.ok) {
                     checkinModal.classList.add('hidden');
-                    if (recordsLoaded) {
-                        await loadAttendanceRecords();
-                    }
+
+                    // Always load/reload records after successful check-in
+                    recordsLoaded = true;
+                    const date = document.getElementById('records-date').value;
+                    await loadAttendanceRecords(1, date, selectedEventId);
+
                     alert('Check-in successful!');
                 } else {
                     if (data.error && data.error.includes('token')) {
@@ -804,7 +835,7 @@
         });
 
         // Remove attendance record
-        window.removeAttendance = async function(recordId) {
+        window.removeAttendance = async function (recordId) {
             if (!confirm('Are you sure you want to delete this attendance record? This action cannot be undone.')) {
                 return;
             }
@@ -849,4 +880,5 @@
     <script type="module" src="../js/header.js"></script>
     <script type="module" src="../../js/themeLanguageSwitcher.js"></script>
 </body>
+
 </html>
