@@ -2272,7 +2272,7 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
 
         case 'register':
             // Get event register (participants + attendance)
-            $logFile = __DIR__ . '/../api_debug.log';
+            $logFile = '/tmp/animaid_api_debug.log';
             $log = function($msg) use ($logFile) {
                 file_put_contents($logFile, date('Y-m-d H:i:s') . " - " . $msg . "\n", FILE_APPEND);
             };
