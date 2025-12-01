@@ -133,7 +133,7 @@
 
         async function loadEvents() {
             try {
-                const response = await fetch(`${API_BASE_URL}/calendar?status=published`, {
+                const response = await fetch(`${API_BASE_URL}/calendar?status=published&_t=${Date.now()}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
                 const data = await response.json();
