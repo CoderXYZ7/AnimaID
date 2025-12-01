@@ -4,345 +4,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="attendance.title">AnimaID - Attendance</title>
-    <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="../src/css/output.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Attendance Register - AnimaID</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="../config.js.php"></script>
+    <script type="module" src="../js/config.js"></script>
 </head>
 
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-100">
+    <div id="header-container"></div>
 
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p class="text-gray-600" data-i18n="attendance.loading">Loading attendance...</p>
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header & Controls -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Attendance Register</h1>
+                    <p class="text-gray-600">Manage daily attendance for events</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                    <!-- Event Selector -->
+                    <div class="w-full md:w-64">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Event</label>
+                        <select id="event-select"
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                            <option value="">Loading events...</option>
+                        </select>
+                    </div>
+
+                    <!-- Date Picker -->
+                    <div class="w-full md:w-48">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" id="register-date"
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h2 class="text-lg font-semibold text-gray-700" id="register-title">Select an event to view register
+                </h2>
+                <button id="add-child-btn"
+                    class="hidden bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    <i class="fas fa-plus mr-2"></i>Add Child to Register
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Child Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Time</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="register-body" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="4" class="px-6 py-10 text-center text-gray-500">
+                                Please select an event to view the register.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div id="main-content" class="hidden">
-
-        <div id="main-header"></div>
-
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-            <!-- Page Header -->
-            <div class="mb-8">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="text-3xl font-bold text-gray-900" data-i18n="attendance.title">Attendance Management
-                        </h2>
-                        <p class="text-gray-600 mt-1" data-i18n="attendance.subtitle">Check-in/check-out children and
-                            view attendance records</p>
-                    </div>
-                    <div class="flex space-x-3">
-                        <a href="children.html"
-                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
-                            data-i18n="attendance.newChild">
-                            <i class="fas fa-plus"></i>
-                        </a>
-                        <button id="quick-checkin-btn"
-                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-                            data-i18n="attendance.quickCheckin">
-                            <i class="fas fa-sign-in-alt"></i>
-                        </button>
-                        <button id="view-records-btn"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-                            data-i18n="attendance.viewRecords">
-                            <i class="fas fa-list"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upper Section: Events and Check-in -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-
-                <!-- Today's Events -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900 flex items-center"
-                            data-i18n="attendance.todaysEvents">
-                            <i class="fas fa-calendar-day text-blue-600 mr-2"></i>
-                            Today's Events
-                        </h3>
-                    </div>
-                    <div class="p-6">
-                        <div id="today-events" class="space-y-3">
-                            <!-- Today's events will be loaded here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Check-in -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200 lg:col-span-2">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900 flex items-center"
-                            data-i18n="attendance.quickCheckin">
-                            <i class="fas fa-search text-green-600 mr-2"></i>
-                            Quick Check-in
-                        </h3>
-                        <p class="text-sm text-gray-600 mt-1" data-i18n="attendance.quickCheckinDescription">Select an
-                            event, then search for children to check them in</p>
-                    </div>
-                    <div class="p-6">
-                        <div id="quick-checkin-form" class="space-y-4">
-                            <div>
-                                <label for="event-select" class="block text-sm font-medium text-gray-700 mb-1"
-                                    data-i18n="attendance.selectEvent">Select Event *</label>
-                                <select id="event-select"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="" data-i18n="attendance.chooseEvent">Choose an event first...
-                                    </option>
-                                </select>
-                                <p class="text-xs text-gray-500 mt-1" data-i18n="attendance.selectEventHelp">You must
-                                    select an event before searching for children</p>
-                            </div>
-                            <div>
-                                <label for="child-search" class="block text-sm font-medium text-gray-700 mb-1"
-                                    data-i18n="attendance.searchChild">Search Child</label>
-                                <input type="text" id="child-search" placeholder="Enter child name or registration #..."
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    disabled data-i18n-placeholder="attendance.searchChildPlaceholder">
-                            </div>
-                            <div id="child-results" class="space-y-2 max-h-40 overflow-y-auto">
-                                <div class="text-sm text-gray-500 text-center py-4">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    Select an event above, then search for children to check them in
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Attendance Records -->
-            <div class="bg-white rounded-lg shadow-md border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-gray-900" data-i18n="attendance.attendanceRecords">
-                            Attendance Records</h3>
-                        <div class="flex space-x-2">
-                            <input type="date" id="records-date"
-                                class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <button id="filter-records-btn"
-                                class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-md text-sm transition-colors">
-                                <i class="fas fa-filter"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="divide-y divide-gray-200" id="attendance-records">
-                    <div class="px-6 py-8 text-center text-gray-500">
-                        <i class="fas fa-list-ul text-3xl mb-2"></i>
-                        <p class="text-sm" data-i18n="attendance.clickViewRecords">Click "View Records" to load
-                            attendance records</p>
-                    </div>
-                </div>
-
-                <!-- Records Pagination -->
-                <div id="records-pagination"
-                    class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                    <div class="text-sm text-gray-700" data-i18n="attendance.pagination"
-                        data-i18n-options='{"showingFrom": "{{showingFrom}}", "showingTo": "{{showingTo}}", "totalRecords": "{{totalRecords}}"}'>
-                        Showing <span id="records-showing-from">1</span> to <span id="records-showing-to">10</span> of
-                        <span id="records-total">0</span> records
-                    </div>
-                    <div class="flex space-x-2">
-                        <button id="records-prev-page"
-                            class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled data-i18n="common.previous">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button id="records-next-page"
-                            class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled data-i18n="common.next">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Check-in Modal -->
-    <div id="checkin-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+    <!-- Add Child Modal -->
+    <div id="add-child-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
             <div class="mt-3">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 id="checkin-modal-title" class="text-lg font-semibold text-gray-900"
-                        data-i18n="attendance.checkinChild">Check-in Child</h3>
-                    <button id="close-checkin-modal" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Add Child to Register</h3>
+
+                <div class="mb-4">
+                    <input type="text" id="child-search" placeholder="Search child by name..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
-                <div id="checkin-content" class="space-y-4">
-                    <!-- Check-in content will be loaded here -->
+                <div id="search-results" class="max-h-60 overflow-y-auto border border-gray-200 rounded-md mb-4 hidden">
+                    <!-- Results will appear here -->
                 </div>
 
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button id="cancel-checkin-btn"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors"
-                        data-i18n="common.cancel">
-                        Cancel
-                    </button>
-                    <button id="confirm-checkin-btn"
-                        class="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors"
-                        data-i18n="attendance.confirmCheckin">
-                        <i class="fas fa-check mr-1"></i>Confirm Check-in
-                    </button>
+                <div class="flex justify-end gap-3">
+                    <button id="close-modal-btn"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Error Screen -->
-    <div id="error-screen" class="hidden fixed inset-0 bg-gray-50 flex items-center justify-center">
-        <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
-            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
-            <h3 class="text-xl font-bold text-gray-900 mb-2" data-i18n="common.accessDenied">Access Denied</h3>
-            <p class="text-gray-600 mb-6" data-i18n="attendance.noPermission">You don't have permission to access
-                attendance management.</p>
-            <a href="../dashboard.html"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-                data-i18n="common.backToDashboard">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Back to Dashboard
-            </a>
-        </div>
-    </div>
+    <script type="module">
+        import { initConfig } from '../js/config.js';
 
-    <script>
-        // Configuration
-        const API_BASE_URL = '/api';
+        let API_BASE_URL = '';
+        let userToken = localStorage.getItem('animaid_token');
+        let currentEventId = null;
 
-        // DOM Elements
-        const loadingScreen = document.getElementById('loading-screen');
-        const mainContent = document.getElementById('main-content');
-        const errorScreen = document.getElementById('error-screen');
-        const todayEvents = document.getElementById('today-events');
-        const attendanceRecords = document.getElementById('attendance-records');
-        const recordsPagination = document.getElementById('records-pagination');
-        const checkinModal = document.getElementById('checkin-modal');
-        const checkinContent = document.getElementById('checkin-content');
-
-        let currentUser = null;
-        let userToken = null;
-        let selectedEventId = null;
-        let selectedParticipantId = null;
-        let currentRecordsPage = 1;
-        let totalRecordsPages = 1;
-        let recordsLoaded = false;
-        let allEvents = [];
-
-        // Initialize page
+        // Initialize
         async function initPage() {
-            try {
-                // Check authentication
-                userToken = localStorage.getItem('animaid_token');
-                const userData = localStorage.getItem('animaid_user');
+            await initConfig();
+            API_BASE_URL = window.ANIMAID_CONFIG.apiUrl;
 
-                if (!userToken || !userData) {
-                    showErrorScreen();
-                    return;
-                }
-
-                currentUser = JSON.parse(userData);
-
-                // Verify token and check permissions
-                const response = await fetch(`${API_BASE_URL}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                if (!response.ok) {
-                    localStorage.removeItem('animaid_token');
-                    localStorage.removeItem('animaid_user');
-                    window.location.href = '../login.html';
-                    return;
-                }
-
-                // Check if user has attendance permissions
-                const hasPermission = await checkAttendancePermission();
-                if (!hasPermission) {
-                    showErrorScreen();
-                    return;
-                }
-
-                // Load initial data
-                await loadTodayEvents();
-                // Don't load attendance records initially - let user click "View Records"
-
-                // Set default date to today
-                document.getElementById('records-date').valueAsDate = new Date();
-
-                // Show main content
-                loadingScreen.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-
-            } catch (error) {
-                console.error('Page initialization error:', error);
-                showErrorScreen();
+            if (!userToken) {
+                window.location.href = '../login.html';
+                return;
             }
+
+            // Set default date to today (local)
+            const localDate = new Date();
+            const year = localDate.getFullYear();
+            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+            const day = String(localDate.getDate()).padStart(2, '0');
+            document.getElementById('register-date').value = `${year}-${month}-${day}`;
+
+            await loadEvents();
+            setupEventListeners();
         }
 
-        // Check if user has attendance permissions
-        async function checkAttendancePermission() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/attendance?page=1&limit=1`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-                return response.ok;
-            } catch (error) {
-                return false;
-            }
-        }
-
-        // Load today's events
-        async function loadTodayEvents() {
+        async function loadEvents() {
             try {
                 const response = await fetch(`${API_BASE_URL}/calendar?status=published`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
-
-                if (!response.ok) throw new Error('Failed to load events');
-
                 const data = await response.json();
 
-                // Filter events for today
-                const today = new Date().toISOString().split('T')[0];
-                const todayEventsData = data.events.filter(event => event.start_date === today);
-
-                allEvents = data.events; // Store all events globally
-                displayTodayEvents(todayEventsData);
-                populateEventSelect(data.events); // Use all events for the select dropdown
-
-            } catch (error) {
-                console.error('Error loading today\'s events:', error);
-                todayEvents.innerHTML = '<div class="text-center text-gray-500">Error loading events</div>';
-            }
-        }
-
-        // Display today's events
-        function displayTodayEvents(events) {
-            if (events.length === 0) {
-                todayEvents.innerHTML = '<div class="text-center text-gray-500">No events scheduled for today</div>';
-                return;
-            }
-
-            todayEvents.innerHTML = events.map(event => `
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex-1">
-                const data = await response.json();
-                
                 const select = document.getElementById('event-select');
                 select.innerHTML = '<option value="">Select an event...</option>';
-                
+
                 data.events.forEach(event => {
                     const option = document.createElement('option');
                     option.value = event.id;
@@ -371,13 +169,13 @@
                 return;
             }
 
-            title.textContent = `Register for ${ date }`;
+            title.textContent = `Register for ${date}`;
             addBtn.classList.remove('hidden');
             tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Loading register...</td></tr>';
 
             try {
-                const response = await fetch(`${ API_BASE_URL } /attendance/register ? event_id = ${ eventId }& date=${ date } `, {
-                    headers: { 'Authorization': `Bearer ${ userToken } ` }
+                const response = await fetch(`${API_BASE_URL}/attendance/register?event_id=${eventId}&date=${date}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
                 });
                 const data = await response.json();
 
@@ -391,7 +189,7 @@
 
         function renderRegister(participants) {
             const tbody = document.getElementById('register-body');
-            
+
             if (participants.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-gray-500">No participants registered for this event yet. Click "Add Child" to start building the register.</td></tr>';
                 return;
@@ -400,10 +198,10 @@
             tbody.innerHTML = participants.map(p => {
                 const isPresent = p.attendance_status === 'present';
                 const isAbsent = p.attendance_status === 'absent';
-                const time = p.check_in_time ? new Date(p.check_in_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-';
+                const time = p.check_in_time ? new Date(p.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-';
 
                 return `
-                < tr class="hover:bg-gray-50" >
+                    <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
@@ -434,7 +232,7 @@
                                 <i class="fas fa-trash-alt opacity-50 cursor-not-allowed"></i>
                             </button>
                         </td>
-                    </tr >
+                    </tr>
                 `;
             }).join('');
         }
@@ -443,7 +241,7 @@
         window.updateStatus = async (childId, status) => {
             const eventId = document.getElementById('event-select').value;
             const dateStr = document.getElementById('register-date').value; // YYYY-MM-DD
-            
+
             // Calculate check-in time
             // If date is today, use null (backend uses NOW)
             // If date is past, use date + 12:00:00
@@ -451,24 +249,24 @@
             const year = localDate.getFullYear();
             const month = String(localDate.getMonth() + 1).padStart(2, '0');
             const day = String(localDate.getDate()).padStart(2, '0');
-            const todayStr = `${ year } -${ month } -${ day } `;
-            
+            const todayStr = `${year}-${month}-${day}`;
+
             let checkInTime = null;
             if (dateStr !== todayStr) {
-                checkInTime = `${ dateStr } 12:00:00`;
+                checkInTime = `${dateStr} 12:00:00`;
             }
 
             try {
                 // For now, we only support 'present' via checkin endpoint
                 // 'absent' would need a new endpoint or logic, but we can simulate it by deleting the record if it exists?
                 // Or we can just use checkin for present.
-                
+
                 if (status === 'present') {
-                    await fetch(`${ API_BASE_URL } /attendance/checkin`, {
+                    await fetch(`${API_BASE_URL}/attendance/checkin`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${ userToken } `
+                            'Authorization': `Bearer ${userToken}`
                         },
                         body: JSON.stringify({
                             child_id: childId,
@@ -519,7 +317,7 @@
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(debounceTimer);
                 const query = e.target.value.trim();
-                
+
                 if (query.length < 2) {
                     searchResults.classList.add('hidden');
                     return;
@@ -527,13 +325,13 @@
 
                 debounceTimer = setTimeout(async () => {
                     try {
-                        const response = await fetch(`${ API_BASE_URL }/children?search=${encodeURIComponent(query)}`, {
-            headers: { 'Authorization': `Bearer ${userToken}` }
-        });
-        const data = await response.json();
+                        const response = await fetch(`${API_BASE_URL}/children?search=${encodeURIComponent(query)}`, {
+                            headers: { 'Authorization': `Bearer ${userToken}` }
+                        });
+                        const data = await response.json();
 
-        if (data.children && data.children.length > 0) {
-            searchResults.innerHTML = data.children.map(child => `
+                        if (data.children && data.children.length > 0) {
+                            searchResults.innerHTML = data.children.map(child => `
                                 <div class="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0 flex justify-between items-center"
                                      onclick="window.addChildToRegister(${child.id})">
                                     <div>
@@ -543,14 +341,14 @@
                                     <i class="fas fa-plus text-blue-600"></i>
                                 </div>
                             `).join('');
-            searchResults.classList.remove('hidden');
-        } else {
-            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No children found</div>';
-            searchResults.classList.remove('hidden');
-        }
+                            searchResults.classList.remove('hidden');
+                        } else {
+                            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No children found</div>';
+                            searchResults.classList.remove('hidden');
+                        }
                     } catch (error) {
-            console.error('Search error:', error);
-        }
+                        console.error('Search error:', error);
+                    }
                 }, 300);
             });
         }
@@ -611,4 +409,3 @@
 </body>
 
 </html>
-```
