@@ -9,6 +9,8 @@
 $requestUri = $_SERVER['REQUEST_URI'];
 $path = parse_url($requestUri, PHP_URL_PATH);
 
+file_put_contents(__DIR__ . '/debug_log.txt', date('Y-m-d H:i:s') . " - URI: $requestUri - Path: $path\n", FILE_APPEND);
+
 // Special handling for config.js.php
 if ($path === '/config.js.php') {
     $configFile = __DIR__ . '/public/config.js.php';
