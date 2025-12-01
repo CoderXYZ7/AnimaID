@@ -2230,12 +2230,13 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
             $childId = (int)($body['child_id'] ?? 0);
             $eventId = (int)($body['event_id'] ?? 0);
             $notes = $body['notes'] ?? '';
+            $checkInTime = $body['check_in_time'] ?? null;
 
             if (!$childId || !$eventId) {
                 throw new Exception('Child ID and Event ID are required');
             }
 
-            $auth->checkInOutChild($childId, $eventId, 'checkin', $user['id'], $notes);
+            $auth->checkInOutChild($childId, $eventId, 'checkin', $user['id'], $notes, $checkInTime);
             return ['message' => 'Check-in recorded successfully'];
 
         case 'checkout':
@@ -2247,12 +2248,13 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
             $childId = (int)($body['child_id'] ?? 0);
             $eventId = (int)($body['event_id'] ?? 0);
             $notes = $body['notes'] ?? '';
+            $checkOutTime = $body['check_out_time'] ?? null;
 
             if (!$childId || !$eventId) {
                 throw new Exception('Child ID and Event ID are required');
             }
 
-            $auth->checkInOutChild($childId, $eventId, 'checkout', $user['id'], $notes);
+            $auth->checkInOutChild($childId, $eventId, 'checkout', $user['id'], $notes, $checkOutTime);
             return ['message' => 'Check-out recorded successfully'];
 
         case null:

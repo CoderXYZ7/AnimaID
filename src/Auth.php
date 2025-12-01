@@ -648,8 +648,8 @@ class Auth {
     /**
      * Check in/out child for an event
      */
-    public function checkInOutChild(int $childId, int $eventId, string $action, int $staffId, string $notes = ''): void {
-        $now = date('Y-m-d H:i:s');
+    public function checkInOutChild(int $childId, int $eventId, string $action, int $staffId, string $notes = '', string $customTime = null): void {
+        $now = $customTime ? date('Y-m-d H:i:s', strtotime($customTime)) : date('Y-m-d H:i:s');
 
         // Check if child is already registered for this event using child_id
         // We also check by name/surname for legacy records that might not have child_id yet

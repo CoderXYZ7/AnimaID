@@ -802,6 +802,23 @@
             }
 
             try {
+                // Determine check-in time based on selected date
+                const selectedDateVal = document.getElementById('records-date').value;
+
+                // Get local today YYYY-MM-DD
+                const localDate = new Date();
+                const year = localDate.getFullYear();
+                const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                const day = String(localDate.getDate()).padStart(2, '0');
+                const todayStr = `${year}-${month}-${day}`;
+
+                let checkInTime = null;
+
+                if (selectedDateVal && selectedDateVal !== todayStr) {
+                    // Backdating: Use selected date + 12:00:00
+                    checkInTime = `${selectedDateVal} 12:00:00`;
+                }
+
                 const response = await fetch(`${API_BASE_URL}/attendance/checkin`, {
                     method: 'POST',
                     headers: {
@@ -811,7 +828,8 @@
                     body: JSON.stringify({
                         child_id: selectedParticipantId,
                         event_id: selectedEventId,
-                        notes: 'Checked in via quick check-in'
+                        notes: 'Checked in via quick check-in',
+                        check_in_time: checkInTime
                     })
                 });
 
@@ -823,15 +841,9 @@
                     // Always load/reload records after successful check-in
                     recordsLoaded = true;
 
-                    // Switch view to today (local time) because check-in is always for now
-                    const localDate = new Date();
-                    const year = localDate.getFullYear();
-                    const month = String(localDate.getMonth() + 1).padStart(2, '0');
-                    const day = String(localDate.getDate()).padStart(2, '0');
-                    const today = `${year}-${month}-${day}`;
-
-                    document.getElementById('records-date').value = today;
-                    await loadAttendanceRecords(1, today, selectedEventId);
+                    // Reload records for the currently selected date (whether it's today or backdated)
+                    const currentSelectedDate = document.getElementById('records-date').value;
+                    await loadAttendanceRecords(1, currentSelectedDate, selectedEventId);
 
                     alert('Check-in successful!');
                 } else {
