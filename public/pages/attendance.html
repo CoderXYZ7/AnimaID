@@ -401,11 +401,13 @@
 
         // Load attendance records
         async function loadAttendanceRecords(page = 1, date = null, eventId = null) {
+            console.log('loadAttendanceRecords called with:', { page, date, eventId });
             try {
                 const params = new URLSearchParams({ page: page, limit: 10 });
                 if (date) params.append('date', date);
                 if (eventId) params.append('event_id', eventId);
 
+                console.log('Fetching records with params:', params.toString());
                 const response = await fetch(`${API_BASE_URL}/attendance?${params}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
@@ -413,6 +415,7 @@
                 if (!response.ok) throw new Error('Failed to load records');
 
                 const data = await response.json();
+                console.log('Records loaded:', data);
 
                 displayAttendanceRecords(data.records || []);
                 updateRecordsPagination({ page: page, total: data.records ? data.records.length : 0, pages: 1 });
@@ -425,6 +428,7 @@
 
         // Display attendance records
         function displayAttendanceRecords(records) {
+            console.log('Displaying records:', records);
             if (records.length === 0) {
                 attendanceRecords.innerHTML = '<div class="px-6 py-4 text-center text-gray-500">No attendance records found</div>';
                 return;
