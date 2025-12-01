@@ -712,7 +712,12 @@
                 const child = childData.child;
 
                 // Now check if child is already checked in to this event
-                const today = new Date().toISOString().split('T')[0];
+                const localDate = new Date();
+                const year = localDate.getFullYear();
+                const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                const day = String(localDate.getDate()).padStart(2, '0');
+                const today = `${year}-${month}-${day}`;
+
                 console.log('Checking attendance for event:', selectedEventId, 'child:', childId, 'date:', today);
 
                 const attendanceCheckResponse = await fetch(`${API_BASE_URL}/attendance?event_id=${selectedEventId}&date=${today}`, {
@@ -813,8 +818,16 @@
 
                     // Always load/reload records after successful check-in
                     recordsLoaded = true;
-                    const date = document.getElementById('records-date').value;
-                    await loadAttendanceRecords(1, date, selectedEventId);
+
+                    // Switch view to today (local time) because check-in is always for now
+                    const localDate = new Date();
+                    const year = localDate.getFullYear();
+                    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(localDate.getDate()).padStart(2, '0');
+                    const today = `${year}-${month}-${day}`;
+
+                    document.getElementById('records-date').value = today;
+                    await loadAttendanceRecords(1, today, selectedEventId);
 
                     alert('Check-in successful!');
                 } else {
