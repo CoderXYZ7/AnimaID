@@ -2272,34 +2272,21 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
 
         case 'register':
             // Get event register (participants + attendance)
-            $logFile = '/tmp/animaid_api_debug.log';
-            $log = function($msg) use ($logFile) {
-                file_put_contents($logFile, date('Y-m-d H:i:s') . " - " . $msg . "\n", FILE_APPEND);
-            };
-            
-            $log("API: Processing register request");
-            
             if ($method !== 'GET') throw new Exception('Method not allowed');
             
-            $log("API: Checking permissions for user " . ($user['id'] ?? 'null'));
             if (!$auth->checkPermission($user['id'], 'attendance.view')) {
-                $log("API: Permission denied");
                 throw new Exception('Insufficient permissions');
             }
 
             $eventId = isset($_GET['event_id']) ? (int)$_GET['event_id'] : 0;
             $date = $_GET['date'] ?? date('Y-m-d');
             
-            $log("API: Fetching register for event $eventId on date $date");
-
             if (!$eventId) throw new Exception('Event ID is required');
 
             try {
                 $result = $auth->getEventRegister($eventId, $date);
-                $log("API: Register fetched, count: " . count($result));
                 return ['register' => $result];
             } catch (Exception $e) {
-                $log("API: Error fetching register: " . $e->getMessage());
                 throw $e;
             }
 
