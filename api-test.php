@@ -24,7 +24,8 @@ echo "6. API file path: " . __DIR__ . '/api/index.php' . "\n";
 echo "\n7. Attempting to include API...\n";
 if (strpos($path, 'api/') === 0) {
     echo "   Routing to API!\n";
-    // Don't actually include it, just test
+    echo "   Query String: " . $_SERVER['QUERY_STRING'] . "\n";
+    echo "   GET params: " . print_r($_GET, true) . "\n";
 } else {
     echo "   NOT routing to API\n";
 }
