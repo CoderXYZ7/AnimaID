@@ -2202,7 +2202,7 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
     $user = $auth->verifyToken($token);
 
     // Handle individual attendance record operations (DELETE)
-    if ($action !== null && $action !== 'checkin' && $action !== 'checkout') {
+    if ($action !== null && $action !== 'checkin' && $action !== 'checkout' && $action !== 'register') {
         $recordId = (int)$action;
 
         switch ($method) {
