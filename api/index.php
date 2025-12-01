@@ -2270,6 +2270,20 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
 
             return ['records' => $auth->getAttendanceRecords($eventId, $participantId, $date)];
 
+        case 'register':
+            // Get event register (participants + attendance)
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+            if (!$auth->checkPermission($user['id'], 'attendance.view')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $eventId = isset($_GET['event_id']) ? (int)$_GET['event_id'] : 0;
+            $date = $_GET['date'] ?? date('Y-m-d');
+
+            if (!$eventId) throw new Exception('Event ID is required');
+
+            return ['register' => $auth->getEventRegister($eventId, $date)];
+
         default:
             throw new Exception('Attendance action not found');
     }
