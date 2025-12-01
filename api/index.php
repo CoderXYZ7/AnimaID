@@ -2272,29 +2272,34 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
 
         case 'register':
             // Get event register (participants + attendance)
-            error_log("API: Processing register request");
+            $logFile = __DIR__ . '/../api_debug.log';
+            $log = function($msg) use ($logFile) {
+                file_put_contents($logFile, date('Y-m-d H:i:s') . " - " . $msg . "\n", FILE_APPEND);
+            };
+            
+            $log("API: Processing register request");
             
             if ($method !== 'GET') throw new Exception('Method not allowed');
             
-            error_log("API: Checking permissions for user " . ($user['id'] ?? 'null'));
+            $log("API: Checking permissions for user " . ($user['id'] ?? 'null'));
             if (!$auth->checkPermission($user['id'], 'attendance.view')) {
-                error_log("API: Permission denied");
+                $log("API: Permission denied");
                 throw new Exception('Insufficient permissions');
             }
 
             $eventId = isset($_GET['event_id']) ? (int)$_GET['event_id'] : 0;
             $date = $_GET['date'] ?? date('Y-m-d');
             
-            error_log("API: Fetching register for event $eventId on date $date");
+            $log("API: Fetching register for event $eventId on date $date");
 
             if (!$eventId) throw new Exception('Event ID is required');
 
             try {
                 $result = $auth->getEventRegister($eventId, $date);
-                error_log("API: Register fetched, count: " . count($result));
+                $log("API: Register fetched, count: " . count($result));
                 return ['register' => $result];
             } catch (Exception $e) {
-                error_log("API: Error fetching register: " . $e->getMessage());
+                $log("API: Error fetching register: " . $e->getMessage());
                 throw $e;
             }
 
