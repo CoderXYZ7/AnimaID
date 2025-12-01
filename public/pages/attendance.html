@@ -583,11 +583,11 @@
                 // Find the selected event to get its date
                 const selectedEvent = allEvents.find(event => event.id == selectedEventId);
                 if (selectedEvent) {
-                    // Set the records date to the event's date
-                    document.getElementById('records-date').value = selectedEvent.start_date;
+                    // We used to switch the date to the event start date, but this is confusing
+                    // for multi-day events or when checking in for "today".
+                    // So we keep the date as is (defaulting to today).
 
-                    // Load and display events for this date
-                    loadEventsForDate(selectedEvent.start_date);
+                    // If the user wants to see past records, they can manually change the date.
                 }
             }
         });
