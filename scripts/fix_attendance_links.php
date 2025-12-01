@@ -66,3 +66,26 @@ if (count($orphans) > 0) {
 }
 
 echo "\nRepair complete.\n";
+
+echo "\n---------------------------------------------------\n";
+echo "PARTICIPANT CONNECTION REPORT\n";
+echo "---------------------------------------------------\n";
+
+$allParticipants = $db->fetchAll("
+    SELECT ep.id, ep.child_name, ep.child_surname, ep.child_id, c.first_name, c.last_name
+    FROM event_participants ep
+    LEFT JOIN children c ON ep.child_id = c.id
+    ORDER BY ep.child_surname, ep.child_name
+");
+
+printf("%-5s | %-30s | %-10s | %-30s\n", "ID", "Participant Name", "Child ID", "Connected Child Name");
+echo str_repeat("-", 85) . "\n";
+
+foreach ($allParticipants as $p) {
+    $pName = $p['child_name'] . ' ' . $p['child_surname'];
+    $cName = $p['first_name'] ? ($p['first_name'] . ' ' . $p['last_name']) : "---";
+    $status = $p['child_id'] ? $p['child_id'] : "MISSING";
+    
+    printf("%-5d | %-30s | %-10s | %-30s\n", $p['id'], substr($pName, 0, 30), $status, substr($cName, 0, 30));
+}
+echo str_repeat("-", 85) . "\n";
