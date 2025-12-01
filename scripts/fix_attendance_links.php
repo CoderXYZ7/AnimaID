@@ -39,7 +39,28 @@ foreach ($participants as $p) {
         echo "  [FIXED] Linked participant '{$p['child_name']} {$p['child_surname']}' to Child ID {$child['id']}\n";
         $fixed++;
     } else {
-        echo "  [WARNING] No matching child found for '{$p['child_name']} {$p['child_surname']}'\n";
+        // Check if we should auto-create
+        if (in_array('--create-missing', $argv)) {
+            echo "  [CREATING] Creating child for '{$p['child_name']} {$p['child_surname']}'... ";
+            try {
+                // Create new child
+                $childId = $db->insert('children', [
+                    'first_name' => $p['child_name'],
+                    'last_name' => $p['child_surname'],
+                    'birth_date' => $p['birth_date'] ?: date('Y-01-01'), // Default to current year if missing
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+                
+                // Link it
+                $db->update('event_participants', ['child_id' => $childId], 'id = ?', [$p['id']]);
+                echo "Done (ID: $childId)\n";
+                $fixed++;
+            } catch (Exception $e) {
+                echo "Failed: " . $e->getMessage() . "\n";
+            }
+        } else {
+            echo "  [WARNING] No matching child found for '{$p['child_name']} {$p['child_surname']}' (Use --create-missing to auto-create)\n";
+        }
     }
 }
 
