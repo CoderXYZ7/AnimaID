@@ -113,7 +113,7 @@
         // Initialize
         async function initPage() {
             await initConfig();
-            API_BASE_URL = window.ANIMAID_CONFIG.apiUrl;
+            API_BASE_URL = window.ANIMAID_CONFIG.api.baseUrl;
 
             if (!userToken) {
                 window.location.href = '../login.html';
