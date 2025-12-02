@@ -77,14 +77,35 @@ try {
     $backupDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     echo "✓ Connected to databases\n\n";
 
-    // Step 3: Get list of tables to restore (exclude migrations and token_blacklist)
+    // Step 3: Get list of tables to restore (exclude migrations, virtual tables, and system tables)
     echo "[3/5] Identifying tables to restore...\n";
     $excludeTables = ['migrations', 'sqlite_sequence'];
     
+    // Get all tables
     $stmt = $backupDb->query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name");
     $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
     
-    $tablesToRestore = array_diff($tables, $excludeTables);
+    // Filter out virtual tables (FTS tables)
+    $regularTables = [];
+    foreach ($tables as $table) {
+        // Check if it's a virtual table
+        $stmt = $backupDb->query("SELECT sql FROM sqlite_master WHERE type='table' AND name='{$table}'");
+        $sql = $stmt->fetchColumn();
+        
+        // Skip virtual tables (FTS, etc.) and excluded tables
+        if (in_array($table, $excludeTables)) {
+            continue;
+        }
+        
+        if (stripos($sql, 'CREATE VIRTUAL TABLE') !== false) {
+            echo "  ⚠ Skipping virtual table: {$table}\n";
+            continue;
+        }
+        
+        $regularTables[] = $table;
+    }
+    
+    $tablesToRestore = $regularTables;
     
     echo "Tables to restore: " . count($tablesToRestore) . "\n";
     foreach ($tablesToRestore as $table) {
@@ -165,7 +186,23 @@ try {
     $currentDb->exec("PRAGMA foreign_keys = ON");
     echo "\n✓ Data import completed\n\n";
 
-    // Step 6: Verify restoration
+    // Step 6: Rebuild FTS search index
+    echo "[6/7] Rebuilding search index...\n";
+    try {
+        // Check if wiki_search_index exists
+        $stmt = $currentDb->query("SELECT name FROM sqlite_master WHERE type='table' AND name='wiki_search_index'");
+        if ($stmt->fetch()) {
+            // Rebuild the FTS index
+            $currentDb->exec("INSERT INTO wiki_search_index(wiki_search_index) VALUES('rebuild')");
+            echo "✓ Search index rebuilt\n\n";
+        } else {
+            echo "⚠ No search index found (skipping)\n\n";
+        }
+    } catch (Exception $e) {
+        echo "⚠ Could not rebuild search index: " . $e->getMessage() . "\n\n";
+    }
+
+    // Step 7: Verify restoration
     echo "Verifying restoration...\n";
     $stmt = $currentDb->query("SELECT COUNT(*) as count FROM users");
     $userCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
