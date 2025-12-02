@@ -732,6 +732,90 @@ class Auth {
     }
 
     /**
+     * Register a child for an event (without checking them in)
+     */
+    public function registerChildForEvent(int $childId, int $eventId): int {
+        // Check if already registered
+        $existing = $this->db->fetchOne(
+            "SELECT id FROM event_participants WHERE event_id = ? AND child_id = ?",
+            [$eventId, $childId]
+        );
+
+        if ($existing) {
+            return $existing['id'];
+        }
+
+        // Get child details
+        $child = $this->db->fetchOne("SELECT * FROM children WHERE id = ?", [$childId]);
+        if (!$child) {
+            throw new Exception('Child not found');
+        }
+
+        // Get primary guardian
+        $guardian = $this->db->fetchOne("SELECT * FROM child_guardians WHERE child_id = ? AND is_primary = 1", [$childId]);
+        
+        // Get medical info
+        $medical = $this->db->fetchOne("SELECT * FROM child_medical WHERE child_id = ?", [$childId]);
+
+        return $this->db->insert('event_participants', [
+            'event_id' => $eventId,
+            'child_id' => $childId,
+            'child_name' => $child['first_name'],
+            'child_surname' => $child['last_name'],
+            'birth_date' => $child['birth_date'],
+            'parent_name' => $guardian ? $guardian['first_name'] . ' ' . $guardian['last_name'] : '',
+            'parent_email' => $guardian ? $guardian['email'] : '',
+            'parent_phone' => $guardian ? $guardian['phone'] : '',
+            'emergency_contact' => $medical ? $medical['emergency_contact_name'] . ' ' . $medical['emergency_contact_phone'] : '',
+            'medical_notes' => $medical ? $medical['allergies'] : '',
+            'status' => 'registered',
+            'registration_date' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    /**
+     * Set attendance status for a participant
+     */
+    public function setAttendanceStatus(int $childId, int $eventId, string $status, int $staffId, string $date = null, string $notes = ''): void {
+        $date = $date ?? date('Y-m-d');
+        
+        // Ensure child is registered
+        $participantId = $this->registerChildForEvent($childId, $eventId);
+
+        // Check for existing attendance record for this date
+        $existing = $this->db->fetchOne(
+            "SELECT id FROM attendance_records 
+             WHERE participant_id = ? AND event_id = ? AND DATE(check_in_time) = ?",
+            [$participantId, $eventId, $date]
+        );
+
+        if ($existing) {
+            // Update existing record
+            $updateData = [
+                'status' => $status,
+                'notes' => $notes
+            ];
+            
+            // Update staff if changing status
+            if ($status === 'present') {
+                $updateData['check_in_staff'] = $staffId;
+            }
+            
+            $this->db->update('attendance_records', $updateData, 'id = ?', [$existing['id']]);
+        } else {
+            // Create new record
+            $this->db->insert('attendance_records', [
+                'participant_id' => $participantId,
+                'event_id' => $eventId,
+                'check_in_time' => $date . ' ' . date('H:i:s'), // Use current time for time component
+                'check_in_staff' => $staffId,
+                'status' => $status,
+                'notes' => $notes
+            ]);
+        }
+    }
+
+    /**
      * Get attendance records
      */
     public function getAttendanceRecords(int $eventId = null, int $participantId = null, string $date = null): array {

@@ -2202,7 +2202,7 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
     $user = $auth->verifyToken($token);
 
     // Handle individual attendance record operations (DELETE)
-    if ($action !== null && $action !== 'checkin' && $action !== 'checkout' && $action !== 'register') {
+    if ($action !== null && $action !== 'checkin' && $action !== 'checkout' && $action !== 'register' && $action !== 'add_participant' && $action !== 'status') {
         $recordId = (int)$action;
 
         switch ($method) {
@@ -2269,6 +2269,41 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
             $date = $_GET['date'] ?? null;
 
             return ['records' => $auth->getAttendanceRecords($eventId, $participantId, $date)];
+
+        case 'add_participant':
+            if ($method !== 'POST') throw new Exception('Method not allowed');
+            if (!$auth->checkPermission($user['id'], 'attendance.checkin')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $childId = (int)($body['child_id'] ?? 0);
+            $eventId = (int)($body['event_id'] ?? 0);
+
+            if (!$childId || !$eventId) {
+                throw new Exception('Child ID and Event ID are required');
+            }
+
+            $auth->registerChildForEvent($childId, $eventId);
+            return ['message' => 'Child added to event register successfully'];
+
+        case 'status':
+            if ($method !== 'POST') throw new Exception('Method not allowed');
+            if (!$auth->checkPermission($user['id'], 'attendance.checkin')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $childId = (int)($body['child_id'] ?? 0);
+            $eventId = (int)($body['event_id'] ?? 0);
+            $status = $body['status'] ?? '';
+            $notes = $body['notes'] ?? '';
+            $date = $body['date'] ?? null;
+
+            if (!$childId || !$eventId || !$status) {
+                throw new Exception('Child ID, Event ID and Status are required');
+            }
+
+            $auth->setAttendanceStatus($childId, $eventId, $status, $user['id'], $date, $notes);
+            return ['message' => 'Attendance status updated successfully'];
 
         case 'register':
             // Get event register (participants + attendance)

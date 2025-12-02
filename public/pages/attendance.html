@@ -242,46 +242,20 @@
             const eventId = document.getElementById('event-select').value;
             const dateStr = document.getElementById('register-date').value; // YYYY-MM-DD
 
-            // Calculate check-in time
-            // If date is today, use null (backend uses NOW)
-            // If date is past, use date + 12:00:00
-            const localDate = new Date();
-            const year = localDate.getFullYear();
-            const month = String(localDate.getMonth() + 1).padStart(2, '0');
-            const day = String(localDate.getDate()).padStart(2, '0');
-            const todayStr = `${year}-${month}-${day}`;
-
-            let checkInTime = null;
-            if (dateStr !== todayStr) {
-                checkInTime = `${dateStr} 12:00:00`;
-            }
-
             try {
-                // For now, we only support 'present' via checkin endpoint
-                // 'absent' would need a new endpoint or logic, but we can simulate it by deleting the record if it exists?
-                // Or we can just use checkin for present.
-
-                if (status === 'present') {
-                    await fetch(`${API_BASE_URL}/attendance/checkin`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${userToken}`
-                        },
-                        body: JSON.stringify({
-                            child_id: childId,
-                            event_id: eventId,
-                            check_in_time: checkInTime
-                        })
-                    });
-                } else if (status === 'absent') {
-                    // TODO: Implement explicit absent marking
-                    // For now, we could delete the attendance record if it exists to reset it?
-                    // But user wants "School Register" style.
-                    // Let's just alert for now or implement delete.
-                    alert('Marking as absent is not fully implemented in backend yet. It will just clear the present status.');
-                    // We would need to find the record ID to delete it.
-                }
+                await fetch(`${API_BASE_URL}/attendance/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        child_id: childId,
+                        event_id: eventId,
+                        status: status,
+                        date: dateStr
+                    })
+                });
 
                 // Reload register to show update
                 await loadRegister();
@@ -292,90 +266,12 @@
             }
         };
 
-        function setupEventListeners() {
-            document.getElementById('event-select').addEventListener('change', loadRegister);
-            document.getElementById('register-date').addEventListener('change', loadRegister);
-
-            // Modal logic
-            const modal = document.getElementById('add-child-modal');
-            const searchInput = document.getElementById('child-search');
-            const searchResults = document.getElementById('search-results');
-
-            document.getElementById('add-child-btn').addEventListener('click', () => {
-                modal.classList.remove('hidden');
-                searchInput.focus();
-            });
-
-            document.getElementById('close-modal-btn').addEventListener('click', () => {
-                modal.classList.add('hidden');
-                searchInput.value = '';
-                searchResults.classList.add('hidden');
-            });
-
-            // Search logic
-            let debounceTimer;
-            searchInput.addEventListener('input', (e) => {
-                clearTimeout(debounceTimer);
-                const query = e.target.value.trim();
-
-                if (query.length < 2) {
-                    searchResults.classList.add('hidden');
-                    return;
-                }
-
-                debounceTimer = setTimeout(async () => {
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/children?search=${encodeURIComponent(query)}`, {
-                            headers: { 'Authorization': `Bearer ${userToken}` }
-                        });
-                        const data = await response.json();
-
-                        if (data.children && data.children.length > 0) {
-                            searchResults.innerHTML = data.children.map(child => `
-                                <div class="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0 flex justify-between items-center"
-                                     onclick="window.addChildToRegister(${child.id})">
-                                    <div>
-                                        <div class="font-medium">${child.first_name} ${child.last_name}</div>
-                                        <div class="text-sm text-gray-500">${child.birth_date}</div>
-                                    </div>
-                                    <i class="fas fa-plus text-blue-600"></i>
-                                </div>
-                            `).join('');
-                            searchResults.classList.remove('hidden');
-                        } else {
-                            searchResults.innerHTML = '<div class="p-3 text-gray-500 text-center">No children found</div>';
-                            searchResults.classList.remove('hidden');
-                        }
-                    } catch (error) {
-                        console.error('Search error:', error);
-                    }
-                }, 300);
-            });
-        }
-
         // Add child to register
         window.addChildToRegister = async (childId) => {
             const eventId = document.getElementById('event-select').value;
 
             try {
-                // We use the checkin endpoint but just to register? 
-                // No, we need a way to just "Register" without "Checking In".
-                // The current backend checkInOutChild does BOTH (registers if not exists, then checks in).
-
-                // To just register, we might need a new endpoint?
-                // OR we can just check them in as "Not Set"?
-
-                // Workaround: Check them in, then immediately delete the attendance record?
-                // That's hacky.
-
-                // Better: Just use the checkin endpoint for now, it will mark them as Present.
-                // The user can then mark them as Absent if they are not there.
-                // Or we can update checkInOutChild to handle 'register_only'?
-
-                // For this iteration, let's just check them in (Present).
-                // "Add to Register" usually implies they are joining the class.
-
-                await fetch(`${API_BASE_URL}/attendance/checkin`, {
+                await fetch(`${API_BASE_URL}/attendance/add_participant`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -383,8 +279,7 @@
                     },
                     body: JSON.stringify({
                         child_id: childId,
-                        event_id: eventId,
-                        notes: 'Added to register'
+                        event_id: eventId
                     })
                 });
 
@@ -393,7 +288,7 @@
                 document.getElementById('search-results').classList.add('hidden');
 
                 await loadRegister();
-                alert('Child added to register and marked present.');
+                alert('Child added to register successfully.');
 
             } catch (error) {
                 console.error('Error adding child:', error);
