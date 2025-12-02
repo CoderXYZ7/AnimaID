@@ -52,8 +52,13 @@ sudo chmod -R 755 uploads/
 
 # Run database initialization
 echo "Running database initialization..."
+if [ ! -f "config/config.php" ]; then
+    echo "Warning: config/config.php not found, creating from default..."
+    cp config/configDefault.php config/config.php
+fi
+
 if [ -f "database/init.php" ]; then
-    sudo -u www-data php database/init.php
+    sudo -u www-data php database/init.php || echo "Warning: Database initialization had errors (this may be normal if already initialized)"
     echo "Database initialization completed"
 else
     echo "Error: database/init.php not found"

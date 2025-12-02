@@ -148,6 +148,15 @@ if [ ! -f .env ]; then
 else
     echo -e "${GREEN}✓ .env file exists${NC}"
 fi
+
+# Check config.php file
+if [ ! -f config/config.php ]; then
+    echo -e "${YELLOW}⚠ config/config.php not found, creating from default...${NC}"
+    cp config/configDefault.php config/config.php
+    echo -e "${GREEN}✓ config/config.php created${NC}"
+else
+    echo -e "${GREEN}✓ config/config.php exists${NC}"
+fi
 echo ""
 
 # Step 4: Set permissions
