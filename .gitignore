@@ -46,3 +46,6 @@ backups/*
 .DS_Store
 Thumbs.dbe
 config/config.php
+
+# Workfiles
+workfiles/*

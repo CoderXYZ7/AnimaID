@@ -124,7 +124,9 @@ echo ""
 
 # Step 1: Pull latest changes
 echo -e "${YELLOW}[1/7] Pulling latest changes...${NC}"
-sudo -u $ACTUAL_USER git pull origin master
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+echo "Pulling from branch: $CURRENT_BRANCH"
+sudo -u $ACTUAL_USER git pull origin $CURRENT_BRANCH
 echo -e "${GREEN}✓ Changes pulled${NC}"
 echo ""
 
