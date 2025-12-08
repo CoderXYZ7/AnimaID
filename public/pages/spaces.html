@@ -18,7 +18,7 @@
     <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
         <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p class="text-gray-600">Loading spaces...</p>
         </div>
     </div>
@@ -35,26 +35,57 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <h2 class="text-3xl font-bold text-gray-900">Space Management</h2>
-                        <p class="text-gray-600 mt-1">Manage physical spaces, rooms, and bookings</p>
+                        <p class="text-gray-600 mt-1">Manage buildings, rooms, and other spaces</p>
                     </div>
                     <button id="add-space-btn"
-                        class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
                         <i class="fas fa-plus mr-2"></i>Add Space
                     </button>
                 </div>
             </div>
 
-            <!-- Spaces Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="spaces-grid">
-                <!-- Spaces will be loaded here -->
-            </div>
-
-            <div id="no-spaces-message" class="hidden text-center py-12">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                    <i class="fas fa-door-open text-gray-400 text-2xl"></i>
+            <!-- Spaces Table -->
+            <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Spaces Hierarchy</h3>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900">No spaces found</h3>
-                <p class="mt-1 text-gray-500">Get started by creating a new space or room.</p>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Name</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Type</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Capacity</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Location</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="spaces-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Rows will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="no-spaces-message" class="hidden text-center py-12">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                        <i class="fas fa-door-open text-gray-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">No spaces found</h3>
+                    <p class="mt-1 text-gray-500">Get started by creating a new space.</p>
+                </div>
             </div>
 
         </main>
@@ -72,37 +103,57 @@
                 </div>
 
                 <form id="space-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                            <input type="text" id="name" name="name" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="e.g. Main Hall">
+                        </div>
+                        <div>
+                            <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                            <select id="type" name="type"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="space">Space</option>
+                                <option value="building">Building</option>
+                                <option value="room">Room</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                        <input type="text" id="name" name="name" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                            placeholder="e.g. Main Hall">
+                        <label for="parent_id" class="block text-sm font-medium text-gray-700 mb-1">Parent Space</label>
+                        <select id="parent_id" name="parent_id"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">None (Top Level)</option>
+                            <!-- Parent options via JS -->
+                        </select>
                     </div>
 
                     <div>
                         <label for="description"
                             class="block text-sm font-medium text-gray-700 mb-1">Description</label>
                         <textarea id="description" name="description" rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"></textarea>
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="capacity" class="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
                             <input type="number" id="capacity" name="capacity" min="0"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                         <div>
                             <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
                             <input type="text" id="location" name="location"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="e.g. Building A">
                         </div>
                     </div>
 
                     <div class="flex items-center mt-4">
                         <input type="checkbox" id="is-active" name="is_active"
-                            class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded" checked>
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" checked>
                         <label for="is-active" class="ml-2 block text-sm text-gray-700">
                             Active (available for booking)
                         </label>
@@ -115,7 +166,7 @@
                         Cancel
                     </button>
                     <button id="save-space-btn"
-                        class="px-4 py-2 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700 transition-colors">
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
                         <i class="fas fa-save mr-1"></i>Save Space
                     </button>
                 </div>
@@ -130,7 +181,7 @@
             <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
             <p class="text-gray-600 mb-6">You don't have permission to manage spaces.</p>
             <a href="../dashboard.html"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 transition-colors">
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Back to Dashboard
             </a>
@@ -149,12 +200,14 @@
         const loadingScreen = document.getElementById('loading-screen');
         const mainContent = document.getElementById('main-content');
         const errorScreen = document.getElementById('error-screen');
-        const spacesGrid = document.getElementById('spaces-grid');
+        const spacesTableBody = document.getElementById('spaces-table-body');
         const noSpacesMessage = document.getElementById('no-spaces-message');
         const spaceModal = document.getElementById('space-modal');
         const spaceForm = document.getElementById('space-form');
+        const parentSelect = document.getElementById('parent_id');
 
         let userToken = null;
+        let allSpaces = [];
 
         // Initialize page
         async function initPage() {
@@ -167,7 +220,6 @@
                     return;
                 }
 
-                // Check simple connectivity/auth by trying to fetch spaces
                 await loadSpaces();
 
                 loadingScreen.classList.add('hidden');
@@ -192,9 +244,9 @@
                 if (!response.ok) throw new Error('Failed to load spaces');
 
                 const result = await response.json();
-                const spaces = result.data || [];
-
-                displaySpaces(spaces);
+                allSpaces = result.data || [];
+                displaySpaces(allSpaces);
+                populateParentOptions(allSpaces);
 
             } catch (error) {
                 console.error('Error loading spaces:', error);
@@ -202,51 +254,98 @@
             }
         }
 
-        function displaySpaces(spaces) {
-            spacesGrid.innerHTML = '';
+        function buildHierarchy(spaces) {
+            const map = {};
+            const roots = [];
 
-            if (spaces.length === 0) {
+            spaces.forEach(s => {
+                s.children = [];
+                map[s.id] = s;
+            });
+
+            spaces.forEach(s => {
+                if (s.parent_id && map[s.parent_id]) {
+                    map[s.parent_id].children.push(s);
+                } else {
+                    roots.push(s);
+                }
+            });
+
+            return roots;
+        }
+
+        function displaySpaces(spaces) {
+            spacesTableBody.innerHTML = '';
+            const hierarchy = buildHierarchy(spaces);
+
+            if (hierarchy.length === 0) {
                 noSpacesMessage.classList.remove('hidden');
                 return;
             }
-
             noSpacesMessage.classList.add('hidden');
 
-            spaces.forEach(space => {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow';
-
+            // Recursive function to render rows
+            function renderRow(space, level = 0) {
+                const paddingLeft = level * 20; // Indent
                 const statusColor = space.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
                 const statusText = space.is_active ? 'Active' : 'Inactive';
+                const typeBadge = space.type === 'building'
+                    ? 'bg-purple-100 text-purple-800'
+                    : (space.type === 'room' ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-800');
 
-                card.innerHTML = `
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-xl font-bold text-gray-900">${space.name}</h3>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">
-                                ${statusText}
-                            </span>
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center" style="padding-left: ${paddingLeft}px;">
+                            ${level > 0 ? '<i class="fas fa-level-up-alt fa-rotate-90 text-gray-400 mr-2"></i>' : ''}
+                            <div class="text-sm font-medium text-gray-900">${space.name}</div>
                         </div>
-                        <p class="text-gray-600 mb-4 text-sm">${space.description || 'No description provided.'}</p>
-                        
-                        <div class="flex items-center text-sm text-gray-500 space-x-4 mb-6">
-                            <span><i class="fas fa-users mr-1"></i> ${space.capacity || 0} Capacity</span>
-                            <span><i class="fas fa-map-marker-alt mr-1"></i> ${space.location || 'N/A'}</span>
-                        </div>
-                        
-                        <div class="flex justify-end space-x-2 pt-4 border-t border-gray-100">
-                             <!-- Placeholder acts for now -->
-                             <button class="text-gray-400 hover:text-gray-600 cursor-not-allowed" title="Booking history coming soon">
-                                <i class="fas fa-history"></i>
-                            </button>
-                            <button onclick="editSpace(${space.id})" class="text-blue-600 hover:text-blue-800">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <!-- Delete not exposed in UI yet to prevent accidents without confirmation logic -->
-                        </div>
-                    </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeBadge}">
+                            ${space.type || 'Space'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${space.capacity || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${space.location || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="editSpace(${space.id})" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button onclick="deleteSpace(${space.id})" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
                 `;
-                spacesGrid.appendChild(card);
+                spacesTableBody.appendChild(tr);
+
+                if (space.children && space.children.length > 0) {
+                    space.children.forEach(child => renderRow(child, level + 1));
+                }
+            }
+
+            hierarchy.forEach(root => renderRow(root, 0));
+        }
+
+        function populateParentOptions(spaces) {
+            // Flatten options but nicely indented? Or just plain names?
+            // Simple flat list for now, filtering out current edit target done in editSpace
+            // We rebuild this every time we open modal to be safe? Or just update it here.
+
+            // Just clear it first
+            parentSelect.innerHTML = '<option value="">None (Top Level)</option>';
+
+            spaces.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.name} (${s.type || 'space'})`;
+                parentSelect.appendChild(opt);
             });
         }
 
@@ -256,6 +355,10 @@
             spaceForm.reset();
             spaceForm.dataset.spaceId = '';
             document.getElementById('is-active').checked = true;
+
+            // Refresh parent options
+            populateParentOptions(allSpaces);
+
             spaceModal.classList.remove('hidden');
         });
 
@@ -273,6 +376,8 @@
 
             const formData = {
                 name: name,
+                type: document.getElementById('type').value,
+                parent_id: document.getElementById('parent_id').value || null,
                 description: document.getElementById('description').value,
                 capacity: document.getElementById('capacity').value,
                 location: document.getElementById('location').value,
@@ -298,7 +403,6 @@
                 if (response.ok) {
                     spaceModal.classList.add('hidden');
                     loadSpaces();
-                    // alert(`Space ${spaceId ? 'updated' : 'created'} successfully!`);
                 } else {
                     alert('Error: ' + (data.error || 'Failed to save space'));
                 }
@@ -311,33 +415,45 @@
         // Global functions
         window.editSpace = async function (id) {
             try {
-                const response = await fetch(`${API_BASE_URL}/spaces/${id}`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                if (!response.ok) throw new Error('Failed to fetch space details');
-
-                const result = await response.json();
-                const space = result.data;
-
-                document.getElementById('modal-title').textContent = 'Edit Space';
-                document.getElementById('name').value = space.name || '';
-                document.getElementById('description').value = space.description || '';
-                document.getElementById('capacity').value = space.capacity || '';
-                document.getElementById('location').value = space.location || '';
-                document.getElementById('is-active').checked = space.is_active;
-
-                spaceForm.dataset.spaceId = space.id;
-                spaceModal.classList.remove('hidden');
-
+                // Find space in local data or fetch details? Local is faster if available.
+                const space = allSpaces.find(s => s.id === id);
+                if (!space) {
+                    // Fallback fetch
+                    const response = await fetch(`${API_BASE_URL}/spaces/${id}`, {
+                        headers: { 'Authorization': `Bearer ${userToken}` }
+                    });
+                    if (!response.ok) throw new Error('Space not found');
+                    const res = await response.json();
+                    populateEditForm(res.data);
+                } else {
+                    populateEditForm(space);
+                }
             } catch (error) {
                 console.error('Error fetching space:', error);
                 alert('Failed to load space details.');
             }
         };
 
+        function populateEditForm(space) {
+            document.getElementById('modal-title').textContent = 'Edit Space';
+            document.getElementById('name').value = space.name || '';
+            document.getElementById('type').value = space.type || 'space';
+            document.getElementById('description').value = space.description || '';
+            document.getElementById('capacity').value = space.capacity || '';
+            document.getElementById('location').value = space.location || '';
+            document.getElementById('is-active').checked = space.is_active;
+
+            // Populate options but exclude self and children (to prevent cycles)
+            // Simple cycle prevention: just exclude self for now.
+            populateParentOptions(allSpaces.filter(s => s.id !== space.id));
+            document.getElementById('parent_id').value = space.parent_id || '';
+
+            spaceForm.dataset.spaceId = space.id;
+            spaceModal.classList.remove('hidden');
+        }
+
         window.deleteSpace = async function (id) {
-            if (!confirm('Are you sure you want to delete this space? This cannot be undone.')) return;
+            if (!confirm('Are you sure you want to delete this space? children spaces will be orphaned or deleted.')) return;
 
             try {
                 const response = await fetch(`${API_BASE_URL}/spaces/${id}`, {

@@ -11,12 +11,41 @@ class SpaceRepository extends BaseRepository
     protected string $table = 'spaces';
 
     /**
-     * Find all active spaces
+     * Create a space
+     */
+    public function insert(array $data): int
+    {
+        // Add parent_id and type to allowed fields if not using BaseRepository generic insert (which I am not? Wait, SpaceRepository extends BaseRepository)
+        // BaseRepository insert uses array keys.
+        // So I just need to make sure the Service passes the right keys.
+        
+        // However, I previously overrode createBooking but NOT insert/update for spaces.
+        // The BaseRepository insert method looks like:
+        /*
+        public function insert(array $data): string
+        {
+            $columns =  implode(', ', array_keys($data));
+            $placeholders = implode(', ', array_fill(0, count($data), '?'));
+            $sql = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
+            $this->query($sql, array_values($data));
+            return $this->db->lastInsertId();
+        }
+        */
+        // So I don't need to change insert/update in Repository if I use the BaseRepository methods.
+        // I DO need to update findAllActive to perhaps order by hierarchy or return parent_id.
+        // Actually findAllActive calls `SELECT *`, so it automagically includes new columns.
+        
+        return parent::insert($data);
+    }
+    
+    /**
+     * Find all active spaces ordered by hierarchy
      */
     public function findAllActive(): array
     {
+        // Order by parent_id (null first) then name, to group roots then children
         return $this->query(
-            "SELECT * FROM {$this->table} WHERE is_active = 1 ORDER BY name ASC"
+            "SELECT * FROM {$this->table} WHERE is_active = 1 ORDER BY COALESCE(parent_id, 0), parent_id, name ASC"
         );
     }
 

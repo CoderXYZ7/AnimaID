@@ -59,6 +59,8 @@ class SpaceService
             'capacity' => $data['capacity'] ?? 0,
             'location' => $data['location'] ?? '',
             'is_active' => isset($data['is_active']) ? ($data['is_active'] ? 1 : 0) : 1,
+            'parent_id' => $data['parent_id'] ?? null,
+            'type' => $data['type'] ?? 'space',
             'updated_at' => date('Y-m-d H:i:s')
         ]);
     }
@@ -78,6 +80,8 @@ class SpaceService
         if (isset($data['capacity'])) $updateData['capacity'] = $data['capacity'];
         if (isset($data['location'])) $updateData['location'] = $data['location'];
         if (isset($data['is_active'])) $updateData['is_active'] = $data['is_active'] ? 1 : 0;
+        if (isset($data['parent_id'])) $updateData['parent_id'] = $data['parent_id'];
+        if (isset($data['type'])) $updateData['type'] = $data['type'];
 
         $this->spaceRepository->update($id, $updateData);
     }
