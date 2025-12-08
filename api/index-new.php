@@ -17,6 +17,10 @@ use AnimaID\Services\PermissionService;
 use AnimaID\Controllers\AuthController;
 use AnimaID\Controllers\UserController;
 use AnimaID\Middleware\AuthMiddleware;
+use AnimaID\Repositories\CalendarRepository;
+use AnimaID\Repositories\ChildRepository;
+use AnimaID\Services\CalendarService;
+use AnimaID\Controllers\CalendarController;
 use AnimaID\Middleware\PermissionMiddleware;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -54,6 +58,8 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $userRepository = new UserRepository($pdo);
 $roleRepository = new RoleRepository($pdo);
 $permissionRepository = new PermissionRepository($pdo);
+$calendarRepository = new CalendarRepository($pdo);
+$childRepository = new ChildRepository($pdo);
 
 // Services
 $jwtManager = new JwtManager(
@@ -64,10 +70,12 @@ $jwtManager = new JwtManager(
 $authService = new AuthService($userRepository, $jwtManager, $config, $pdo);
 $userService = new UserService($userRepository, $config, $pdo);
 $permissionService = new PermissionService($permissionRepository, $config, $pdo);
+$calendarService = new CalendarService($calendarRepository, $childRepository, $config);
 
 // Controllers
 $authController = new AuthController($authService);
 $userController = new UserController($userService);
+$calendarController = new CalendarController($calendarService);
 
 // Middleware
 $authMiddleware = new AuthMiddleware($authService);
@@ -82,7 +90,7 @@ $app->post('/api/auth/login', [$authController, 'login']);
 // PROTECTED ROUTES (Authentication required)
 // ============================================================================
 
-$app->group('/api', function ($group) use ($authController, $userController, $permissionService) {
+$app->group('/api', function ($group) use ($authController, $userController, $calendarController, $permissionService) {
     
     // Auth routes
     $group->post('/auth/logout', [$authController, 'logout']);
@@ -98,6 +106,30 @@ $app->group('/api', function ($group) use ($authController, $userController, $pe
         $group->put('/{id}', [$userController, 'update']);
         $group->delete('/{id}', [$userController, 'delete']);
     })->add(new PermissionMiddleware($permissionService, ['admin.users', 'users.manage'], 'any'));
+
+    // Calendar routes
+    $group->group('/calendar', function ($group) use ($calendarController, $permissionService) {
+        $group->get('', [$calendarController, 'index']);
+        $group->post('', [$calendarController, 'create'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.create'], 'any'));
+        
+        $group->get('/{id}', [$calendarController, 'show']);
+        $group->put('/{id}', [$calendarController, 'update'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.edit'], 'any'));
+        
+        $group->delete('/{id}', [$calendarController, 'delete'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.delete'], 'any'));
+        
+        // Participants
+        $group->get('/{id}/participants', [$calendarController, 'participants'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.participants.view', 'calendar.view'], 'any'));
+            
+        $group->post('/{id}/register', [$calendarController, 'register'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.participants.manage'], 'any'));
+            
+        $group->delete('/{id}/participants/{participantId}', [$calendarController, 'unregister'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.participants.manage'], 'any'));
+    });
 
 })->add($authMiddleware);
 
