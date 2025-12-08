@@ -5,9 +5,9 @@
 - [ ] **Unified Architecture**: The project is currently split between a legacy monolithic core (`src/Auth.php`, `api/index.php`) and a dormant modern core (`Slim 4`, `src/Services/`, `api/index-new.php`).
     - **Goal**: Fully migrate to the Slim 4 architecture.
 - [ ] **Refactor "God Class" (`src/Auth.php`)**: This file violates SRP by handling Auth, Calendar, Attendance, Spaces, and Wiki.
-    - [ ] Move Calendar logic to `CalendarService`
-    - [ ] Move Attendance logic to `AttendanceService`
-    - [ ] Move Wiki logic to `WikiService`
+    - [x] Move Calendar logic to `CalendarService`
+    - [ ] Move Attendance logic to `AttendanceService` (De-prioritized by user request)
+    - [x] Move Wiki logic to `WikiService`
     - [ ] Move Space Booking logic to `SpaceService`
 - [ ] **Replace Monolithic Router**: The `api/index.php` file (2700+ lines) uses a massive switch statement and manual JSON parsing. 
     - **Goal**: Replace with Slim 4 Controllers and Routing Middleware.
