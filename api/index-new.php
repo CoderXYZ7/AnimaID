@@ -16,6 +16,7 @@ use AnimaID\Services\UserService;
 use AnimaID\Services\PermissionService;
 use AnimaID\Controllers\AuthController;
 use AnimaID\Controllers\UserController;
+use AnimaID\Controllers\SystemController;
 use AnimaID\Middleware\AuthMiddleware;
 use AnimaID\Repositories\CalendarRepository;
 use AnimaID\Repositories\ChildRepository;
@@ -76,6 +77,7 @@ $calendarService = new CalendarService($calendarRepository, $childRepository, $c
 $authController = new AuthController($authService);
 $userController = new UserController($userService);
 $calendarController = new CalendarController($calendarService);
+$systemController = new SystemController($pdo);
 
 // Middleware
 $authMiddleware = new AuthMiddleware($authService);
@@ -90,7 +92,11 @@ $app->post('/api/auth/login', [$authController, 'login']);
 // PROTECTED ROUTES (Authentication required)
 // ============================================================================
 
-$app->group('/api', function ($group) use ($authController, $userController, $calendarController, $permissionService) {
+$app->group('/api', function ($group) use ($authController, $userController, $calendarController, $systemController, $permissionService) {
+    
+    // System Status
+    $group->get('/system/status', [$systemController, 'status'])
+        ->add(new PermissionMiddleware($permissionService, ['admin.system.view'], 'any'));
     
     // Auth routes
     $group->post('/auth/logout', [$authController, 'logout']);
