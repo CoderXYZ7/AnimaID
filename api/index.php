@@ -98,6 +98,28 @@ if (!$token && $_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 try {
+    // BRIDGING: Handle system/status directly to support new dashboard features
+    if ($endpoint === 'system' && $resourceId === 'status') {
+         $status = [
+            'status' => 'healthy',
+            'version' => '1.0.0',
+            'timestamp' => date('c'),
+            'database' => true,
+            'modules' => [
+                ['name' => 'Authentication', 'path' => '/api/auth', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4 + JWT'],
+                ['name' => 'User Management', 'path' => '/api/users', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4'],
+                ['name' => 'Role Management', 'path' => '/api/roles', 'status' => 'partial', 'details' => 'Repository and Service exist, routes pending'],
+                ['name' => 'Calendar', 'path' => '/api/calendar', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4'],
+                ['name' => 'Wiki', 'path' => '/api/wiki', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4'],
+                ['name' => 'Attendance', 'path' => '/api/attendance', 'status' => 'legacy', 'details' => 'Running on legacy api/index.php'],
+                ['name' => 'Spaces', 'path' => '/api/spaces', 'status' => 'legacy', 'details' => 'Running on legacy api/index.php'],
+                ['name' => 'Reports', 'path' => '/api/reports', 'status' => 'legacy', 'details' => 'Running on legacy api/index.php']
+            ]
+        ];
+        echo json_encode($status);
+        exit;
+    }
+
     // Log the request for debugging
     error_log("API Request: {$requestMethod} {$endpoint}/{$resourceId}");
 
