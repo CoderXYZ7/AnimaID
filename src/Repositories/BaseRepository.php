@@ -19,6 +19,11 @@ abstract class BaseRepository
         $this->db = $db;
     }
 
+    public function getPdo(): PDO
+    {
+        return $this->db;
+    }
+
     /**
      * Find a record by ID
      */
