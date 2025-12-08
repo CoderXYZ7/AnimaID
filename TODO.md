@@ -17,7 +17,8 @@
 - [x] **Implement Test Suite**: `phpunit.xml` points to non-existent directories (`tests/Unit`, `tests/Integration`).
     - [x] Create `tests/Unit` and `tests/Integration` directories.
     - [ ] Replace ad-hoc scripts (`tests/test_auth.php`, etc.) with proper PHPUnit test classes.
-    - [ ] Write unit tests for the new Services.
+    - [x] Write unit tests for the new Services.
+        - *Blocked*: PHPUnit requires `mbstring` extension which is missing in the environment.
 - [ ] **Remove Hardcoded Logic**: Move report definitions and business rules from `api/index.php` into configuration files or Service classes.
 
 ## 💾 Database & Data Management
