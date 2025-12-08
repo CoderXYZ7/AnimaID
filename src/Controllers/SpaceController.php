@@ -84,11 +84,12 @@ class SpaceController
                 'data' => ['id' => $spaceId],
                 'message' => 'Space created successfully'
             ], 201);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            error_log('Space creation error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return $this->jsonResponse($response, [
                 'success' => false,
-                'error' => $e->getMessage()
-            ], 400);
+                'error' => 'Internal Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 

@@ -398,13 +398,19 @@
                     body: JSON.stringify(formData)
                 });
 
-                const data = await response.json();
-
                 if (response.ok) {
+                    const data = await response.json();
                     spaceModal.classList.add('hidden');
                     loadSpaces();
                 } else {
-                    alert('Error: ' + (data.error || 'Failed to save space'));
+                    const text = await response.text();
+                    console.error('Server Error:', response.status, text);
+                    try {
+                        const data = JSON.parse(text);
+                        alert('Error: ' + (data.error || 'Failed to save space'));
+                    } catch (e) {
+                        alert('Server Error (' + response.status + '). Check console for details.');
+                    }
                 }
             } catch (error) {
                 console.error('Error saving space:', error);
