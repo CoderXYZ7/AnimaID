@@ -112,7 +112,7 @@ try {
                 ['name' => 'Calendar', 'path' => '/api/calendar', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4'],
                 ['name' => 'Wiki', 'path' => '/api/wiki', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4'],
                 ['name' => 'Attendance', 'path' => '/api/attendance', 'status' => 'legacy', 'details' => 'Running on legacy api/index.php'],
-                ['name' => 'Spaces', 'path' => '/api/spaces', 'status' => 'legacy', 'details' => 'Running on legacy api/index.php'],
+                ['name' => 'Spaces', 'path' => '/api/spaces', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4'],
                 ['name' => 'Reports', 'path' => '/api/reports', 'status' => 'legacy', 'details' => 'Running on legacy api/index.php']
             ]
         ];

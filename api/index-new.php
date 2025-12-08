@@ -8,18 +8,23 @@
 use Slim\Factory\AppFactory;
 use AnimaID\Config\ConfigManager;
 use AnimaID\Security\JwtManager;
-use AnimaID\Repositories\UserRepository;
-use AnimaID\Repositories\RoleRepository;
+use AnimaID\Repositories\ChildRepository;
 use AnimaID\Repositories\PermissionRepository;
+use AnimaID\Repositories\RoleRepository;
+use AnimaID\Repositories\SpaceRepository;
+use AnimaID\Repositories\UserRepository;
+use AnimaID\Repositories\WikiRepository;
 use AnimaID\Services\AuthService;
-use AnimaID\Services\UserService;
-use AnimaID\Services\PermissionService;
 use AnimaID\Services\CalendarService;
+use AnimaID\Services\PermissionService;
+use AnimaID\Services\SpaceService;
+use AnimaID\Services\UserService;
 use AnimaID\Services\WikiService;
 use AnimaID\Controllers\AuthController;
-use AnimaID\Controllers\UserController;
-use AnimaID\Controllers\SystemController;
 use AnimaID\Controllers\CalendarController;
+use AnimaID\Controllers\SpaceController;
+use AnimaID\Controllers\SystemController;
+use AnimaID\Controllers\UserController;
 use AnimaID\Controllers\WikiController;
 use AnimaID\Middleware\AuthMiddleware;
 use AnimaID\Middleware\PermissionMiddleware;
@@ -62,6 +67,7 @@ $permissionRepository = new PermissionRepository($pdo);
 $calendarRepository = new CalendarRepository($pdo);
 $childRepository = new ChildRepository($pdo);
 $wikiRepository = new WikiRepository($pdo);
+$spaceRepository = new SpaceRepository($pdo);
 
 // Services
 $jwtManager = new JwtManager(
@@ -74,6 +80,7 @@ $userService = new UserService($userRepository, $config, $pdo);
 $permissionService = new PermissionService($permissionRepository, $config, $pdo);
 $calendarService = new CalendarService($calendarRepository, $childRepository, $config);
 $wikiService = new WikiService($wikiRepository, $config);
+$spaceService = new SpaceService($spaceRepository, $config);
 
 // Controllers
 $authController = new AuthController($authService);
@@ -81,6 +88,7 @@ $userController = new UserController($userService);
 $calendarController = new CalendarController($calendarService);
 $systemController = new SystemController($pdo);
 $wikiController = new WikiController($wikiService);
+$spaceController = new SpaceController($spaceService);
 
 // Middleware
 $authMiddleware = new AuthMiddleware($authService);
@@ -95,8 +103,21 @@ $app->post('/api/auth/login', [$authController, 'login']);
 // PROTECTED ROUTES (Authentication required)
 // ============================================================================
 
-$app->group('/api', function ($group) use ($authController, $userController, $calendarController, $systemController, $wikiController, $permissionService) {
+$app->group('/api', function ($group) use ($authController, $userController, $calendarController, $systemController, $wikiController, $spaceController, $permissionService) {
     
+    // Space Routes
+    $group->group('/spaces', function ($group) use ($spaceController, $permissionService) {
+        $group->get('', [$spaceController, 'index']);
+        $group->get('/{id}', [$spaceController, 'show']);
+        $group->get('/{id}/bookings', [$spaceController, 'getBookings']);
+        
+        $group->post('/bookings', [$spaceController, 'createBooking'])
+            ->add(new PermissionMiddleware($permissionService, ['spaces.book'], 'any'));
+            
+        $group->delete('/bookings/{id}', [$spaceController, 'deleteBooking'])
+            ->add(new PermissionMiddleware($permissionService, ['spaces.manage'], 'any'));
+    });
+
     // Wiki Routes
     $group->group('/wiki', function ($group) use ($wikiController, $permissionService) {
         $group->get('/pages', [$wikiController, 'index']);

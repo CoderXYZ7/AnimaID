@@ -97,8 +97,8 @@ class SystemController
             [
                 'name' => 'Spaces',
                 'path' => '/api/spaces',
-                'status' => 'legacy',
-                'details' => 'Running on legacy api/index.php'
+                'status' => 'migrated',
+                'details' => 'Fully migrated to Slim 4'
             ],
             [
                 'name' => 'Reports',
