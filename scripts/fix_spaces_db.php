@@ -7,8 +7,9 @@ echo "AnimaID Spaces Database Repair Tool\n";
 echo "===================================\n\n";
 
 try {
-    $config = new ConfigManager(__DIR__ . '/../config/config.php');
-    $dbPath = $config->get('database.path');
+    $config = ConfigManager::getInstance();
+    $dbPath = $config->get('database.file'); // ConfigManager returns absolute path already via __DIR__ concatenation in loadConfiguration
+
     
     if (!file_exists($dbPath)) {
         die("Database not found at $dbPath\n");
