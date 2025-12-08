@@ -109,6 +109,16 @@ $app->group('/api', function ($group) use ($authController, $userController, $ca
     $group->group('/spaces', function ($group) use ($spaceController, $permissionService) {
         $group->get('', [$spaceController, 'index']);
         $group->get('/{id}', [$spaceController, 'show']);
+        
+        $group->post('', [$spaceController, 'create'])
+             ->add(new PermissionMiddleware($permissionService, ['spaces.manage'], 'any'));
+        
+        $group->put('/{id}', [$spaceController, 'update'])
+             ->add(new PermissionMiddleware($permissionService, ['spaces.manage'], 'any'));
+             
+        $group->delete('/{id}', [$spaceController, 'delete'])
+             ->add(new PermissionMiddleware($permissionService, ['spaces.manage'], 'any'));
+
         $group->get('/{id}/bookings', [$spaceController, 'getBookings']);
         
         $group->post('/bookings', [$spaceController, 'createBooking'])

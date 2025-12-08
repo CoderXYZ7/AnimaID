@@ -70,6 +70,74 @@ class SpaceController
     }
 
     /**
+     * Create space
+     * POST /api/spaces
+     */
+    public function create(Request $request, Response $response): Response
+    {
+        try {
+            $data = json_decode($request->getBody()->getContents(), true);
+            $spaceId = $this->spaceService->createSpace($data);
+
+            return $this->jsonResponse($response, [
+                'success' => true,
+                'data' => ['id' => $spaceId],
+                'message' => 'Space created successfully'
+            ], 201);
+        } catch (\Exception $e) {
+            return $this->jsonResponse($response, [
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Update space
+     * PUT /api/spaces/{id}
+     */
+    public function update(Request $request, Response $response, array $args): Response
+    {
+        try {
+            $id = (int) $args['id'];
+            $data = json_decode($request->getBody()->getContents(), true);
+            $this->spaceService->updateSpace($id, $data);
+
+            return $this->jsonResponse($response, [
+                'success' => true,
+                'message' => 'Space updated successfully'
+            ]);
+        } catch (\Exception $e) {
+            return $this->jsonResponse($response, [
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Delete space
+     * DELETE /api/spaces/{id}
+     */
+    public function delete(Request $request, Response $response, array $args): Response
+    {
+        try {
+            $id = (int) $args['id'];
+            $this->spaceService->deleteSpace($id);
+
+            return $this->jsonResponse($response, [
+                'success' => true,
+                'message' => 'Space deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return $this->jsonResponse($response, [
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
      * Get space bookings
      * GET /api/spaces/{id}/bookings
      */

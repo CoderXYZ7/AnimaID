@@ -8,7 +8,8 @@
     - [x] Move Calendar logic to `CalendarService`
     - [ ] Move Attendance logic to `AttendanceService` (De-prioritized by user request)
     - [x] Move Wiki logic to `WikiService`
-    - [ ] Move Space Booking logic to `SpaceService`
+    - [x] Move Space Booking logic to `SpaceService`
+    - [x] Implement Space Management Frontend (`spaces.html`)
 - [ ] **Replace Monolithic Router**: The `api/index.php` file (2700+ lines) uses a massive switch statement and manual JSON parsing. 
     - **Goal**: Replace with Slim 4 Controllers and Routing Middleware.
 
