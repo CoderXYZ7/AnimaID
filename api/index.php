@@ -2306,13 +2306,22 @@ function handleSpacesRequest(?string $spaceId, string $method, array $body, ?str
     global $db; 
     
     // Load dependencies manually
+    // Ensure ConfigManager is loaded
+    if (!class_exists('\AnimaID\Config\ConfigManager')) {
+        require_once __DIR__ . '/../src/Config/ConfigManager.php';
+    }
     $config = \AnimaID\Config\ConfigManager::getInstance();
-    $spaceRepo = new \AnimaID\Repositories\SpaceRepository($db->getPdo()); // Assuming Database class has getPdo() or we access $pdo
-    // Database.php wrapper usually just wraps PDO. let's check Database.php
-    // If Database class extends or acts like PDO, we might pass it directly if Repository expects PDO.
-    // SpaceRepository expects PDO.
-    // src/Database.php usually wraps PDO.
-    // Let's assume we can get PDO. If not, we fix it.
+    
+    // Ensure Repositories and Services are loaded if autoloader misses them
+    if (!class_exists('\AnimaID\Repositories\SpaceRepository')) {
+         require_once __DIR__ . '/../src/Repositories/BaseRepository.php'; // Parent class
+         require_once __DIR__ . '/../src/Repositories/SpaceRepository.php';
+    }
+    if (!class_exists('\AnimaID\Services\SpaceService')) {
+         require_once __DIR__ . '/../src/Services/SpaceService.php';
+    }
+
+    $spaceRepo = new \AnimaID\Repositories\SpaceRepository($db->getPdo()); 
     $spaceService = new \AnimaID\Services\SpaceService($spaceRepo, $config);
 
     if (!$token) throw new Exception('Authentication required');
