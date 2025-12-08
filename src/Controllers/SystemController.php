@@ -91,8 +91,8 @@ class SystemController
             [
                 'name' => 'Wiki',
                 'path' => '/api/wiki',
-                'status' => 'legacy',
-                'details' => 'Running on legacy api/index.php'
+                'status' => 'migrated',
+                'details' => 'Fully migrated to Slim 4'
             ],
             [
                 'name' => 'Spaces',

@@ -14,14 +14,14 @@ use AnimaID\Repositories\PermissionRepository;
 use AnimaID\Services\AuthService;
 use AnimaID\Services\UserService;
 use AnimaID\Services\PermissionService;
+use AnimaID\Services\CalendarService;
+use AnimaID\Services\WikiService;
 use AnimaID\Controllers\AuthController;
 use AnimaID\Controllers\UserController;
 use AnimaID\Controllers\SystemController;
-use AnimaID\Middleware\AuthMiddleware;
-use AnimaID\Repositories\CalendarRepository;
-use AnimaID\Repositories\ChildRepository;
-use AnimaID\Services\CalendarService;
 use AnimaID\Controllers\CalendarController;
+use AnimaID\Controllers\WikiController;
+use AnimaID\Middleware\AuthMiddleware;
 use AnimaID\Middleware\PermissionMiddleware;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -61,6 +61,7 @@ $roleRepository = new RoleRepository($pdo);
 $permissionRepository = new PermissionRepository($pdo);
 $calendarRepository = new CalendarRepository($pdo);
 $childRepository = new ChildRepository($pdo);
+$wikiRepository = new WikiRepository($pdo);
 
 // Services
 $jwtManager = new JwtManager(
@@ -72,12 +73,14 @@ $authService = new AuthService($userRepository, $jwtManager, $config, $pdo);
 $userService = new UserService($userRepository, $config, $pdo);
 $permissionService = new PermissionService($permissionRepository, $config, $pdo);
 $calendarService = new CalendarService($calendarRepository, $childRepository, $config);
+$wikiService = new WikiService($wikiRepository, $config);
 
 // Controllers
 $authController = new AuthController($authService);
 $userController = new UserController($userService);
 $calendarController = new CalendarController($calendarService);
 $systemController = new SystemController($pdo);
+$wikiController = new WikiController($wikiService);
 
 // Middleware
 $authMiddleware = new AuthMiddleware($authService);
@@ -92,8 +95,25 @@ $app->post('/api/auth/login', [$authController, 'login']);
 // PROTECTED ROUTES (Authentication required)
 // ============================================================================
 
-$app->group('/api', function ($group) use ($authController, $userController, $calendarController, $systemController, $permissionService) {
+$app->group('/api', function ($group) use ($authController, $userController, $calendarController, $systemController, $wikiController, $permissionService) {
     
+    // Wiki Routes
+    $group->group('/wiki', function ($group) use ($wikiController, $permissionService) {
+        $group->get('/pages', [$wikiController, 'index']);
+        $group->get('/categories', [$wikiController, 'categories']);
+        
+        $group->post('/pages', [$wikiController, 'create'])
+            ->add(new PermissionMiddleware($permissionService, ['wiki.create'], 'any'));
+        
+        $group->get('/pages/{id}', [$wikiController, 'show']);
+        
+        $group->put('/pages/{id}', [$wikiController, 'update'])
+            ->add(new PermissionMiddleware($permissionService, ['wiki.edit'], 'any'));
+            
+        $group->delete('/pages/{id}', [$wikiController, 'delete'])
+            ->add(new PermissionMiddleware($permissionService, ['wiki.moderate'], 'any'));
+    });
+
     // System Status
     $group->get('/system/status', [$systemController, 'status'])
         ->add(new PermissionMiddleware($permissionService, ['admin.system.view'], 'any'));
