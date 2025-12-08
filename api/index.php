@@ -2306,23 +2306,36 @@ function handleSpacesRequest(?string $spaceId, string $method, array $body, ?str
     global $db; 
     
     // Load dependencies manually
-    // Ensure ConfigManager is loaded
-    if (!class_exists('\AnimaID\Config\ConfigManager')) {
-        require_once __DIR__ . '/../src/Config/ConfigManager.php';
-    }
-    $config = \AnimaID\Config\ConfigManager::getInstance();
+    try {
+        // Ensure ConfigManager is loaded
+        if (!class_exists('\AnimaID\Config\ConfigManager')) {
+            $configPath = __DIR__ . '/../src/Config/ConfigManager.php';
+            if (file_exists($configPath)) {
+                require_once $configPath;
+            } else {
+                throw new Exception("ConfigManager file not found at " . $configPath);
+            }
+        }
+        $config = \AnimaID\Config\ConfigManager::getInstance();
+        
+        // Ensure Repositories and Services are loaded if autoloader misses them
+        if (!class_exists('\AnimaID\Repositories\SpaceRepository')) {
+             if (!class_exists('\AnimaID\Repositories\BaseRepository')) {
+                  require_once __DIR__ . '/../src/Repositories/BaseRepository.php';
+             }
+             require_once __DIR__ . '/../src/Repositories/SpaceRepository.php';
+        }
+        if (!class_exists('\AnimaID\Services\SpaceService')) {
+             require_once __DIR__ . '/../src/Services/SpaceService.php';
+        }
     
-    // Ensure Repositories and Services are loaded if autoloader misses them
-    if (!class_exists('\AnimaID\Repositories\SpaceRepository')) {
-         require_once __DIR__ . '/../src/Repositories/BaseRepository.php'; // Parent class
-         require_once __DIR__ . '/../src/Repositories/SpaceRepository.php';
-    }
-    if (!class_exists('\AnimaID\Services\SpaceService')) {
-         require_once __DIR__ . '/../src/Services/SpaceService.php';
-    }
+        $spaceRepo = new \AnimaID\Repositories\SpaceRepository($db->getPdo()); 
+        $spaceService = new \AnimaID\Services\SpaceService($spaceRepo, $config);
 
-    $spaceRepo = new \AnimaID\Repositories\SpaceRepository($db->getPdo()); 
-    $spaceService = new \AnimaID\Services\SpaceService($spaceRepo, $config);
+    } catch (Throwable $e) {
+        error_log("Dependency Loading Error in Space Module: " . $e->getMessage());
+        return ['error' => 'Internal Server Error: ' . $e->getMessage()];
+    }
 
     if (!$token) throw new Exception('Authentication required');
     $user = $auth->verifyToken($token);
