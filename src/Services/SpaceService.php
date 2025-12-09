@@ -65,6 +65,7 @@ class SpaceService
             'is_active' => isset($data['is_active']) ? ($data['is_active'] ? 1 : 0) : 1,
             'parent_id' => $parentId,
             'type' => $data['type'] ?? 'space',
+            'color' => $data['color'] ?? '#2563eb',
             'updated_at' => date('Y-m-d H:i:s')
         ]);
     }
@@ -92,6 +93,7 @@ class SpaceService
              $updateData['parent_id'] = ($data['parent_id'] !== '') ? $data['parent_id'] : null;
         }
         if (isset($data['type'])) $updateData['type'] = $data['type'];
+        if (isset($data['color'])) $updateData['color'] = $data['color'];
 
         $this->spaceRepository->update($id, $updateData);
     }
