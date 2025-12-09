@@ -26,6 +26,8 @@ try {
     if (!in_array('parent_id', $columns)) $missing[] = 'parent_id';
     if (!in_array('type', $columns)) $missing[] = 'type';
 
+    if (!in_array('color', $columns)) $missing[] = 'color';
+
     if (empty($missing)) {
         echo "✅ Database schema is correct. All columns exist.\n";
     } else {
@@ -41,6 +43,12 @@ try {
         if (in_array('type', $missing)) {
             echo " - Adding 'type' column...";
             $pdo->exec("ALTER TABLE spaces ADD COLUMN type VARCHAR(50) DEFAULT 'space'");
+            echo " DONE.\n";
+        }
+
+        if (in_array('color', $missing)) {
+            echo " - Adding 'color' column...";
+            $pdo->exec("ALTER TABLE spaces ADD COLUMN color VARCHAR(7) DEFAULT '#2563eb'");
             echo " DONE.\n";
         }
         
