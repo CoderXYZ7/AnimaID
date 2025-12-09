@@ -48,18 +48,22 @@ class SpaceService
             throw new \Exception('Space name is required');
         }
 
-        // Validate capacity
-        if (isset($data['capacity']) && $data['capacity'] < 0) {
+        // Validate and sanitize capacity
+        $capacity = isset($data['capacity']) && $data['capacity'] !== '' ? (int)$data['capacity'] : 0;
+        if ($capacity < 0) {
              throw new \Exception('Capacity cannot be negative');
         }
+        
+        // Sanitize parent_id
+        $parentId = isset($data['parent_id']) && $data['parent_id'] !== '' ? $data['parent_id'] : null;
 
         return $this->spaceRepository->insert([
             'name' => $data['name'],
             'description' => $data['description'] ?? '',
-            'capacity' => $data['capacity'] ?? 0,
+            'capacity' => $capacity,
             'location' => $data['location'] ?? '',
             'is_active' => isset($data['is_active']) ? ($data['is_active'] ? 1 : 0) : 1,
-            'parent_id' => $data['parent_id'] ?? null,
+            'parent_id' => $parentId,
             'type' => $data['type'] ?? 'space',
             'updated_at' => date('Y-m-d H:i:s')
         ]);
@@ -77,10 +81,16 @@ class SpaceService
         $updateData = ['updated_at' => date('Y-m-d H:i:s')];
         if (isset($data['name'])) $updateData['name'] = $data['name'];
         if (isset($data['description'])) $updateData['description'] = $data['description'];
-        if (isset($data['capacity'])) $updateData['capacity'] = $data['capacity'];
+        if (isset($data['capacity'])) {
+            $capacity = $data['capacity'] !== '' ? (int)$data['capacity'] : 0;
+            if ($capacity < 0) throw new \Exception('Capacity cannot be negative');
+            $updateData['capacity'] = $capacity;
+        }
         if (isset($data['location'])) $updateData['location'] = $data['location'];
         if (isset($data['is_active'])) $updateData['is_active'] = $data['is_active'] ? 1 : 0;
-        if (isset($data['parent_id'])) $updateData['parent_id'] = $data['parent_id'];
+        if (isset($data['parent_id'])) {
+             $updateData['parent_id'] = ($data['parent_id'] !== '') ? $data['parent_id'] : null;
+        }
         if (isset($data['type'])) $updateData['type'] = $data['type'];
 
         $this->spaceRepository->update($id, $updateData);
