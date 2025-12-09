@@ -52,19 +52,122 @@ class SpaceRepository extends BaseRepository
     /**
      * Find bookings for a specific space within a date range
      */
-    public function findBookings(int $spaceId, string $startDate, string $endDate): array
+    /**
+     * Find bookings for a specific space or all spaces within a date range
+     */
+    public function findBookings(?int $spaceId, string $startDate, string $endDate): array
     {
-        return $this->query(
-            "SELECT sb.*, u.username as booked_by_name, e.title as event_title 
+        $sql = "SELECT sb.*, u.username as booked_by_name, e.title as event_title, s.name as space_name, s.type as space_type 
              FROM space_bookings sb
              INNER JOIN users u ON sb.booked_by = u.id
              LEFT JOIN calendar_events e ON sb.event_id = e.id
-             WHERE sb.space_id = ? 
-             AND sb.start_time < ? 
-             AND sb.end_time > ?
-             ORDER BY sb.start_time ASC",
-            [$spaceId, $endDate, $startDate]
-        );
+             LEFT JOIN spaces s ON sb.space_id = s.id
+             WHERE sb.start_time < ? 
+             AND sb.end_time > ?";
+        
+        $params = [$endDate, $startDate];
+
+        if ($spaceId) {
+            $sql .= " AND sb.space_id = ?";
+            $params[] = $spaceId;
+        }
+
+        $sql .= " ORDER BY sb.start_time ASC";
+
+        return $this->query($sql, $params);
+    }
+
+    /**
+     * Find ALL bookings for all spaces (Alias for findBookings with null spaceId)
+     */
+    public function findAllBookings(string $startDate, string $endDate): array
+    {
+        return $this->findBookings(null, $startDate, $endDate);
+    }
+    
+    /**
+     * Check for overlapping bookings considering hierarchy (Parent/Child blocking)
+     * Returns the conflicting space info array if conflict found, or null if safe.
+     */
+    public function checkHierarchyOverlap(int $spaceId, string $startTime, string $endTime, ?int $excludeBookingId = null): ?array
+    {
+        // 1. Resolve all related Space IDs (Self, Ancestors, Descendants)
+        // Note: Booking a child blocks the parent? Yes, usually.
+        // Booking a parent blocks the child? Yes.
+        
+        $relatedIds = array_unique(array_merge(
+            [$spaceId],
+            $this->getAncestorIds($spaceId),
+            $this->getDescendantIds($spaceId)
+        ));
+        
+        if (empty($relatedIds)) return null;
+
+        $placeholders = str_repeat('?,', count($relatedIds) - 1) . '?';
+        
+        $sql = "SELECT sb.*, s.name as space_name FROM space_bookings sb
+                JOIN spaces s ON sb.space_id = s.id
+                WHERE sb.space_id IN ($placeholders)
+                AND sb.status != 'rejected'
+                AND sb.start_time < ? 
+                AND sb.end_time > ?";
+        
+        $params = $relatedIds;
+        $params[] = $endTime;
+        $params[] = $startTime;
+
+        if ($excludeBookingId) {
+            $sql .= " AND sb.id != ?";
+            $params[] = $excludeBookingId;
+        }
+
+        $sql .= " LIMIT 1";
+
+        $result = $this->queryOne($sql, $params);
+        
+        if ($result) {
+            return [
+                'id' => $result['id'],
+                'name' => $result['space_name'],
+                'start_time' => $result['start_time'],
+                'end_time' => $result['end_time']
+            ];
+        }
+        
+        return null;
+    }
+
+    private function getAncestorIds(int $spaceId): array
+    {
+        $ids = [];
+        $currentId = $spaceId;
+        
+        // Prevent infinite loops with depth limit
+        $depth = 0;
+        while ($depth < 10) {
+            $parent = $this->queryOne("SELECT parent_id FROM spaces WHERE id = ?", [$currentId]);
+            if (!$parent || !$parent['parent_id']) break;
+            
+            $ids[] = $parent['parent_id'];
+            $currentId = $parent['parent_id'];
+            $depth++;
+        }
+        return $ids;
+    }
+
+    private function getDescendantIds(int $spaceId): array
+    {
+        $ids = [];
+        // Direct children
+        $children = $this->query("SELECT id FROM spaces WHERE parent_id = ?", [$spaceId]);
+        
+        foreach ($children as $child) {
+            $ids[] = $child['id'];
+            // Recursively get grandchildren
+            $ids = array_merge($ids, $this->getDescendantIds($child['id']));
+        }
+        
+        return $ids;
     }
     
     /**

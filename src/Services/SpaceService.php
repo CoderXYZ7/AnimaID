@@ -112,13 +112,17 @@ class SpaceService
     /**
      * Create booking
      */
+    /**
+     * Create booking
+     */
     public function createBooking(array $data, int $userId): int
     {
         $this->validateBookingData($data);
 
-        // Check availability
-        if ($this->spaceRepository->checkOverlap($data['space_id'], $data['start_time'], $data['end_time'])) {
-            throw new \Exception('Space is already booked for this time period');
+        // Check availability strictly with hierarchy
+        $conflict = $this->spaceRepository->checkHierarchyOverlap($data['space_id'], $data['start_time'], $data['end_time']);
+        if ($conflict) {
+            throw new \Exception("Conflict detected: Space '{$conflict['name']}' is already booked during this time.");
         }
 
         $bookingData = [
@@ -154,8 +158,9 @@ class SpaceService
                 throw new \Exception('End time must be after start time');
             }
 
-            if ($this->spaceRepository->checkOverlap($booking['space_id'], $startTime, $endTime, $id)) {
-                throw new \Exception('Space is already booked for this time period');
+            $conflict = $this->spaceRepository->checkHierarchyOverlap($booking['space_id'], $startTime, $endTime, $id);
+            if ($conflict) {
+                throw new \Exception("Conflict detected: Space '{$conflict['name']}' is already booked during this time.");
             }
         }
 
@@ -172,6 +177,17 @@ class SpaceService
         if (!$end) $end = date('Y-m-t');
 
         return $this->spaceRepository->findBookings($spaceId, $start, $end);
+    }
+
+    /**
+     * Get ALL bookings for all spaces
+     */
+    public function getAllBookings(?string $start = null, ?string $end = null): array
+    {
+        if (!$start) $start = date('Y-m-01');
+        if (!$end) $end = date('Y-m-t');
+        
+        return $this->spaceRepository->findAllBookings($start, $end);
     }
     
     /**
