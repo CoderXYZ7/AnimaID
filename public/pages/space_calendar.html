@@ -240,8 +240,8 @@
                             title: `${b.space_name}: ${b.purpose || 'Reserved'}`,
                             start: b.start_time,
                             end: b.end_time,
-                            backgroundColor: getSpaceColor(b.space_type),
-                            borderColor: getSpaceColor(b.space_type),
+                            backgroundColor: b.space_color || getSpaceColor(b.space_type),
+                            borderColor: b.space_color || getSpaceColor(b.space_type),
                             extendedProps: {
                                 space_id: b.space_id,
                                 purpose: b.purpose,
