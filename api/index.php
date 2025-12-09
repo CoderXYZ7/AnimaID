@@ -2406,19 +2406,13 @@ function handleSpacesRequest(?string $spaceId, string $method, array $body, ?str
                 'message' => 'Space created successfully'
             ];
 
-        case 'PUT':
-             if (!$auth->checkPermission($user['id'], 'spaces.manage')) throw new Exception('Insufficient permissions');
-             if (!$spaceId) throw new Exception('Space ID required');
-             $spaceService->updateSpace((int)$spaceId, $body);
-             return ['message' => 'Space updated successfully'];
-
         case 'DELETE':
              // Check if booking or space
              global $pathSegments;
-             if ($spaceId === 'bookings' && isset($pathSegments[3])) {
+             if ($spaceId === 'bookings' && isset($pathSegments[2])) {
                  // DELETE /api/spaces/bookings/{id}
                  if (!$auth->checkPermission($user['id'], 'spaces.manage')) throw new Exception('Insufficient permissions');
-                 $spaceService->deleteBooking((int)$pathSegments[3]);
+                 $spaceService->deleteBooking((int)$pathSegments[2]);
                  return ['message' => 'Booking cancelled'];
              }
              
