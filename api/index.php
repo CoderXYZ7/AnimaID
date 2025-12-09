@@ -2358,7 +2358,8 @@ function handleSpacesRequest(?string $spaceId, string $method, array $body, ?str
 
                 // Check if it's GET /api/spaces/{id}/bookings
                 global $pathSegments; // /api/spaces/1/bookings
-                if (isset($pathSegments[3]) && $pathSegments[3] === 'bookings') {
+                // segments: 0=spaces, 1=id, 2=bookings
+                if (isset($pathSegments[2]) && $pathSegments[2] === 'bookings') {
                      return ['data' => $spaceService->getSpaceBookings((int)$spaceId, $_GET['start'] ?? null, $_GET['end'] ?? null)];
                 }
                 
@@ -2370,9 +2371,10 @@ function handleSpacesRequest(?string $spaceId, string $method, array $body, ?str
         case 'PUT':
              // Check if it's Updating Booking: /api/spaces/bookings/{id}
              global $pathSegments;
-             if ($spaceId === 'bookings' && isset($pathSegments[3])) {
+             // segments: 0=spaces, 1=bookings, 2=id
+             if ($spaceId === 'bookings' && isset($pathSegments[2])) {
                  if (!$auth->checkPermission($user['id'], 'spaces.book')) throw new Exception('Insufficient permissions');
-                 $spaceService->updateBooking((int)$pathSegments[3], $body);
+                 $spaceService->updateBooking((int)$pathSegments[2], $body);
                  return ['message' => 'Booking updated successfully'];
              }
              
