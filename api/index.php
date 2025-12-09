@@ -2224,7 +2224,7 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
     $user = $auth->verifyToken($token);
 
     // Handle individual attendance record operations (DELETE)
-    if ($action !== null && $action !== 'checkin' && $action !== 'checkout') {
+    if ($action !== null && $action !== 'checkin' && $action !== 'checkout' && $action !== 'register' && $action !== 'add_participant' && $action !== 'status') {
         $recordId = (int)$action;
 
         switch ($method) {
@@ -2252,12 +2252,13 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
             $childId = (int)($body['child_id'] ?? 0);
             $eventId = (int)($body['event_id'] ?? 0);
             $notes = $body['notes'] ?? '';
+            $checkInTime = $body['check_in_time'] ?? null;
 
             if (!$childId || !$eventId) {
                 throw new Exception('Child ID and Event ID are required');
             }
 
-            $auth->checkInOutChild($childId, $eventId, 'checkin', $user['id'], $notes);
+            $auth->checkInOutChild($childId, $eventId, 'checkin', $user['id'], $notes, $checkInTime);
             return ['message' => 'Check-in recorded successfully'];
 
         case 'checkout':
@@ -2269,12 +2270,13 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
             $childId = (int)($body['child_id'] ?? 0);
             $eventId = (int)($body['event_id'] ?? 0);
             $notes = $body['notes'] ?? '';
+            $checkOutTime = $body['check_out_time'] ?? null;
 
             if (!$childId || !$eventId) {
                 throw new Exception('Child ID and Event ID are required');
             }
 
-            $auth->checkInOutChild($childId, $eventId, 'checkout', $user['id'], $notes);
+            $auth->checkInOutChild($childId, $eventId, 'checkout', $user['id'], $notes, $checkOutTime);
             return ['message' => 'Check-out recorded successfully'];
 
         case null:
@@ -2289,6 +2291,61 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
             $date = $_GET['date'] ?? null;
 
             return ['records' => $auth->getAttendanceRecords($eventId, $participantId, $date)];
+
+        case 'add_participant':
+            if ($method !== 'POST') throw new Exception('Method not allowed');
+            if (!$auth->checkPermission($user['id'], 'attendance.checkin')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $childId = (int)($body['child_id'] ?? 0);
+            $eventId = (int)($body['event_id'] ?? 0);
+
+            if (!$childId || !$eventId) {
+                throw new Exception('Child ID and Event ID are required');
+            }
+
+            $auth->registerChildForEvent($childId, $eventId);
+            return ['message' => 'Child added to event register successfully'];
+
+        case 'status':
+            if ($method !== 'POST') throw new Exception('Method not allowed');
+            if (!$auth->checkPermission($user['id'], 'attendance.checkin')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $childId = (int)($body['child_id'] ?? 0);
+            $eventId = (int)($body['event_id'] ?? 0);
+            $status = $body['status'] ?? '';
+            $notes = $body['notes'] ?? '';
+            $date = $body['date'] ?? null;
+
+            if (!$childId || !$eventId || !$status) {
+                throw new Exception('Child ID, Event ID and Status are required');
+            }
+
+            $auth->setAttendanceStatus($childId, $eventId, $status, $user['id'], $date, $notes);
+            return ['message' => 'Attendance status updated successfully'];
+
+        case 'register':
+            // Get event register (participants + attendance)
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+            
+            if (!$auth->checkPermission($user['id'], 'attendance.view')) {
+                throw new Exception('Insufficient permissions');
+            }
+
+            $eventId = isset($_GET['event_id']) ? (int)$_GET['event_id'] : 0;
+            $date = $_GET['date'] ?? date('Y-m-d');
+            
+            if (!$eventId) throw new Exception('Event ID is required');
+
+            try {
+                $result = $auth->getEventRegister($eventId, $date);
+                return ['register' => $result];
+            } catch (Exception $e) {
+                throw $e;
+            }
 
         default:
             throw new Exception('Attendance action not found');

@@ -1,19 +1,21 @@
 <?php
 
 /**
- * AnimaID Main Entry Point
- * Serves static files and handles basic routing
+ * AnimaID Public Entry Point
+ * This file should be in the public/ directory if your web server's document root points here
  */
 
 // Get the requested path
 $requestUri = $_SERVER['REQUEST_URI'];
 $path = parse_url($requestUri, PHP_URL_PATH);
 
-file_put_contents(__DIR__ . '/debug_log.txt', date('Y-m-d H:i:s') . " - URI: $requestUri - Path: $path\n", FILE_APPEND);
+// Log for debugging
+$logFile = __DIR__ . '/../debug_log.txt';
+file_put_contents($logFile, date('Y-m-d H:i:s') . " - URI: $requestUri - Path: $path\n", FILE_APPEND);
 
 // Special handling for config.js.php
 if ($path === '/config.js.php') {
-    $configFile = __DIR__ . '/public/config.js.php';
+    $configFile = __DIR__ . '/config.js.php';
     if (file_exists($configFile)) {
         require $configFile;
         exit;
@@ -21,7 +23,7 @@ if ($path === '/config.js.php') {
 }
 
 // Serve static files directly if they exist in the public directory
-$staticFilePath = __DIR__ . '/public' . $path;
+$staticFilePath = __DIR__ . $path;
 if (file_exists($staticFilePath) && is_file($staticFilePath)) {
     $extension = pathinfo($staticFilePath, PATHINFO_EXTENSION);
     $contentTypes = [
@@ -35,7 +37,15 @@ if (file_exists($staticFilePath) && is_file($staticFilePath)) {
         'jpg' => 'image/jpeg',
         'jpeg' => 'image/jpeg',
         'svg' => 'image/svg+xml',
+        'php' => 'text/html', // PHP files should be executed, not served
     ];
+    
+    // For PHP files, execute them
+    if ($extension === 'php') {
+        require $staticFilePath;
+        exit;
+    }
+    
     $contentType = $contentTypes[$extension] ?? 'text/plain';
     header("Content-Type: {$contentType}");
     readfile($staticFilePath);
@@ -46,31 +56,30 @@ $path = ltrim($path, '/');
 
 // Define public files that can be served
 $publicFiles = [
-    '' => 'public/index.html', // Root path
-    'index.html' => 'public/index.html',
-    'login.html' => 'public/login.html',
-    'dashboard.html' => 'public/dashboard.html',
-    'calendar.html' => 'public/pages/calendar.html',
-    'attendance.html' => 'public/pages/attendance.html',
-    'children.html' => 'public/pages/children.html',
-    'animators.html' => 'public/pages/animators.html',
-    'communications.html' => 'public/pages/communications.html',
-    'media.html' => 'public/pages/media.html',
-    'shared.html' => 'public/pages/shared.html',
-    'pages/wiki.html' => 'public/pages/wiki.html',
-    'pages/wiki-categories.html' => 'public/pages/wiki-categories.html',
-    'public.html' => 'public/public.html',
-    'admin/users.html' => 'public/admin/users.html',
-    'admin/roles.html' => 'public/admin/roles.html',
-    'admin/status.html' => 'public/admin/status.html',
-    'admin/reports.html' => 'public/admin/reports.html',
-    'styleguide.html' => 'docs/StyleGuide.md', // For demo purposes
-    'config.js' => 'public/config.js.php', // Add config.js route
+    '' => 'index.html', // Root path
+    'index.html' => 'index.html',
+    'login.html' => 'login.html',
+    'dashboard.html' => 'dashboard.html',
+    'calendar.html' => 'pages/calendar.html',
+    'attendance.html' => 'pages/attendance.html',
+    'children.html' => 'pages/children.html',
+    'animators.html' => 'pages/animators.html',
+    'communications.html' => 'pages/communications.html',
+    'media.html' => 'pages/media.html',
+    'shared.html' => 'pages/shared.html',
+    'pages/wiki.html' => 'pages/wiki.html',
+    'pages/wiki-categories.html' => 'pages/wiki-categories.html',
+    'public.html' => 'public.html',
+    'admin/users.html' => 'admin/users.html',
+    'admin/roles.html' => 'admin/roles.html',
+    'admin/status.html' => 'admin/status.html',
+    'admin/reports.html' => 'admin/reports.html',
+    'config.js' => 'config.js.php', // Add config.js route
 ];
 
 // Check if requesting a public file
 if (isset($publicFiles[$path])) {
-    $file = $publicFiles[$path];
+    $file = __DIR__ . '/' . $publicFiles[$path];
 
     if (file_exists($file)) {
         // Set appropriate content type
@@ -81,21 +90,26 @@ if (isset($publicFiles[$path])) {
             'js' => 'application/javascript',
             'json' => 'application/json',
             'md' => 'text/markdown',
+            'php' => 'text/html',
         ];
 
         $contentType = $contentTypes[$extension] ?? 'text/plain';
         header("Content-Type: {$contentType}");
 
-        // Serve the file
-        readfile($file);
+        // For PHP files, execute them
+        if ($extension === 'php') {
+            require $file;
+        } else {
+            readfile($file);
+        }
         exit;
     }
 }
 
 // Check if requesting API
 if (strpos($path, 'api/') === 0) {
-    // Route to API handler
-    require_once 'api/index.php';
+    // Route to API handler (one level up from public/)
+    require_once __DIR__ . '/../api/index.php';
     exit;
 }
 

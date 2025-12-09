@@ -4,877 +4,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="attendance.title">AnimaID - Attendance</title>
-    <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="../src/css/output.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Attendance Register - AnimaID</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="/config.js.php"></script>
+    <script type="module" src="/js/config.js"></script>
 </head>
 
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-100">
+    <div id="header-container"></div>
 
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p class="text-gray-600" data-i18n="attendance.loading">Loading attendance...</p>
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header & Controls -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Attendance Register</h1>
+                    <p class="text-gray-600">Manage daily attendance for events</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                    <!-- Event Selector -->
+                    <div class="w-full md:w-64">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Event</label>
+                        <select id="event-select"
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                            <option value="">Loading events...</option>
+                        </select>
+                    </div>
+
+                    <!-- Date Picker -->
+                    <div class="w-full md:w-48">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" id="register-date"
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h2 class="text-lg font-semibold text-gray-700" id="register-title">Select an event to view register
+                </h2>
+                <button id="add-child-btn"
+                    class="hidden bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    <i class="fas fa-plus mr-2"></i>Add Child to Register
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Child Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Time</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="register-body" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="4" class="px-6 py-10 text-center text-gray-500">
+                                Please select an event to view the register.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div id="main-content" class="hidden">
-
-        <div id="main-header"></div>
-
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-            <!-- Page Header -->
-            <div class="mb-8">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="text-3xl font-bold text-gray-900" data-i18n="attendance.title">Attendance Management
-                        </h2>
-                        <p class="text-gray-600 mt-1" data-i18n="attendance.subtitle">Check-in/check-out children and
-                            view attendance records</p>
-                    </div>
-                    <div class="flex space-x-3">
-                        <a href="children.html"
-                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
-                            data-i18n="attendance.newChild">
-                            <i class="fas fa-plus"></i>
-                        </a>
-                        <button id="quick-checkin-btn"
-                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-                            data-i18n="attendance.quickCheckin">
-                            <i class="fas fa-sign-in-alt"></i>
-                        </button>
-                        <button id="view-records-btn"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-                            data-i18n="attendance.viewRecords">
-                            <i class="fas fa-list"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upper Section: Events and Check-in -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-
-                <!-- Today's Events -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900 flex items-center"
-                            data-i18n="attendance.todaysEvents">
-                            <i class="fas fa-calendar-day text-blue-600 mr-2"></i>
-                            Today's Events
-                        </h3>
-                    </div>
-                    <div class="p-6">
-                        <div id="today-events" class="space-y-3">
-                            <!-- Today's events will be loaded here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Check-in -->
-                <div class="bg-white rounded-lg shadow-md border border-gray-200 lg:col-span-2">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900 flex items-center"
-                            data-i18n="attendance.quickCheckin">
-                            <i class="fas fa-search text-green-600 mr-2"></i>
-                            Quick Check-in
-                        </h3>
-                        <p class="text-sm text-gray-600 mt-1" data-i18n="attendance.quickCheckinDescription">Select an
-                            event, then search for children to check them in</p>
-                    </div>
-                    <div class="p-6">
-                        <div id="quick-checkin-form" class="space-y-4">
-                            <div>
-                                <label for="event-select" class="block text-sm font-medium text-gray-700 mb-1"
-                                    data-i18n="attendance.selectEvent">Select Event *</label>
-                                <select id="event-select"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="" data-i18n="attendance.chooseEvent">Choose an event first...
-                                    </option>
-                                </select>
-                                <p class="text-xs text-gray-500 mt-1" data-i18n="attendance.selectEventHelp">You must
-                                    select an event before searching for children</p>
-                            </div>
-                            <div>
-                                <label for="child-search" class="block text-sm font-medium text-gray-700 mb-1"
-                                    data-i18n="attendance.searchChild">Search Child</label>
-                                <input type="text" id="child-search" placeholder="Enter child name or registration #..."
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    disabled data-i18n-placeholder="attendance.searchChildPlaceholder">
-                            </div>
-                            <div id="child-results" class="space-y-2 max-h-40 overflow-y-auto">
-                                <div class="text-sm text-gray-500 text-center py-4">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    Select an event above, then search for children to check them in
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Attendance Records -->
-            <div class="bg-white rounded-lg shadow-md border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-gray-900" data-i18n="attendance.attendanceRecords">
-                            Attendance Records</h3>
-                        <div class="flex space-x-2">
-                            <input type="date" id="records-date"
-                                class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <button id="filter-records-btn"
-                                class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-md text-sm transition-colors">
-                                <i class="fas fa-filter"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="divide-y divide-gray-200" id="attendance-records">
-                    <div class="px-6 py-8 text-center text-gray-500">
-                        <i class="fas fa-list-ul text-3xl mb-2"></i>
-                        <p class="text-sm" data-i18n="attendance.clickViewRecords">Click "View Records" to load
-                            attendance records</p>
-                    </div>
-                </div>
-
-                <!-- Records Pagination -->
-                <div id="records-pagination"
-                    class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-                    <div class="text-sm text-gray-700">
-                        Showing <span id="records-showing-from">1</span> to <span id="records-showing-to">10</span> of
-                        <span id="records-total">0</span> records
-                    </div>
-                    <div class="flex space-x-2">
-                        <button id="records-prev-page"
-                            class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled>
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button id="records-next-page"
-                            class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Check-in Modal -->
-    <div id="checkin-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+    <!-- Add Child Modal -->
+    <div id="add-child-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
             <div class="mt-3">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 id="checkin-modal-title" class="text-lg font-semibold text-gray-900"
-                        data-i18n="attendance.checkinChild">Check-in Child</h3>
-                    <button id="close-checkin-modal" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Add Child to Register</h3>
+
+                <div class="mb-4">
+                    <input type="text" id="child-search" placeholder="Search child by name..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
-                <div id="checkin-content" class="space-y-4">
-                    <!-- Check-in content will be loaded here -->
+                <div id="search-results" class="max-h-60 overflow-y-auto border border-gray-200 rounded-md mb-4 hidden">
+                    <!-- Results will appear here -->
                 </div>
 
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button id="cancel-checkin-btn"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors"
-                        data-i18n="common.cancel">
-                        Cancel
-                    </button>
-                    <button id="confirm-checkin-btn"
-                        class="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors"
-                        data-i18n="attendance.confirmCheckin">
-                        <i class="fas fa-check mr-1"></i>Confirm Check-in
-                    </button>
+                <div class="flex justify-end gap-3">
+                    <button id="close-modal-btn"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Error Screen -->
-    <div id="error-screen" class="hidden fixed inset-0 bg-gray-50 flex items-center justify-center">
-        <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
-            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
-            <h3 class="text-xl font-bold text-gray-900 mb-2" data-i18n="common.accessDenied">Access Denied</h3>
-            <p class="text-gray-600 mb-6" data-i18n="attendance.noPermission">You don't have permission to access
-                attendance management.</p>
-            <a href="../dashboard.html"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-                data-i18n="common.backToDashboard">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Back to Dashboard
-            </a>
-        </div>
-    </div>
+    <script type="module">
+        import { initConfig } from '/js/config.js';
 
-    <script>
-        // Configuration
-        const API_BASE_URL = '/api';
+        let API_BASE_URL = '';
+        let userToken = localStorage.getItem('animaid_token');
+        let currentEventId = null;
 
-        // DOM Elements
-        const loadingScreen = document.getElementById('loading-screen');
-        const mainContent = document.getElementById('main-content');
-        const errorScreen = document.getElementById('error-screen');
-        const todayEvents = document.getElementById('today-events');
-        const attendanceRecords = document.getElementById('attendance-records');
-        const recordsPagination = document.getElementById('records-pagination');
-        const checkinModal = document.getElementById('checkin-modal');
-        const checkinContent = document.getElementById('checkin-content');
-
-        let currentUser = null;
-        let userToken = null;
-        let selectedEventId = null;
-        let selectedParticipantId = null;
-        let currentRecordsPage = 1;
-        let totalRecordsPages = 1;
-        let recordsLoaded = false;
-        let allEvents = [];
-
-        // Initialize page
+        // Initialize
         async function initPage() {
-            try {
-                // Check authentication
-                userToken = localStorage.getItem('animaid_token');
-                const userData = localStorage.getItem('animaid_user');
+            await initConfig();
+            API_BASE_URL = window.ANIMAID_CONFIG.api.baseUrl;
 
-                if (!userToken || !userData) {
-                    showErrorScreen();
-                    return;
-                }
-
-                currentUser = JSON.parse(userData);
-
-                // Verify token and check permissions
-                const response = await fetch(`${API_BASE_URL}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                if (!response.ok) {
-                    localStorage.removeItem('animaid_token');
-                    localStorage.removeItem('animaid_user');
-                    window.location.href = '../login.html';
-                    return;
-                }
-
-                // Check if user has attendance permissions
-                const hasPermission = await checkAttendancePermission();
-                if (!hasPermission) {
-                    showErrorScreen();
-                    return;
-                }
-
-                // Load initial data
-                await loadTodayEvents();
-                // Don't load attendance records initially - let user click "View Records"
-
-                // Set default date to today
-                document.getElementById('records-date').valueAsDate = new Date();
-
-                // Show main content
-                loadingScreen.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-
-            } catch (error) {
-                console.error('Page initialization error:', error);
-                showErrorScreen();
+            if (!userToken) {
+                window.location.href = '../login.html';
+                return;
             }
+
+            // Set default date to today (local)
+            const localDate = new Date();
+            const year = localDate.getFullYear();
+            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+            const day = String(localDate.getDate()).padStart(2, '0');
+            document.getElementById('register-date').value = `${year}-${month}-${day}`;
+
+            await loadEvents();
+            setupEventListeners();
         }
 
-        // Check if user has attendance permissions
-        async function checkAttendancePermission() {
+        async function loadEvents() {
             try {
-                const response = await fetch(`${API_BASE_URL}/attendance?page=1&limit=1`, {
+                const response = await fetch(`${API_BASE_URL}/calendar?status=published&_t=${Date.now()}`, {
                     headers: { 'Authorization': `Bearer ${userToken}` }
                 });
-                return response.ok;
-            } catch (error) {
-                return false;
-            }
-        }
-
-        // Load today's events
-        async function loadTodayEvents() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/calendar?status=published`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                if (!response.ok) throw new Error('Failed to load events');
-
                 const data = await response.json();
 
-                // Filter events for today
-                const today = new Date().toISOString().split('T')[0];
-                const todayEventsData = data.events.filter(event => event.start_date === today);
+                const select = document.getElementById('event-select');
+                select.innerHTML = '<option value="">Select an event...</option>';
 
-                allEvents = data.events; // Store all events globally
-                displayTodayEvents(todayEventsData);
-                populateEventSelect(data.events); // Use all events for the select dropdown
-
-            } catch (error) {
-                console.error('Error loading today\'s events:', error);
-                todayEvents.innerHTML = '<div class="text-center text-gray-500">Error loading events</div>';
-            }
-        }
-
-        // Display today's events
-        function displayTodayEvents(events) {
-            if (events.length === 0) {
-                todayEvents.innerHTML = '<div class="text-center text-gray-500">No events scheduled for today</div>';
-                return;
-            }
-
-            todayEvents.innerHTML = events.map(event => `
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex-1">
-                        <h4 class="text-sm font-medium text-gray-900">${event.title}</h4>
-                        <p class="text-xs text-gray-600">${event.start_time || 'All day'} - ${event.location || 'No location'}</p>
-                    </div>
-                    <button onclick="selectEvent(${event.id})" class="text-blue-600 hover:text-blue-900 text-sm">
-                        Select
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        // Load events for a specific date
-        function loadEventsForDate(date) {
-            const eventsForDate = allEvents.filter(event => event.start_date === date);
-            displayEventsForDate(eventsForDate, date);
-        }
-
-        // Display events for a specific date
-        function displayEventsForDate(events, date) {
-            // Update the header to show the selected date
-            const dateHeader = document.querySelector('#today-events').parentElement.previousElementSibling.querySelector('h3');
-            const formattedDate = new Date(date).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            dateHeader.innerHTML = `<i class="fas fa-calendar-day text-blue-600 mr-2"></i>Events on ${formattedDate}`;
-
-            if (events.length === 0) {
-                todayEvents.innerHTML = `<div class="text-center text-gray-500">No events scheduled for ${formattedDate}</div>`;
-                return;
-            }
-
-            todayEvents.innerHTML = events.map(event => `
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex-1">
-                        <h4 class="text-sm font-medium text-gray-900">${event.title}</h4>
-                        <p class="text-xs text-gray-600">${event.start_time || 'All day'} - ${event.location || 'No location'}</p>
-                    </div>
-                    <button onclick="selectEvent(${event.id})" class="text-blue-600 hover:text-blue-900 text-sm">
-                        Select
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        // Populate event select dropdown
-        function populateEventSelect(events) {
-            const eventSelect = document.getElementById('event-select');
-            eventSelect.innerHTML = '<option value="">Choose an event...</option>';
-
-            events.forEach(event => {
-                const option = document.createElement('option');
-                option.value = event.id;
-                const dateStr = new Date(event.start_date).toLocaleDateString();
-                const timeStr = event.start_time || 'All day';
-                option.textContent = `${event.title} (${dateStr} - ${timeStr})`;
-                eventSelect.appendChild(option);
-            });
-        }
-
-        // Load attendance records
-        async function loadAttendanceRecords(page = 1, date = null, eventId = null) {
-            try {
-                const params = new URLSearchParams({ page: page, limit: 10 });
-                if (date) params.append('date', date);
-                if (eventId) params.append('event_id', eventId);
-
-                const response = await fetch(`${API_BASE_URL}/attendance?${params}`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
+                data.events.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.id;
+                    option.textContent = event.title;
+                    select.appendChild(option);
                 });
 
-                if (!response.ok) throw new Error('Failed to load records');
-
-                const data = await response.json();
-
-                displayAttendanceRecords(data.records || []);
-                updateRecordsPagination({ page: page, total: data.records ? data.records.length : 0, pages: 1 });
-
             } catch (error) {
-                console.error('Error loading attendance records:', error);
-                attendanceRecords.innerHTML = '<div class="px-6 py-4 text-center text-gray-500">Error loading records</div>';
+                console.error('Error loading events:', error);
             }
         }
 
-        // Display attendance records
-        function displayAttendanceRecords(records) {
-            if (records.length === 0) {
-                attendanceRecords.innerHTML = '<div class="px-6 py-4 text-center text-gray-500">No attendance records found</div>';
+        async function loadRegister() {
+            const eventId = document.getElementById('event-select').value;
+            const date = document.getElementById('register-date').value;
+            currentEventId = eventId;
+
+            const tbody = document.getElementById('register-body');
+            const title = document.getElementById('register-title');
+            const addBtn = document.getElementById('add-child-btn');
+
+            if (!eventId) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-gray-500">Please select an event.</td></tr>';
+                title.textContent = 'Select an event';
+                addBtn.classList.add('hidden');
                 return;
             }
 
-            attendanceRecords.innerHTML = records.map(record => `
-                <div class="px-6 py-4 hover:bg-gray-50">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                    <i class="fas fa-user text-blue-600"></i>
+            title.textContent = `Register for ${date}`;
+            addBtn.classList.remove('hidden');
+            tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Loading register...</td></tr>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/attendance/register?event_id=${eventId}&date=${date}`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                const data = await response.json();
+
+                renderRegister(data.register || []);
+
+            } catch (error) {
+                console.error('Error loading register:', error);
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-red-500">Error loading register data.</td></tr>';
+            }
+        }
+
+        function renderRegister(participants) {
+            const tbody = document.getElementById('register-body');
+
+            if (participants.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-gray-500">No participants registered for this event yet. Click "Add Child" to start building the register.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = participants.map(p => {
+                const isPresent = p.attendance_status === 'present';
+                const isAbsent = p.attendance_status === 'absent';
+                const time = p.check_in_time ? new Date(p.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-';
+
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                    ${p.child_name.charAt(0)}${p.child_surname.charAt(0)}
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">${p.child_name} ${p.child_surname}</div>
                                 </div>
                             </div>
-                            <div class="flex-1">
-                                <h4 class="text-sm font-medium text-gray-900">${record.child_name} ${record.child_surname}</h4>
-                                <p class="text-sm text-gray-600">${record.event_title}</p>
-                                <div class="flex items-center space-x-4 mt-1">
-                                    ${record.check_in_time ? `
-                                        <span class="text-xs text-green-600">
-                                            <i class="fas fa-sign-in-alt mr-1"></i>
-                                            Check-in: ${formatDateTime(record.check_in_time)}
-                                        </span>
-                                    ` : ''}
-                                    ${record.check_out_time ? `
-                                        <span class="text-xs text-orange-600">
-                                            <i class="fas fa-sign-out-alt mr-1"></i>
-                                            Check-out: ${formatDateTime(record.check_out_time)}
-                                        </span>
-                                    ` : ''}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(record.status)}">
-                                        ${record.status}
-                                    </span>
-                                </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex space-x-2">
+                                <button onclick="window.updateStatus(${p.child_id}, 'present')" 
+                                    class="px-3 py-1 rounded-full text-xs font-semibold ${isPresent ? 'bg-green-100 text-green-800 ring-2 ring-green-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">
+                                    Present
+                                </button>
+                                <button onclick="window.updateStatus(${p.child_id}, 'absent')"
+                                    class="px-3 py-1 rounded-full text-xs font-semibold ${isAbsent ? 'bg-red-100 text-red-800 ring-2 ring-red-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">
+                                    Absent
+                                </button>
                             </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="removeAttendance(${record.id})" class="text-red-600 hover:text-red-900 text-sm px-3 py-1 bg-red-100 rounded-md transition-colors" title="Remove attendance record">
-                                <i class="fas fa-trash-alt"></i>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${time}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="text-red-600 hover:text-red-900" title="Remove from register (Not implemented yet)">
+                                <i class="fas fa-trash-alt opacity-50 cursor-not-allowed"></i>
                             </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Update records pagination
-        function updateRecordsPagination(paginationData) {
-            const showingFrom = document.getElementById('records-showing-from');
-            const showingTo = document.getElementById('records-showing-to');
-            const total = document.getElementById('records-total');
-            const prevPage = document.getElementById('records-prev-page');
-            const nextPage = document.getElementById('records-next-page');
-
-            // Check if elements exist before updating
-            if (showingFrom) showingFrom.textContent = ((paginationData.page - 1) * 10) + 1;
-            if (showingTo) showingTo.textContent = Math.min(paginationData.page * 10, paginationData.total);
-            if (total) total.textContent = paginationData.total;
-
-            if (prevPage) prevPage.disabled = paginationData.page <= 1;
-            if (nextPage) nextPage.disabled = paginationData.page >= paginationData.pages;
-
-            totalRecordsPages = paginationData.pages;
-        }
-
-        // Search children
-        let searchTimeout;
-        document.getElementById('child-search').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            const query = e.target.value.trim();
-
-            if (query.length < 2) {
-                document.getElementById('child-results').innerHTML = '';
-                return;
-            }
-
-            searchTimeout = setTimeout(() => searchChildren(query), 300);
-        });
-
-        async function searchChildren(query) {
-            if (!selectedEventId) {
-                document.getElementById('child-results').innerHTML = '<div class="text-sm text-gray-500">Please select an event first</div>';
-                return;
-            }
-
-            try {
-                // Search children from the children database
-                const response = await fetch(`${API_BASE_URL}/children?search=${encodeURIComponent(query)}&limit=10`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                if (!response.ok) throw new Error('Failed to search children');
-
-                const data = await response.json();
-                const children = data.children || [];
-
-                displayChildResults(children);
-
-            } catch (error) {
-                console.error('Error searching children:', error);
-                document.getElementById('child-results').innerHTML = '<div class="text-sm text-red-500">Error searching</div>';
-            }
-        }
-
-        // Display child search results
-        function displayChildResults(children) {
-            const resultsDiv = document.getElementById('child-results');
-
-            if (children.length === 0) {
-                resultsDiv.innerHTML = '<div class="text-sm text-gray-500">No children found</div>';
-                return;
-            }
-
-            resultsDiv.innerHTML = children.map(child => `
-                <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                    <div>
-                        <div class="text-sm font-medium text-gray-900">${child.first_name} ${child.last_name}</div>
-                        <div class="text-xs text-gray-600">Reg: ${child.registration_number || 'N/A'} | Age: ${child.birth_date ? calculateAge(child.birth_date) : 'N/A'}</div>
-                    </div>
-                    <button onclick="checkinChild(${child.id})" class="text-green-600 hover:text-green-900 text-sm px-3 py-1 bg-green-100 rounded-md">
-                        Check-in
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        // Update quick check-in UI based on selected event
-        function updateQuickCheckInUI() {
-            const childSearch = document.getElementById('child-search');
-            const childResults = document.getElementById('child-results');
-
-            if (selectedEventId) {
-                childSearch.disabled = false;
-                childSearch.placeholder = "Enter child name or registration #...";
-                childResults.innerHTML = '<div class="text-sm text-gray-500 text-center py-4"><i class="fas fa-search mr-1"></i>Start typing to search for children</div>';
-            } else {
-                childSearch.disabled = true;
-                childSearch.placeholder = "Select an event first...";
-                childResults.innerHTML = '<div class="text-sm text-gray-500 text-center py-4"><i class="fas fa-info-circle mr-1"></i>Select an event above, then search for children to check them in</div>';
-            }
-
-            childSearch.value = '';
-        }
-
-        // Event select change
-        document.getElementById('event-select').addEventListener('change', (e) => {
-            selectedEventId = e.target.value;
-            updateQuickCheckInUI();
-
-            // If an event is selected, update the records date and show events for that date
-            if (selectedEventId) {
-                // Find the selected event to get its date
-                const selectedEvent = allEvents.find(event => event.id == selectedEventId);
-                if (selectedEvent) {
-                    // Set the records date to the event's date
-                    document.getElementById('records-date').value = selectedEvent.start_date;
-
-                    // Load and display events for this date
-                    loadEventsForDate(selectedEvent.start_date);
-                }
-            }
-        });
-
-        // View records button
-        document.getElementById('view-records-btn').addEventListener('click', () => {
-            recordsLoaded = true;
-            const date = document.getElementById('records-date').value;
-            const eventId = document.getElementById('event-select').value;
-            loadAttendanceRecords(1, date, eventId || null);
-        });
-
-        // Filter records by date
-        document.getElementById('filter-records-btn').addEventListener('click', () => {
-            const date = document.getElementById('records-date').value;
-            const eventId = document.getElementById('event-select').value;
-            loadAttendanceRecords(1, date, eventId || null);
-        });
-
-        // Update events display when date changes
-        document.getElementById('records-date').addEventListener('change', (e) => {
-            const selectedDate = e.target.value;
-            loadEventsForDate(selectedDate);
-        });
-
-        // Records pagination
-        document.getElementById('records-prev-page').addEventListener('click', () => {
-            if (currentRecordsPage > 1) {
-                loadAttendanceRecords(currentRecordsPage - 1, document.getElementById('records-date').value);
-            }
-        });
-
-        document.getElementById('records-next-page').addEventListener('click', () => {
-            if (currentRecordsPage < totalRecordsPages) {
-                loadAttendanceRecords(currentRecordsPage + 1, document.getElementById('records-date').value);
-            }
-        });
-
-        // Modal controls
-        document.getElementById('close-checkin-modal').addEventListener('click', () => {
-            checkinModal.classList.add('hidden');
-        });
-
-        document.getElementById('cancel-checkin-btn').addEventListener('click', () => {
-            checkinModal.classList.add('hidden');
-        });
-
-        // Utility functions
-        function formatDateTime(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleString();
-        }
-
-        function formatTime(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        function getStatusColor(status) {
-            const colors = {
-                'present': 'bg-green-100 text-green-800',
-                'absent': 'bg-red-100 text-red-800',
-                'late': 'bg-yellow-100 text-yellow-800',
-                'early_departure': 'bg-orange-100 text-orange-800'
-            };
-            return colors[status] || 'bg-gray-100 text-gray-800';
-        }
-
-        function showErrorScreen() {
-            loadingScreen.classList.add('hidden');
-            mainContent.classList.add('hidden');
-            errorScreen.classList.remove('hidden');
-        }
-
-        // Calculate age from birth date
-        function calculateAge(birthDate) {
-            const today = new Date();
-            const birth = new Date(birthDate);
-            let age = today.getFullYear() - birth.getFullYear();
-            const monthDiff = today.getMonth() - birth.getMonth();
-
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                age--;
-            }
-
-            return age;
-        }
-
-        // Global functions for inline event handlers
-        window.selectEvent = function (eventId) {
-            selectedEventId = eventId;
-            document.getElementById('event-select').value = eventId;
-            updateQuickCheckInUI();
-            document.getElementById('child-search').focus();
-        };
-
-        window.checkinChild = async function (childId) {
-            selectedParticipantId = childId;
-
-            console.log('API_BASE_URL:', API_BASE_URL);
-            console.log('userToken:', userToken ? userToken.substring(0, 20) + '...' : 'null');
-
-            try {
-                // Load child details first
-                const childResponse = await fetch(`${API_BASE_URL}/children/${childId}`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                console.log('Child response status:', childResponse.status);
-                console.log('Child response ok:', childResponse.ok);
-
-                if (!childResponse.ok) {
-                    const errorData = await childResponse.json().catch(() => ({}));
-                    console.log('Error data:', errorData);
-                    if (errorData.error && errorData.error.includes('token')) {
-                        // Token expired, redirect to login
-                        localStorage.removeItem('animaid_token');
-                        localStorage.removeItem('animaid_user');
-                        window.location.href = '../login.html';
-                        return;
-                    }
-                    throw new Error('Failed to load child details');
-                }
-
-                const childData = await childResponse.json();
-                const child = childData.child;
-
-                // Now check if child is already checked in to this event
-                const today = new Date().toISOString().split('T')[0];
-                console.log('Checking attendance for event:', selectedEventId, 'child:', childId, 'date:', today);
-
-                const attendanceCheckResponse = await fetch(`${API_BASE_URL}/attendance?event_id=${selectedEventId}&date=${today}`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                console.log('Attendance check response status:', attendanceCheckResponse.status);
-
-                if (attendanceCheckResponse.ok) {
-                    const attendanceData = await attendanceCheckResponse.json();
-                    const existingRecords = attendanceData.records || [];
-                    console.log('Existing records:', existingRecords);
-
-                    // Check if this child is already checked in by comparing names
-                    // Since participant_id != child_id, we need to match by name
-                    const alreadyCheckedIn = existingRecords.some(record => {
-                        console.log('Checking record:', record.child_name, record.child_surname, 'vs', child.first_name, child.last_name, 'check_in:', record.check_in_time, 'check_out:', record.check_out_time);
-                        const nameMatches = record.child_name === child.first_name && record.child_surname === child.last_name;
-                        const isCheckedIn = record.check_in_time && !record.check_out_time;
-                        return nameMatches && isCheckedIn;
-                    });
-
-                    console.log('Already checked in:', alreadyCheckedIn);
-
-                    if (alreadyCheckedIn) {
-                        alert(`${child.first_name} ${child.last_name} is already checked in to this event.`);
-                        return;
-                    }
-                } else {
-                    console.log('Attendance check failed, proceeding with check-in');
-                }
-
-                // Load event details
-                const eventResponse = await fetch(`${API_BASE_URL}/calendar/${selectedEventId}`, {
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                if (!eventResponse.ok) {
-                    const errorData = await eventResponse.json().catch(() => ({}));
-                    if (errorData.error && errorData.error.includes('token')) {
-                        // Token expired, redirect to login
-                        localStorage.removeItem('animaid_token');
-                        localStorage.removeItem('animaid_user');
-                        window.location.href = '../login.html';
-                        return;
-                    }
-                    throw new Error('Failed to load event details');
-                }
-
-                const eventData = await eventResponse.json();
-
-                // Show check-in modal
-                document.getElementById('checkin-modal-title').textContent = 'Check-in Child';
-                checkinContent.innerHTML = `
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-user text-green-600 text-2xl"></i>
-                        </div>
-                        <h4 class="text-lg font-semibold text-gray-900 mb-2">${child.first_name} ${child.last_name}</h4>
-                        <p class="text-gray-600 mb-4">Reg: ${child.registration_number || 'N/A'}</p>
-                        <p class="text-sm text-gray-500">Event: ${eventData.event.title}</p>
-                    </div>
+                        </td>
+                    </tr>
                 `;
+            }).join('');
+        }
 
-                checkinModal.classList.remove('hidden');
-
-            } catch (error) {
-                console.error('Error loading child details:', error);
-                alert('Failed to load child details. Please try logging in again.');
-            }
-        };
-
-        // Confirm check-in
-        document.getElementById('confirm-checkin-btn').addEventListener('click', async () => {
-            if (!selectedParticipantId || !selectedEventId) {
-                alert('No participant or event selected');
-                return;
-            }
+        // Global function for status updates
+        window.updateStatus = async (childId, status) => {
+            const eventId = document.getElementById('event-select').value;
+            const dateStr = document.getElementById('register-date').value; // YYYY-MM-DD
 
             try {
-                const response = await fetch(`${API_BASE_URL}/attendance/checkin`, {
+                await fetch(`${API_BASE_URL}/attendance/status`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${userToken}`
                     },
                     body: JSON.stringify({
-                        child_id: selectedParticipantId,
-                        event_id: selectedEventId,
-                        notes: 'Checked in via quick check-in'
+                        child_id: childId,
+                        event_id: eventId,
+                        status: status,
+                        date: dateStr
                     })
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    checkinModal.classList.add('hidden');
-                    if (recordsLoaded) {
-                        await loadAttendanceRecords();
-                    }
-                    alert('Check-in successful!');
-                } else {
-                    if (data.error && data.error.includes('token')) {
-                        // Token expired, redirect to login
-                        localStorage.removeItem('animaid_token');
-                        localStorage.removeItem('animaid_user');
-                        window.location.href = '../login.html';
-                        return;
-                    }
-                    alert('Error: ' + (data.error || 'Failed to check in'));
-                }
+                // Reload register to show update
+                await loadRegister();
 
             } catch (error) {
-                console.error('Error during check-in:', error);
-                alert('Network error. Please try again.');
-            }
-        });
-
-        // Remove attendance record
-        window.removeAttendance = async function (recordId) {
-            if (!confirm('Are you sure you want to delete this attendance record? This action cannot be undone.')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/attendance/${recordId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${userToken}` }
-                });
-
-                if (response.ok) {
-                    alert('Attendance record deleted successfully!');
-                    // Refresh the attendance records
-                    if (recordsLoaded) {
-                        await loadAttendanceRecords();
-                    }
-                } else {
-                    const errorData = await response.json().catch(() => ({}));
-                    if (errorData.error && errorData.error.includes('token')) {
-                        // Token expired, redirect to login
-                        localStorage.removeItem('animaid_token');
-                        localStorage.removeItem('animaid_user');
-                        window.location.href = '../login.html';
-                        return;
-                    }
-                    alert('Error: ' + (errorData.error || 'Failed to delete attendance record'));
-                }
-
-            } catch (error) {
-                console.error('Error deleting attendance record:', error);
-                alert('Network error. Please try again.');
+                console.error('Error updating status:', error);
+                alert('Failed to update status');
             }
         };
 
-        // Initialize when page loads
+        // Add child to register
+        window.addChildToRegister = async (childId) => {
+            const eventId = document.getElementById('event-select').value;
+
+            try {
+                await fetch(`${API_BASE_URL}/attendance/add_participant`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({
+                        child_id: childId,
+                        event_id: eventId
+                    })
+                });
+
+                document.getElementById('add-child-modal').classList.add('hidden');
+                document.getElementById('child-search').value = '';
+                document.getElementById('search-results').classList.add('hidden');
+
+                await loadRegister();
+                alert('Child added to register successfully.');
+
+            } catch (error) {
+                console.error('Error adding child:', error);
+                alert('Failed to add child');
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', initPage);
     </script>
-
-
-
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
-    <script type="module" src="../js/header.js"></script>
-    <script type="module" src="../../js/themeLanguageSwitcher.js"></script>
+    <script type="module" src="/js/header.js"></script>
+    <script type="module" src="/js/themeLanguageSwitcher.js"></script>
 </body>
 
 </html>
