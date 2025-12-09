@@ -2303,10 +2303,14 @@ function handleSpacesRequest(?string $spaceId, string $method, array $body, ?str
     // We reuse the existing db connection from Auth
     // Actually, Auth has protected $db. We might need a quick hack or use the ConfigManager to get a new connection.
     // Wait, the legacy api/index.php creates $db on line 37: $db = new Database();
-    global $db; 
-    
     // Load dependencies manually
     try {
+        // Ensure Database is loaded
+        if (!class_exists('Database')) {
+            require_once __DIR__ . '/../src/Database.php';
+        }
+        $db = Database::getInstance();
+
         // Ensure ConfigManager is loaded
         if (!class_exists('\AnimaID\Config\ConfigManager')) {
             $configPath = __DIR__ . '/../src/Config/ConfigManager.php';
