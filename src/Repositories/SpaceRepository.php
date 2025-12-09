@@ -57,7 +57,7 @@ class SpaceRepository extends BaseRepository
      */
     public function findBookings(?int $spaceId, string $startDate, string $endDate): array
     {
-        $sql = "SELECT sb.*, u.username as booked_by_name, e.title as event_title, s.name as space_name, s.type as space_type 
+        $sql = "SELECT sb.*, u.username as booked_by_name, e.title as event_title, s.name as space_name, s.type as space_type, s.color as space_color 
              FROM space_bookings sb
              INNER JOIN users u ON sb.booked_by = u.id
              LEFT JOIN calendar_events e ON sb.event_id = e.id
