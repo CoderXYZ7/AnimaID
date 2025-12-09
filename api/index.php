@@ -157,6 +157,9 @@ try {
     } elseif (strpos($errorMsg, 'Insufficient permissions') !== false) {
         $statusCode = 403;
         $errorMessage = 'Insufficient permissions';
+    } elseif (strpos($errorMsg, 'Conflict detected') !== false) {
+        $statusCode = 409;
+        $errorMessage = $errorMsg; // Expose the specific conflict message
     } elseif (strpos($errorMsg, 'not found') !== false) {
         $statusCode = 404;
         $errorMessage = 'Resource not found';
