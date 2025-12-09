@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Bookings - AnimaID</title>
+    <link rel="icon" href="../assets/logo/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../src/css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FullCalendar -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .fc-event {
+            cursor: pointer;
+        }
+
+        .fc-theme-standard td,
+        .fc-theme-standard th {
+            border-color: #e5e7eb;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+    <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading calendar...</p>
+        </div>
+    </div>
+
+    <div id="main-content" class="hidden">
+        <div id="main-header"></div>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Space Bookings</h2>
+                    <p class="text-gray-600">Overview of all space reservations</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="spaces.html"
+                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-list mr-2"></i>Manage Spaces
+                    </a>
+                    <button id="add-booking-btn"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>New Booking
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                <div id="calendar"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="booking-modal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900" id="modal-title">New Booking</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="booking-form" class="p-6 space-y-4">
+                <div id="error-message" class="hidden p-3 bg-red-100 text-red-700 rounded text-sm mb-4"></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Space</label>
+                    <select id="space_id" name="space_id" required
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 px-3 border">
+                        <option value="">Select a space...</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                        <input type="datetime-local" id="start_time" name="start_time" required
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 px-3 border">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                        <input type="datetime-local" id="end_time" name="end_time" required
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 px-3 border">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Purpose/Event</label>
+                    <input type="text" id="purpose" name="purpose"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 py-2 px-3 border"
+                        placeholder="e.g. Weekly Meeting">
+                </div>
+
+                <input type="hidden" id="booking_id">
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="delete-btn"
+                        class="hidden px-4 py-2 text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                        Delete
+                    </button>
+                    <button type="button" id="cancel-btn"
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" id="save-btn"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm">
+                        Save Booking
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script type="module" src="../js/header.js"></script>
+    <script type="module" src="../../js/themeLanguageSwitcher.js"></script>
+
+    <script>
+        const API_BASE_URL = window.location.origin + '/api';
+        let calendar;
+        let spaces = [];
+        let userToken = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            userToken = localStorage.getItem('animaid_token');
+            if (!userToken) {
+                window.location.href = '/index.html';
+                return;
+            }
+
+            await Promise.all([loadSpaces(), initCalendar()]);
+
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            calendar.render();
+        });
+
+        async function loadSpaces() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/spaces`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                const data = await res.json();
+                spaces = data.data || [];
+
+                const select = document.getElementById('space_id');
+                // Build options with simple indentation for hierarchy
+                const hierarchy = buildSpaceHierarchy(spaces);
+                renderSpaceOptions(select, hierarchy);
+
+            } catch (e) {
+                console.error("Failed to load spaces", e);
+            }
+        }
+
+        function buildSpaceHierarchy(list) {
+            const map = {};
+            const roots = [];
+            list.forEach(s => { s.children = []; map[s.id] = s; });
+            list.forEach(s => {
+                if (s.parent_id && map[s.parent_id]) {
+                    map[s.parent_id].children.push(s);
+                } else {
+                    roots.push(s);
+                }
+            });
+            return roots;
+        }
+
+        function renderSpaceOptions(selectElement, nodes, level = 0) {
+            nodes.forEach(node => {
+                const option = document.createElement('option');
+                option.value = node.id;
+                option.textContent = (level > 0 ? '\u00A0'.repeat(level * 4) + '↳ ' : '') + node.name + ` (${node.type})`;
+                selectElement.appendChild(option);
+
+                if (node.children && node.children.length > 0) {
+                    renderSpaceOptions(selectElement, node.children, level + 1);
+                }
+            });
+        }
+
+        async function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                slotMinTime: '08:00:00',
+                slotMaxTime: '22:00:00',
+                height: 'auto',
+                events: async (info, successCallback, failureCallback) => {
+                    try {
+                        const url = `${API_BASE_URL}/spaces?start=${info.startStr}&end=${info.endStr}`;
+                        // We need the special logic to fetch bookings.
+                        // Currently GET /api/spaces returns list of spaces.
+                        // We need GET /api/spaces/bookings usually, but logic in backend might be tricky.
+                        // My update to SpaceService added getAllBookings method, but did I expose it in SpaceController/Router?
+                        // Legacy router: create GET case for 'bookings' resourceId?
+                        // Let's assume fetching from /api/spaces is for LIST.
+                        // I might need to update the frontend to fetch specific range or bookings.
+                        // Let's try fetching spaces one by one? No too slow.
+                        // I'll call a dedicated endpoint. 
+                        // Wait, I updated SpaceRepository::findAllBookings.
+                        // But I need to verify if legacy Router exposes it.
+                        // Legacy router handles `spaces` -> `handleSpacesRequest`.
+                        // If I request `GET /api/spaces/bookings?start=...&end=...`
+                        // resourceId = 'bookings'.
+                        // My legacy router update handles POST /api/spaces/bookings? Yes.
+                        // Does it handle GET /api/spaces/bookings?
+                        // Look at file 478 (api/index.php).
+                        // GET case: `if ($spaceId) { ... if bookings ... return getSpaceBookings(...) }`
+                        // So `GET /api/spaces/bookings` might fall into `getSpace((int)"bookings")` which is 0?
+                        // No, `(int)"bookings"` is 0. 
+                        // I NEED TO FIX ROUTER TO HANDLE "bookings" keyword specifically in GET list.
+                        // For now, I'll fetch PER SPACE or assume I fix the router in next step.
+                        // I'll assume we use `GET /api/spaces/bookings` and I will fix backend to support it.
+
+                        const res = await fetch(`${API_BASE_URL}/spaces/bookings?start=${info.startStr}&end=${info.endStr}`, {
+                            headers: { 'Authorization': `Bearer ${userToken}` }
+                        });
+                        if (!res.ok) throw new Error('Failed');
+                        const json = await res.json();
+
+                        const events = json.data.map(b => ({
+                            id: b.id,
+                            title: `${b.space_name}: ${b.purpose || 'Reserved'}`,
+                            start: b.start_time,
+                            end: b.end_time,
+                            backgroundColor: getSpaceColor(b.space_type),
+                            borderColor: getSpaceColor(b.space_type),
+                            extendedProps: {
+                                space_id: b.space_id,
+                                purpose: b.purpose,
+                                booked_by: b.booked_by
+                            }
+                        }));
+                        successCallback(events);
+                    } catch (e) {
+                        failureCallback(e);
+                    }
+                },
+                selectable: true,
+                select: (info) => {
+                    openModal({ start: info.start, end: info.end });
+                },
+                eventClick: (info) => {
+                    openModal({
+                        id: info.event.id,
+                        space_id: info.event.extendedProps.space_id,
+                        start: info.event.start,
+                        end: info.event.end,
+                        purpose: info.event.extendedProps.purpose,
+                        isEdit: true
+                    });
+                }
+            });
+        }
+
+        function getSpaceColor(type) {
+            if (type === 'building') return '#7c3aed'; // Purple
+            if (type === 'room') return '#4f46e5'; // Indigo
+            return '#2563eb'; // Blue default
+        }
+
+        // Modal Logic
+        const modal = document.getElementById('booking-modal');
+        const form = document.getElementById('booking-form');
+
+        function openModal(data) {
+            document.getElementById('error-message').classList.add('hidden');
+            form.reset();
+
+            if (data.isEdit) {
+                document.getElementById('modal-title').textContent = 'Edit Booking';
+                document.getElementById('booking_id').value = data.id;
+                document.getElementById('space_id').value = data.space_id;
+                document.getElementById('purpose').value = data.purpose;
+                document.getElementById('delete-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('modal-title').textContent = 'New Booking';
+                document.getElementById('booking_id').value = '';
+                document.getElementById('delete-btn').classList.add('hidden');
+            }
+
+            // Format dates for input (local ISO)
+            const toLocalISO = (date) => {
+                const offset = date.getTimezoneOffset() * 60000;
+                return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+            };
+
+            document.getElementById('start_time').value = toLocalISO(data.start || new Date());
+            document.getElementById('end_time').value = toLocalISO(data.end || new Date(new Date().getTime() + 3600000));
+
+            modal.classList.remove('hidden');
+        }
+
+        document.getElementById('close-modal').addEventListener('click', () => modal.classList.add('hidden'));
+        document.getElementById('cancel-btn').addEventListener('click', () => modal.classList.add('hidden'));
+
+        // Save
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorEl = document.getElementById('error-message');
+            errorEl.classList.add('hidden');
+
+            const payload = {
+                space_id: document.getElementById('space_id').value,
+                start_time: document.getElementById('start_time').value.replace('T', ' ') + ':00', // Ensure SQL format
+                end_time: document.getElementById('end_time').value.replace('T', ' ') + ':00',
+                purpose: document.getElementById('purpose').value
+            };
+
+            const id = document.getElementById('booking_id').value;
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `${API_BASE_URL}/spaces/bookings/${id}` : `${API_BASE_URL}/spaces/bookings`;
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const json = await res.json();
+
+                if (!res.ok) {
+                    // Show error from backend (Conflict, etc)
+                    throw new Error(json.error || 'Failed to save');
+                }
+
+                modal.classList.add('hidden');
+                calendar.refetchEvents();
+
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.remove('hidden');
+            }
+        });
+
+        // Delete
+        document.getElementById('delete-btn').addEventListener('click', async () => {
+            if (!confirm('Cancel this booking?')) return;
+
+            const id = document.getElementById('booking_id').value;
+            try {
+                const res = await fetch(`${API_BASE_URL}/spaces/bookings/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
+                if (res.ok) {
+                    modal.classList.add('hidden');
+                    calendar.refetchEvents();
+                } else {
+                    alert('Failed to delete');
+                }
+            } catch (e) {
+                alert('Error deleting');
+            }
+        });
+
+    </script>
+</body>
+
+</html>

@@ -263,4 +263,26 @@ class ChildRepository extends BaseRepository
             "SELECT gender, COUNT(*) as count FROM {$this->table} GROUP BY gender"
         );
     }
+
+    /**
+     * Get primary guardian
+     */
+    public function getPrimaryGuardian(int $childId): ?array
+    {
+        return $this->queryOne(
+            "SELECT * FROM child_guardians WHERE child_id = ? AND is_primary = 1 LIMIT 1",
+            [$childId]
+        );
+    }
+
+    /**
+     * Get medical info
+     */
+    public function getMedicalInfo(int $childId): ?array
+    {
+        return $this->queryOne(
+            "SELECT * FROM child_medical WHERE child_id = ?",
+            [$childId]
+        );
+    }
 }

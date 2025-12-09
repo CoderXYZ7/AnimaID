@@ -124,7 +124,9 @@ echo ""
 
 # Step 1: Pull latest changes
 echo -e "${YELLOW}[1/7] Pulling latest changes...${NC}"
-sudo -u $ACTUAL_USER git pull origin master
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+echo "Pulling from branch: $CURRENT_BRANCH"
+sudo -u $ACTUAL_USER git pull origin $CURRENT_BRANCH
 echo -e "${GREEN}✓ Changes pulled${NC}"
 echo ""
 
@@ -145,6 +147,15 @@ if [ ! -f .env ]; then
     read -p "Press enter to continue after editing .env..."
 else
     echo -e "${GREEN}✓ .env file exists${NC}"
+fi
+
+# Check config.php file
+if [ ! -f config/config.php ]; then
+    echo -e "${YELLOW}⚠ config/config.php not found, creating from default...${NC}"
+    cp config/configDefault.php config/config.php
+    echo -e "${GREEN}✓ config/config.php created${NC}"
+else
+    echo -e "${GREEN}✓ config/config.php exists${NC}"
 fi
 echo ""
 

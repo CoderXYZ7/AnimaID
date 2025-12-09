@@ -8,14 +8,24 @@
 use Slim\Factory\AppFactory;
 use AnimaID\Config\ConfigManager;
 use AnimaID\Security\JwtManager;
-use AnimaID\Repositories\UserRepository;
-use AnimaID\Repositories\RoleRepository;
+use AnimaID\Repositories\ChildRepository;
 use AnimaID\Repositories\PermissionRepository;
+use AnimaID\Repositories\RoleRepository;
+use AnimaID\Repositories\SpaceRepository;
+use AnimaID\Repositories\UserRepository;
+use AnimaID\Repositories\WikiRepository;
 use AnimaID\Services\AuthService;
-use AnimaID\Services\UserService;
+use AnimaID\Services\CalendarService;
 use AnimaID\Services\PermissionService;
+use AnimaID\Services\SpaceService;
+use AnimaID\Services\UserService;
+use AnimaID\Services\WikiService;
 use AnimaID\Controllers\AuthController;
+use AnimaID\Controllers\CalendarController;
+use AnimaID\Controllers\SpaceController;
+use AnimaID\Controllers\SystemController;
 use AnimaID\Controllers\UserController;
+use AnimaID\Controllers\WikiController;
 use AnimaID\Middleware\AuthMiddleware;
 use AnimaID\Middleware\PermissionMiddleware;
 
@@ -54,6 +64,10 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $userRepository = new UserRepository($pdo);
 $roleRepository = new RoleRepository($pdo);
 $permissionRepository = new PermissionRepository($pdo);
+$calendarRepository = new CalendarRepository($pdo);
+$childRepository = new ChildRepository($pdo);
+$wikiRepository = new WikiRepository($pdo);
+$spaceRepository = new SpaceRepository($pdo);
 
 // Services
 $jwtManager = new JwtManager(
@@ -64,10 +78,17 @@ $jwtManager = new JwtManager(
 $authService = new AuthService($userRepository, $jwtManager, $config, $pdo);
 $userService = new UserService($userRepository, $config, $pdo);
 $permissionService = new PermissionService($permissionRepository, $config, $pdo);
+$calendarService = new CalendarService($calendarRepository, $childRepository, $config);
+$wikiService = new WikiService($wikiRepository, $config);
+$spaceService = new SpaceService($spaceRepository, $config);
 
 // Controllers
 $authController = new AuthController($authService);
 $userController = new UserController($userService);
+$calendarController = new CalendarController($calendarService);
+$systemController = new SystemController($pdo);
+$wikiController = new WikiController($wikiService);
+$spaceController = new SpaceController($spaceService);
 
 // Middleware
 $authMiddleware = new AuthMiddleware($authService);
@@ -82,7 +103,51 @@ $app->post('/api/auth/login', [$authController, 'login']);
 // PROTECTED ROUTES (Authentication required)
 // ============================================================================
 
-$app->group('/api', function ($group) use ($authController, $userController, $permissionService) {
+$app->group('/api', function ($group) use ($authController, $userController, $calendarController, $systemController, $wikiController, $spaceController, $permissionService) {
+    
+    // Space Routes
+    $group->group('/spaces', function ($group) use ($spaceController, $permissionService) {
+        $group->get('', [$spaceController, 'index']);
+        $group->get('/{id}', [$spaceController, 'show']);
+        
+        $group->post('', [$spaceController, 'create'])
+             ->add(new PermissionMiddleware($permissionService, ['spaces.manage'], 'any'));
+        
+        $group->put('/{id}', [$spaceController, 'update'])
+             ->add(new PermissionMiddleware($permissionService, ['spaces.manage'], 'any'));
+             
+        $group->delete('/{id}', [$spaceController, 'delete'])
+             ->add(new PermissionMiddleware($permissionService, ['spaces.manage'], 'any'));
+
+        $group->get('/{id}/bookings', [$spaceController, 'getBookings']);
+        
+        $group->post('/bookings', [$spaceController, 'createBooking'])
+            ->add(new PermissionMiddleware($permissionService, ['spaces.book'], 'any'));
+            
+        $group->delete('/bookings/{id}', [$spaceController, 'deleteBooking'])
+            ->add(new PermissionMiddleware($permissionService, ['spaces.manage'], 'any'));
+    });
+
+    // Wiki Routes
+    $group->group('/wiki', function ($group) use ($wikiController, $permissionService) {
+        $group->get('/pages', [$wikiController, 'index']);
+        $group->get('/categories', [$wikiController, 'categories']);
+        
+        $group->post('/pages', [$wikiController, 'create'])
+            ->add(new PermissionMiddleware($permissionService, ['wiki.create'], 'any'));
+        
+        $group->get('/pages/{id}', [$wikiController, 'show']);
+        
+        $group->put('/pages/{id}', [$wikiController, 'update'])
+            ->add(new PermissionMiddleware($permissionService, ['wiki.edit'], 'any'));
+            
+        $group->delete('/pages/{id}', [$wikiController, 'delete'])
+            ->add(new PermissionMiddleware($permissionService, ['wiki.moderate'], 'any'));
+    });
+
+    // System Status
+    $group->get('/system/status', [$systemController, 'status'])
+        ->add(new PermissionMiddleware($permissionService, ['admin.system.view'], 'any'));
     
     // Auth routes
     $group->post('/auth/logout', [$authController, 'logout']);
@@ -98,6 +163,30 @@ $app->group('/api', function ($group) use ($authController, $userController, $pe
         $group->put('/{id}', [$userController, 'update']);
         $group->delete('/{id}', [$userController, 'delete']);
     })->add(new PermissionMiddleware($permissionService, ['admin.users', 'users.manage'], 'any'));
+
+    // Calendar routes
+    $group->group('/calendar', function ($group) use ($calendarController, $permissionService) {
+        $group->get('', [$calendarController, 'index']);
+        $group->post('', [$calendarController, 'create'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.create'], 'any'));
+        
+        $group->get('/{id}', [$calendarController, 'show']);
+        $group->put('/{id}', [$calendarController, 'update'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.edit'], 'any'));
+        
+        $group->delete('/{id}', [$calendarController, 'delete'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.delete'], 'any'));
+        
+        // Participants
+        $group->get('/{id}/participants', [$calendarController, 'participants'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.participants.view', 'calendar.view'], 'any'));
+            
+        $group->post('/{id}/register', [$calendarController, 'register'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.participants.manage'], 'any'));
+            
+        $group->delete('/{id}/participants/{participantId}', [$calendarController, 'unregister'])
+            ->add(new PermissionMiddleware($permissionService, ['calendar.participants.manage'], 'any'));
+    });
 
 })->add($authMiddleware);
 

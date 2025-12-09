@@ -29,11 +29,18 @@ class ConfigManager
 
     private function loadEnvironment(): void
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
-        
-        // Load .env file if it exists, otherwise use defaults
-        if (file_exists(__DIR__ . '/../../.env')) {
-            $dotenv->load();
+        // Try to load .env with Dotenv if available
+        if (class_exists('Dotenv\Dotenv')) {
+            try {
+                $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+                
+                // Load .env file if it exists
+                if (file_exists(__DIR__ . '/../../.env')) {
+                    $dotenv->load();
+                }
+            } catch (\Exception $e) {
+                // Ignore if Dotenv fails or creates issues, fallback to server env vars
+            }
         }
     }
 

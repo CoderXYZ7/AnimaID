@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body class="bg-gray-50 min-h-screen">
 
     <!-- Loading Screen -->
@@ -35,7 +37,8 @@
                         <h2 class="text-3xl font-bold text-gray-900">System Status</h2>
                         <p class="text-gray-600 mt-1">Monitor system health, performance, and configuration</p>
                     </div>
-                    <button id="refresh-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <button id="refresh-btn"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
                         <i class="fas fa-sync-alt mr-2"></i>Refresh
                     </button>
                 </div>
@@ -218,28 +221,32 @@
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <button id="backup-btn" class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button id="backup-btn"
+                            class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div class="text-center">
                                 <i class="fas fa-download text-blue-600 text-xl mb-2"></i>
                                 <span class="text-sm font-medium">Create Backup</span>
                             </div>
                         </button>
 
-                        <button id="clear-cache-btn" class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button id="clear-cache-btn"
+                            class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div class="text-center">
                                 <i class="fas fa-broom text-green-600 text-xl mb-2"></i>
                                 <span class="text-sm font-medium">Clear Cache</span>
                             </div>
                         </button>
 
-                        <button id="restart-services-btn" class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button id="restart-services-btn"
+                            class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div class="text-center">
                                 <i class="fas fa-power-off text-orange-600 text-xl mb-2"></i>
                                 <span class="text-sm font-medium">Restart Services</span>
                             </div>
                         </button>
 
-                        <button id="view-logs-btn" class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                        <button id="view-logs-btn"
+                            class="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div class="text-center">
                                 <i class="fas fa-file-alt text-purple-600 text-xl mb-2"></i>
                                 <span class="text-sm font-medium">View Logs</span>
@@ -258,14 +265,17 @@
             <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Access Denied</h3>
             <p class="text-gray-600 mb-4">You don't have permission to access system status.</p>
-            <p class="text-sm text-gray-500 mb-6">System status requires admin privileges. Please log in with an admin account or contact your system administrator.</p>
+            <p class="text-sm text-gray-500 mb-6">System status requires admin privileges. Please log in with an admin
+                account or contact your system administrator.</p>
             <div class="space-y-3">
-                <a href="../../../login.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                <a href="../../../login.html"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
                     <i class="fas fa-sign-in-alt mr-2"></i>
                     Log In
                 </a>
                 <br>
-                <a href="../../../dashboard.html" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                <a href="../../../dashboard.html"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Dashboard
                 </a>
@@ -440,26 +450,73 @@
         }
 
         // Load API endpoints status
-        function loadApiEndpoints() {
-            const endpoints = [
-                { name: 'Authentication', path: '/auth', status: 'online' },
-                { name: 'User Management', path: '/users', status: 'online' },
-                { name: 'Role Management', path: '/roles', status: 'online' },
-                { name: 'Permissions', path: '/permissions', status: 'online' },
-                { name: 'System Status', path: '/system', status: 'online' }
-            ];
+        async function loadApiEndpoints() {
+            try {
+                // Fetch status from the new endpoint we just created
+                // Note: The main /api/system/status call in loadSystemStatus executes this too
+                // but we can reuse the data passed to loadSystemStatus if we refactor,
+                // or just fetch again/use the response. 
 
-            const endpointsHtml = endpoints.map(endpoint => `
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                        <span class="text-sm font-medium text-gray-900">${endpoint.name}</span>
-                    </div>
-                    <span class="text-xs text-gray-500">${endpoint.path}</span>
-                </div>
-            `).join('');
+                // Let's refactor slightly to pass data if available, or fetch
+                const response = await fetch(`${API_BASE_URL}/system/status`, {
+                    headers: { 'Authorization': `Bearer ${userToken}` }
+                });
 
-            document.getElementById('api-endpoints').innerHTML = endpointsHtml;
+                let modules = [];
+                if (response.ok) {
+                    const data = await response.json();
+                    modules = data.modules;
+                } else {
+                    // Fallback or error state
+                    modules = [];
+                }
+
+                if (!modules || modules.length === 0) {
+                    document.getElementById('api-endpoints').innerHTML = '<p class="text-sm text-gray-500">No module information available.</p>';
+                    return;
+                }
+
+                const endpointsHtml = modules.map(module => {
+                    let colorClass = 'bg-gray-500';
+                    let statusText = 'Unknown';
+
+                    if (module.status === 'migrated') {
+                        colorClass = 'bg-green-500';
+                        statusText = 'Migrated (Slim 4)';
+                    } else if (module.status === 'partial') {
+                        colorClass = 'bg-yellow-500';
+                        statusText = 'Partial / Pending';
+                    } else if (module.status === 'legacy') {
+                        colorClass = 'bg-orange-500';
+                        statusText = 'Legacy (index.php)';
+                    } else {
+                        colorClass = 'bg-red-500';
+                        statusText = 'Broken / Missing';
+                    }
+
+                    return `
+                        <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                            <div>
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 ${colorClass} rounded-full mr-3" title="${statusText}"></div>
+                                    <span class="text-sm font-medium text-gray-900">${module.name}</span>
+                                </div>
+                                <div class="text-xs text-gray-500 ml-6 mt-1">${module.details || ''}</div>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-600">${module.path}</span>
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-gray-400 mt-1">${statusText}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('api-endpoints').innerHTML = endpointsHtml;
+
+            } catch (error) {
+                console.error('Error loading API endpoints:', error);
+                document.getElementById('api-endpoints').innerHTML = '<p class="text-sm text-red-500">Error loading API status.</p>';
+            }
         }
 
         // Refresh button
@@ -529,4 +586,5 @@
     <script type="module" src="../../js/header.js"></script>
     <script type="module" src="../../js/themeLanguageSwitcher.js"></script>
 </body>
+
 </html>

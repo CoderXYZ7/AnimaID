@@ -35,6 +35,10 @@ class Database {
     public function getConnection() {
         return $this->pdo;
     }
+    
+    public function getPdo() {
+        return $this->pdo;
+    }
 
     public function beginTransaction() {
         return $this->pdo->beginTransaction();

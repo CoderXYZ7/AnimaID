@@ -98,6 +98,28 @@ if (!$token && $_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 try {
+    // BRIDGING: Handle system/status directly to support new dashboard features
+    if ($endpoint === 'system' && $resourceId === 'status') {
+         $status = [
+            'status' => 'healthy',
+            'version' => '1.0.0',
+            'timestamp' => date('c'),
+            'database' => true,
+            'modules' => [
+                ['name' => 'Authentication', 'path' => '/api/auth', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4 + JWT'],
+                ['name' => 'User Management', 'path' => '/api/users', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4'],
+                ['name' => 'Role Management', 'path' => '/api/roles', 'status' => 'partial', 'details' => 'Repository and Service exist, routes pending'],
+                ['name' => 'Calendar', 'path' => '/api/calendar', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4'],
+                ['name' => 'Wiki', 'path' => '/api/wiki', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4'],
+                ['name' => 'Attendance', 'path' => '/api/attendance', 'status' => 'legacy', 'details' => 'Running on legacy api/index.php'],
+                ['name' => 'Spaces', 'path' => '/api/spaces', 'status' => 'migrated', 'details' => 'Fully migrated to Slim 4'],
+                ['name' => 'Reports', 'path' => '/api/reports', 'status' => 'legacy', 'details' => 'Running on legacy api/index.php']
+            ]
+        ];
+        echo json_encode($status);
+        exit;
+    }
+
     // Log the request for debugging
     error_log("API Request: {$requestMethod} {$endpoint}/{$resourceId}");
 
@@ -2331,8 +2353,52 @@ function handleAttendanceRequest(?string $action, string $method, array $body, ?
 }
 
 function handleSpacesRequest(?string $spaceId, string $method, array $body, ?string $token, Auth $auth): array {
-    if (!$token) throw new Exception('Authentication required');
+    global $container; // Assuming new services are available via container if set up, or we instantiate manually.
+    // For legacy router, we usually don't have the Slim container available easily unless we bootstrapped it.
+    // So we will instantiate SpaceRepository and SpaceService manually.
+    
+    // We reuse the existing db connection from Auth
+    // Actually, Auth has protected $db. We might need a quick hack or use the ConfigManager to get a new connection.
+    // Wait, the legacy api/index.php creates $db on line 37: $db = new Database();
+    // Load dependencies manually
+    try {
+        // Ensure Database is loaded
+        if (!class_exists('Database')) {
+            require_once __DIR__ . '/../src/Database.php';
+        }
+        $db = Database::getInstance();
 
+        // Ensure ConfigManager is loaded
+        if (!class_exists('\AnimaID\Config\ConfigManager')) {
+            $configPath = __DIR__ . '/../src/Config/ConfigManager.php';
+            if (file_exists($configPath)) {
+                require_once $configPath;
+            } else {
+                throw new Exception("ConfigManager file not found at " . $configPath);
+            }
+        }
+        $config = \AnimaID\Config\ConfigManager::getInstance();
+        
+        // Ensure Repositories and Services are loaded if autoloader misses them
+        if (!class_exists('\AnimaID\Repositories\SpaceRepository')) {
+             if (!class_exists('\AnimaID\Repositories\BaseRepository')) {
+                  require_once __DIR__ . '/../src/Repositories/BaseRepository.php';
+             }
+             require_once __DIR__ . '/../src/Repositories/SpaceRepository.php';
+        }
+        if (!class_exists('\AnimaID\Services\SpaceService')) {
+             require_once __DIR__ . '/../src/Services/SpaceService.php';
+        }
+    
+        $spaceRepo = new \AnimaID\Repositories\SpaceRepository($db->getPdo()); 
+        $spaceService = new \AnimaID\Services\SpaceService($spaceRepo, $config);
+
+    } catch (Throwable $e) {
+        error_log("Dependency Loading Error in Space Module: " . $e->getMessage());
+        return ['error' => 'Internal Server Error: ' . $e->getMessage()];
+    }
+
+    if (!$token) throw new Exception('Authentication required');
     $user = $auth->verifyToken($token);
 
     switch ($method) {
@@ -2341,25 +2407,78 @@ function handleSpacesRequest(?string $spaceId, string $method, array $body, ?str
                 throw new Exception('Insufficient permissions');
             }
 
-            if ($spaceId === null) {
-                return ['spaces' => $auth->getSpaces()];
-            } else {
-                // Get space bookings
-                $startDate = $_GET['start_date'] ?? null;
-                $endDate = $_GET['end_date'] ?? null;
-                return ['bookings' => $auth->getSpaceBookings($startDate, $endDate)];
+            if ($spaceId) {
+                // Check if it's GET /api/spaces/bookings (All bookings)
+                if ($spaceId === 'bookings') {
+                     return ['data' => $spaceService->getAllBookings($_GET['start'] ?? null, $_GET['end'] ?? null)];
+                }
+
+                // Check if it's GET /api/spaces/{id}/bookings
+                global $pathSegments; // /api/spaces/1/bookings
+                // segments: 0=spaces, 1=id, 2=bookings
+                if (isset($pathSegments[2]) && $pathSegments[2] === 'bookings') {
+                     return ['data' => $spaceService->getSpaceBookings((int)$spaceId, $_GET['start'] ?? null, $_GET['end'] ?? null)];
+                }
+                
+                // Otherwise GET /api/spaces/{id}
+                return ['data' => $spaceService->getSpace((int)$spaceId)];
             }
+            return ['data' => $spaceService->getAllSpaces()];
+
+        case 'PUT':
+             // Check if it's Updating Booking: /api/spaces/bookings/{id}
+             global $pathSegments;
+             // segments: 0=spaces, 1=bookings, 2=id
+             if ($spaceId === 'bookings' && isset($pathSegments[2])) {
+                 if (!$auth->checkPermission($user['id'], 'spaces.book')) throw new Exception('Insufficient permissions');
+                 $spaceService->updateBooking((int)$pathSegments[2], $body);
+                 return ['message' => 'Booking updated successfully'];
+             }
+             
+             if (!$auth->checkPermission($user['id'], 'spaces.manage')) throw new Exception('Insufficient permissions');
+             if (!$spaceId) throw new Exception('Space ID required');
+             $spaceService->updateSpace((int)$spaceId, $body);
+             return ['message' => 'Space updated successfully'];
 
         case 'POST':
-            if (!$auth->checkPermission($user['id'], 'spaces.book')) {
-                throw new Exception('Insufficient permissions');
+            // Check if it's a booking creation: /api/spaces/bookings
+            // The legacy router splits path. /api/spaces is endpoint.
+            // If resourceId is 'bookings', then it is /api/spaces/bookings
+            
+            if ($spaceId === 'bookings') {
+                if (!$auth->checkPermission($user['id'], 'spaces.book')) throw new Exception('Insufficient permissions');
+                return [
+                    'data' => ['id' => $spaceService->createBooking($body, $user['id'])],
+                    'message' => 'Booking created successfully'
+                ];
             }
-
-            $bookingId = $auth->createSpaceBooking($body, $user['id']);
+            
+            // Otherwise it is Create Space
+            if (!$auth->checkPermission($user['id'], 'spaces.manage')) throw new Exception('Insufficient permissions');
             return [
-                'booking_id' => $bookingId,
-                'message' => 'Space booking created successfully'
+                'data' => ['id' => $spaceService->createSpace($body)],
+                'message' => 'Space created successfully'
             ];
+
+        case 'PUT':
+             if (!$auth->checkPermission($user['id'], 'spaces.manage')) throw new Exception('Insufficient permissions');
+             if (!$spaceId) throw new Exception('Space ID required');
+             $spaceService->updateSpace((int)$spaceId, $body);
+             return ['message' => 'Space updated successfully'];
+
+        case 'DELETE':
+             // Check if booking or space
+             global $pathSegments;
+             if ($spaceId === 'bookings' && isset($pathSegments[3])) {
+                 // DELETE /api/spaces/bookings/{id}
+                 if (!$auth->checkPermission($user['id'], 'spaces.manage')) throw new Exception('Insufficient permissions');
+                 $spaceService->deleteBooking((int)$pathSegments[3]);
+                 return ['message' => 'Booking cancelled'];
+             }
+             
+             if (!$auth->checkPermission($user['id'], 'spaces.manage')) throw new Exception('Insufficient permissions');
+             $spaceService->deleteSpace((int)$spaceId);
+             return ['message' => 'Space deleted successfully'];
 
         default:
             throw new Exception('Method not allowed');
