@@ -737,7 +737,7 @@
                     console.log('Already checked in:', alreadyCheckedIn);
 
                     if (alreadyCheckedIn) {
-                        alert(`${child.first_name} ${child.last_name} is already checked in to this event.`);
+                        await Modal.warning(`${child.first_name} ${child.last_name} is already checked in to this event.`);
                         return;
                     }
                 } else {
@@ -780,14 +780,14 @@
 
             } catch (error) {
                 console.error('Error loading child details:', error);
-                alert('Failed to load child details. Please try logging in again.');
+                await Modal.error('Failed to load child details. Please try logging in again.');
             }
         };
 
         // Confirm check-in
         document.getElementById('confirm-checkin-btn').addEventListener('click', async () => {
             if (!selectedParticipantId || !selectedEventId) {
-                alert('No participant or event selected');
+                await Modal.warning('No participant or event selected');
                 return;
             }
 
@@ -812,7 +812,7 @@
                     if (recordsLoaded) {
                         await loadAttendanceRecords();
                     }
-                    alert('Check-in successful!');
+                    await Modal.success('Check-in successful!');
                 } else {
                     if (data.error && data.error.includes('token')) {
                         // Token expired, redirect to login
@@ -821,20 +821,23 @@
                         window.location.href = '../login.html';
                         return;
                     }
-                    alert('Error: ' + (data.error || 'Failed to check in'));
+                    await Modal.error(data.error || 'Failed to check in');
                 }
 
             } catch (error) {
                 console.error('Error during check-in:', error);
-                alert('Network error. Please try again.');
+                await Modal.error('Network error. Please try again.');
             }
         });
 
         // Remove attendance record
         window.removeAttendance = async function (recordId) {
-            if (!confirm('Are you sure you want to delete this attendance record? This action cannot be undone.')) {
-                return;
-            }
+            const confirmed = await Modal.confirm('Are you sure you want to delete this attendance record? This action cannot be undone.', {
+                title: 'Delete Attendance Record',
+                dangerous: true,
+                confirmText: 'Delete'
+            });
+            if (!confirmed) return;
 
             try {
                 const response = await fetch(`${API_BASE_URL}/attendance/${recordId}`, {
@@ -843,7 +846,7 @@
                 });
 
                 if (response.ok) {
-                    alert('Attendance record deleted successfully!');
+                    await Modal.success('Attendance record deleted successfully!');
                     // Refresh the attendance records
                     if (recordsLoaded) {
                         await loadAttendanceRecords();
@@ -857,12 +860,12 @@
                         window.location.href = '../login.html';
                         return;
                     }
-                    alert('Error: ' + (errorData.error || 'Failed to delete attendance record'));
+                    await Modal.error(errorData.error || 'Failed to delete attendance record');
                 }
 
             } catch (error) {
                 console.error('Error deleting attendance record:', error);
-                alert('Network error. Please try again.');
+                await Modal.error('Network error. Please try again.');
             }
         };
 
@@ -873,6 +876,7 @@
 
 
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script src="../js/modal.js"></script>
     <script type="module" src="../js/header.js"></script>
     <script type="module" src="../../js/themeLanguageSwitcher.js"></script>
 </body>

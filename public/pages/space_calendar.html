@@ -243,6 +243,7 @@
     </div>
 
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script src="../js/modal.js"></script>
     <script type="module" src="../js/header.js"></script>
     <script type="module" src="../../js/themeLanguageSwitcher.js"></script>
 
@@ -477,7 +478,12 @@
 
         // Delete
         document.getElementById('delete-btn').addEventListener('click', async () => {
-            if (!confirm('Cancel this booking?')) return;
+            const confirmed = await Modal.confirm('Cancel this booking?', {
+                title: 'Cancel Booking',
+                dangerous: true,
+                confirmText: 'Cancel Booking'
+            });
+            if (!confirmed) return;
 
             const id = document.getElementById('booking_id').value;
             try {
@@ -489,10 +495,10 @@
                     modal.classList.add('hidden');
                     calendar.refetchEvents();
                 } else {
-                    alert('Failed to delete');
+                    await Modal.error('Failed to cancel booking');
                 }
             } catch (e) {
-                alert('Error deleting');
+                await Modal.error('Error cancelling booking');
             }
         });
 
