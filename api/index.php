@@ -2141,9 +2141,153 @@ function handleSystemRequest(?string $action, string $method, ?string $token, Au
                 ];
             }
 
+        case 'backup':
+            if ($method !== 'POST') throw new Exception('Method not allowed');
+            return handleBackupCreate();
+
+        case 'backups':
+            if ($method !== 'GET') throw new Exception('Method not allowed');
+            return handleBackupList();
+
         default:
             throw new Exception('System action not found');
     }
+}
+
+/**
+ * Create a database and uploads backup
+ */
+function handleBackupCreate(): array {
+    $timestamp = date('Y-m-d_H-i-s');
+    $backupsDir = __DIR__ . '/../backups';
+    $databasePath = __DIR__ . '/../database/animaid.db';
+    $uploadsDir = __DIR__ . '/../uploads';
+    
+    // Ensure backups directory exists
+    if (!is_dir($backupsDir)) {
+        mkdir($backupsDir, 0755, true);
+    }
+    
+    $results = [];
+    
+    // Backup database
+    $dbBackupFile = $backupsDir . "/animaid_db_{$timestamp}.db";
+    try {
+        $source = new PDO('sqlite:' . $databasePath);
+        $source->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $source->exec('PRAGMA wal_checkpoint(FULL)');
+        
+        if (copy($databasePath, $dbBackupFile)) {
+            $results['database'] = [
+                'success' => true,
+                'file' => basename($dbBackupFile),
+                'size' => filesize($dbBackupFile)
+            ];
+        } else {
+            $results['database'] = ['success' => false, 'error' => 'Failed to copy database'];
+        }
+    } catch (Exception $e) {
+        $results['database'] = ['success' => false, 'error' => $e->getMessage()];
+    }
+    
+    // Backup uploads
+    if (is_dir($uploadsDir)) {
+        $files = scandir($uploadsDir);
+        $files = array_diff($files, ['.', '..', '.gitkeep', '.gitignore']);
+        
+        if (!empty($files)) {
+            $uploadsBackupFile = $backupsDir . "/animaid_uploads_{$timestamp}.tar.gz";
+            $command = sprintf(
+                'tar -czf %s -C %s . 2>&1',
+                escapeshellarg($uploadsBackupFile),
+                escapeshellarg($uploadsDir)
+            );
+            exec($command, $output, $returnCode);
+            
+            if ($returnCode === 0 && file_exists($uploadsBackupFile)) {
+                $results['uploads'] = [
+                    'success' => true,
+                    'file' => basename($uploadsBackupFile),
+                    'size' => filesize($uploadsBackupFile)
+                ];
+            } else {
+                $results['uploads'] = ['success' => false, 'error' => 'Failed to create archive'];
+            }
+        } else {
+            $results['uploads'] = ['success' => true, 'file' => null, 'skipped' => true, 'reason' => 'Uploads folder is empty'];
+        }
+    } else {
+        $results['uploads'] = ['success' => true, 'file' => null, 'skipped' => true, 'reason' => 'Uploads folder not found'];
+    }
+    
+    return [
+        'message' => 'Backup completed',
+        'timestamp' => $timestamp,
+        'results' => $results
+    ];
+}
+
+/**
+ * List all existing backups
+ */
+function handleBackupList(): array {
+    $backupsDir = __DIR__ . '/../backups';
+    
+    if (!is_dir($backupsDir)) {
+        return ['backups' => [], 'total_size' => 0];
+    }
+    
+    $files = scandir($backupsDir);
+    $files = array_diff($files, ['.', '..', '.gitkeep', '.gitignore']);
+    
+    if (empty($files)) {
+        return ['backups' => [], 'total_size' => 0];
+    }
+    
+    // Sort by modification time (newest first)
+    usort($files, function($a, $b) use ($backupsDir) {
+        return filemtime($backupsDir . '/' . $b) - filemtime($backupsDir . '/' . $a);
+    });
+    
+    $backups = [];
+    $totalSize = 0;
+    
+    foreach ($files as $file) {
+        $path = $backupsDir . '/' . $file;
+        $size = filesize($path);
+        $totalSize += $size;
+        
+        $type = 'unknown';
+        if (strpos($file, '_db_') !== false) {
+            $type = 'database';
+        } elseif (strpos($file, '_uploads_') !== false) {
+            $type = 'uploads';
+        }
+        
+        $backups[] = [
+            'name' => $file,
+            'type' => $type,
+            'size' => $size,
+            'size_formatted' => formatBackupBytes($size),
+            'created_at' => date('Y-m-d H:i:s', filemtime($path))
+        ];
+    }
+    
+    return [
+        'backups' => $backups,
+        'total_size' => $totalSize,
+        'total_size_formatted' => formatBackupBytes($totalSize)
+    ];
+}
+
+/**
+ * Format bytes to human readable
+ */
+function formatBackupBytes(int $bytes): string {
+    if ($bytes === 0) return '0 B';
+    $units = ['B', 'KB', 'MB', 'GB'];
+    $i = floor(log($bytes, 1024));
+    return round($bytes / pow(1024, $i), 2) . ' ' . $units[$i];
 }
 
 function handleCalendarRequest(?string $eventId, string $method, array $body, ?string $token, Auth $auth): array {
