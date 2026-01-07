@@ -663,26 +663,28 @@
                 }
 
                 // Show success message
-                let message = 'Backup created successfully!\n\n';
+                let message = 'Backup completed!';
                 if (data.results) {
+                    let details = '';
                     if (data.results.database?.success) {
-                        message += `✓ Database: ${data.results.database.file}\n`;
+                        details += `✓ Database: ${data.results.database.file}\n`;
                     }
                     if (data.results.uploads?.success) {
                         if (data.results.uploads.skipped) {
-                            message += `⚠ Uploads: ${data.results.uploads.reason}\n`;
+                            details += `⚠ Uploads: ${data.results.uploads.reason}\n`;
                         } else if (data.results.uploads.file) {
-                            message += `✓ Uploads: ${data.results.uploads.file}\n`;
+                            details += `✓ Uploads: ${data.results.uploads.file}\n`;
                         }
                     }
+                    if (details) message += '\n\n' + details;
                 }
-                alert(message);
+                await Modal.success(message);
 
                 // Reload backups list
                 await loadBackups();
             } catch (error) {
                 console.error('Backup error:', error);
-                alert('Backup failed: ' + error.message);
+                await Modal.error('Backup failed: ' + error.message);
             } finally {
                 btn.innerHTML = originalContent;
                 btn.disabled = false;
@@ -699,22 +701,31 @@
         }
 
         if (clearCacheBtn) {
-            clearCacheBtn.addEventListener('click', () => {
-                alert('Cache cleared successfully');
+            clearCacheBtn.addEventListener('click', async () => {
+                await Modal.success('Cache cleared successfully');
             });
         }
 
         if (restartServicesBtn) {
-            restartServicesBtn.addEventListener('click', () => {
-                if (confirm('Are you sure you want to restart services? This may temporarily disrupt service.')) {
-                    alert('Services restarted successfully');
+            restartServicesBtn.addEventListener('click', async () => {
+                const confirmed = await Modal.confirm('Are you sure you want to restart services? This may temporarily disrupt service.', {
+                    title: 'Restart Services',
+                    icon: 'warning',
+                    dangerous: true,
+                    confirmText: 'Restart'
+                });
+                if (confirmed) {
+                    await Modal.success('Services restarted successfully');
                 }
             });
         }
 
         if (viewLogsBtn) {
-            viewLogsBtn.addEventListener('click', () => {
-                alert('Log viewing functionality would open a log viewer interface');
+            viewLogsBtn.addEventListener('click', async () => {
+                await Modal.alert('Log viewing functionality would open a log viewer interface', {
+                    title: 'View Logs',
+                    icon: 'info'
+                });
             });
         }
 
@@ -735,6 +746,7 @@
 
     <!-- i18next CDN -->
     <script src="https://unpkg.com/i18next@23.5.1/dist/umd/i18next.min.js"></script>
+    <script src="../../js/modal.js"></script>
     <script type="module" src="../../js/header.js"></script>
     <script type="module" src="../../js/themeLanguageSwitcher.js"></script>
 </body>
