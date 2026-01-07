@@ -388,6 +388,9 @@
                 // Load system status
                 await loadSystemStatus();
 
+                // Load backups list
+                await loadBackups();
+
                 // Show main content
                 loadingScreen.classList.add('hidden');
                 mainContent.classList.remove('hidden');
@@ -694,9 +697,6 @@
         if (createBackupBtn) {
             createBackupBtn.addEventListener('click', () => createBackup(createBackupBtn));
         }
-
-        // Load backups on page load
-        loadBackups();
 
         if (clearCacheBtn) {
             clearCacheBtn.addEventListener('click', () => {
