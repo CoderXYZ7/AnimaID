@@ -22,9 +22,8 @@ async function initializePageWhenReady() {
     if (domReady && i18nReady) {
         ui.showLoadingScreen();
         try {
-            // initI18n is now handled globally by themeLanguageSwitcher.js
-            applyTranslations(); // Apply translations after i18n is initialized
-            document.documentElement.lang = getCurrentLanguage(); // Set HTML lang attribute
+            applyTranslations();
+            document.documentElement.lang = getCurrentLanguage();
 
             const userData = localStorage.getItem('animaid_user');
             if (!userData) {
@@ -269,7 +268,7 @@ window.deleteAnimator = async (animatorId) => {
 
 // Tabs
 document.querySelectorAll('.tab-button').forEach(button => {
-    button.addEventListener('click', function() {
+    button.addEventListener('click', function () {
         document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active', 'border-blue-500', 'text-blue-600'));
         this.classList.add('active', 'border-blue-500', 'text-blue-600');
         document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
@@ -297,7 +296,7 @@ async function loadLinkedUsers(animatorId) {
 
 async function showLinkUserModal() {
     const users = await apiService.getUsers();
-    
+
     if (users.users.length === 0) {
         ui.showToast('No users available to link', 'error');
         return;
@@ -346,7 +345,7 @@ async function showLinkUserModal() {
     `;
 
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
+
     document.getElementById('close-link-user-modal').addEventListener('click', hideLinkUserModal);
     document.getElementById('cancel-link-user-modal').addEventListener('click', hideLinkUserModal);
 
