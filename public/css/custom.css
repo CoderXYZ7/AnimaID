@@ -109,22 +109,4 @@ body.dark {
     color: #93c5fd;
 }
 
-#theme-switcher {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: var(--card-background-light);
-    color: var(--text-light);
-    border: 1px solid var(--border-light);
-    border-radius: 9999px;
-    padding: 0.5rem;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    z-index: 10000;
-}
-
-.dark #theme-switcher {
-    background-color: var(--card-background-dark);
-    color: var(--text-dark);
-    border-color: var(--border-dark);
-}
+/* Theme Switcher specific styles removed to allow it to fit in header/navbar */
