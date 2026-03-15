@@ -9,7 +9,8 @@ RewriteRule . - [L]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule . - [L]
 
-# Don't rewrite PHP files - let them be processed normally
+# Don't rewrite PHP files that physically exist at this path
+RewriteCond %{REQUEST_FILENAME} -f
 RewriteCond %{REQUEST_FILENAME} \.php$
 RewriteRule . - [L]
 
