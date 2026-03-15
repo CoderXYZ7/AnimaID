@@ -22,7 +22,7 @@ RUN git clone --depth=1 --branch=${BRANCH} ${REPO_URL} /var/www/html \
 WORKDIR /var/www/html
 
 # Install PHP dependencies (production only)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi --no-audit
 
 # Create required directories and set permissions
 RUN mkdir -p database/backups uploads \
