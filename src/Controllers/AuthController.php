@@ -38,7 +38,6 @@ class AuthController
             $result = $this->authService->login($data['username'], $data['password']);
 
             return $this->jsonResponse($response, $result);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -62,7 +61,6 @@ class AuthController
                 'success' => true,
                 'message' => 'Logged out successfully'
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -83,7 +81,6 @@ class AuthController
             $result = $this->authService->refreshToken($token);
 
             return $this->jsonResponse($response, $result);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -105,7 +102,6 @@ class AuthController
                 'success' => true,
                 'user' => $user
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -120,7 +116,7 @@ class AuthController
     private function jsonResponse(Response $response, array $data, int $status = 200): Response
     {
         $response->getBody()->write(json_encode($data));
-        
+
         return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($status);

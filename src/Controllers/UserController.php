@@ -38,7 +38,6 @@ class UserController
                 'data' => $result['users'],
                 'pagination' => $result['pagination']
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -68,7 +67,6 @@ class UserController
                 'success' => true,
                 'data' => $user
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -86,7 +84,7 @@ class UserController
         try {
             $data = json_decode($request->getBody()->getContents(), true);
             $currentUser = $request->getAttribute('user');
-            
+
             $data['created_by'] = $currentUser['id'];
 
             $user = $this->userService->createUser($data);
@@ -96,7 +94,6 @@ class UserController
                 'data' => $user,
                 'message' => 'User created successfully'
             ], 201);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -122,7 +119,6 @@ class UserController
                 'data' => $user,
                 'message' => 'User updated successfully'
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -146,7 +142,6 @@ class UserController
                 'success' => true,
                 'message' => 'User deleted successfully'
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -168,7 +163,6 @@ class UserController
                 'success' => true,
                 'data' => $stats
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -183,7 +177,7 @@ class UserController
     private function jsonResponse(Response $response, array $data, int $status = 200): Response
     {
         $response->getBody()->write(json_encode($data));
-        
+
         return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($status);

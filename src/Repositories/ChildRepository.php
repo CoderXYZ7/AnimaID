@@ -53,7 +53,7 @@ class ChildRepository extends BaseRepository
         }
 
         $query = "SELECT * FROM {$this->table}";
-        
+
         if (!empty($conditions)) {
             $query .= " WHERE " . implode(' AND ', $conditions);
         }
@@ -71,7 +71,7 @@ class ChildRepository extends BaseRepository
     public function findWithGuardians(int $childId): ?array
     {
         $child = $this->findById($childId);
-        
+
         if (!$child) {
             return null;
         }
@@ -90,7 +90,7 @@ class ChildRepository extends BaseRepository
     public function findWithDocuments(int $childId): ?array
     {
         $child = $this->findById($childId);
-        
+
         if (!$child) {
             return null;
         }
@@ -109,7 +109,7 @@ class ChildRepository extends BaseRepository
     public function findWithNotes(int $childId): ?array
     {
         $child = $this->findById($childId);
-        
+
         if (!$child) {
             return null;
         }
@@ -139,7 +139,7 @@ class ChildRepository extends BaseRepository
     public function addGuardian(int $childId, array $guardianData): int
     {
         $guardianData['child_id'] = $childId;
-        
+
         $stmt = $this->db->prepare(
             "INSERT INTO child_guardians (child_id, first_name, last_name, relationship, 
              phone, email, is_primary, can_pickup, notes) 

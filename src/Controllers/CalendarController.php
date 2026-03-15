@@ -29,11 +29,11 @@ class CalendarController
             $params = $request->getQueryParams();
             $page = (int) ($params['page'] ?? 1);
             $limit = (int) ($params['limit'] ?? 20);
-            
+
             // Extract filters
             $filters = [];
             $allowedFilters = ['status', 'event_type', 'start_date', 'end_date', 'is_public'];
-            
+
             foreach ($allowedFilters as $key) {
                 if (isset($params[$key])) {
                     $filters[$key] = $params[$key];
@@ -47,7 +47,6 @@ class CalendarController
                 'data' => $result['events'],
                 'pagination' => $result['pagination']
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -77,7 +76,6 @@ class CalendarController
                 'success' => true,
                 'data' => $event
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -95,7 +93,7 @@ class CalendarController
         try {
             $data = json_decode($request->getBody()->getContents(), true);
             $currentUser = $request->getAttribute('user');
-            
+
             $event = $this->calendarService->createEvent($data, $currentUser['id']);
 
             return $this->jsonResponse($response, [
@@ -103,7 +101,6 @@ class CalendarController
                 'data' => $event,
                 'message' => 'Event created successfully'
             ], 201);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -129,7 +126,6 @@ class CalendarController
                 'data' => $event,
                 'message' => 'Event updated successfully'
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -152,7 +148,6 @@ class CalendarController
                 'success' => true,
                 'message' => 'Event deleted successfully'
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -175,7 +170,6 @@ class CalendarController
                 'success' => true,
                 'data' => $participants
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -193,7 +187,7 @@ class CalendarController
         try {
             $eventId = (int) $args['id'];
             $data = json_decode($request->getBody()->getContents(), true);
-            
+
             if (empty($data['child_id'])) {
                 throw new \Exception('child_id is required');
             }
@@ -205,7 +199,6 @@ class CalendarController
                 'data' => ['participant_id' => $participantId],
                 'message' => 'Child registered successfully'
             ], 201);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -230,7 +223,6 @@ class CalendarController
                 'success' => true,
                 'message' => 'Participant removed successfully'
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -245,7 +237,7 @@ class CalendarController
     private function jsonResponse(Response $response, array $data, int $status = 200): Response
     {
         $response->getBody()->write(json_encode($data));
-        
+
         return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($status);

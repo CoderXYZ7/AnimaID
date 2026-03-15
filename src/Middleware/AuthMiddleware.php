@@ -25,7 +25,7 @@ class AuthMiddleware
     {
         // Get token from Authorization header
         $authHeader = $request->getHeaderLine('Authorization');
-        
+
         if (empty($authHeader)) {
             return $this->unauthorizedResponse('Missing authorization token');
         }

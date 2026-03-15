@@ -43,7 +43,7 @@ class RoleRepository extends BaseRepository
     public function findWithPermissions(int $roleId): ?array
     {
         $role = $this->findById($roleId);
-        
+
         if (!$role) {
             return null;
         }
@@ -77,7 +77,7 @@ class RoleRepository extends BaseRepository
 
         // Then add new permissions
         $stmt = $this->db->prepare("INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)");
-        
+
         foreach ($permissionIds as $permissionId) {
             $stmt->execute([$roleId, $permissionId]);
         }

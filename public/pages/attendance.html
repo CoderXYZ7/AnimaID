@@ -41,6 +41,11 @@
                             view attendance records</p>
                     </div>
                     <div class="flex space-x-3">
+                        <button id="quick-add-child-btn"
+                            class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                            <i class="fas fa-child mr-2"></i>
+                            <span>+ Quick Add Child</span>
+                        </button>
                         <a href="children.html"
                             class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
                             data-i18n="attendance.newChild">
@@ -168,6 +173,63 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Quick Add Child Modal -->
+    <div id="quick-add-child-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        <i class="fas fa-child text-orange-600 mr-2"></i>Quick Add Child
+                    </h3>
+                    <button id="close-quick-add-child-modal" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <form id="quick-add-child-form" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="qac-first-name" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                            <input type="text" id="qac-first-name" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                placeholder="First name">
+                        </div>
+                        <div>
+                            <label for="qac-last-name" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                            <input type="text" id="qac-last-name" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                placeholder="Last name">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="qac-birth-date" class="block text-sm font-medium text-gray-700 mb-1">Birth Date *</label>
+                        <input type="date" id="qac-birth-date" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                    </div>
+                    <div>
+                        <label for="qac-guardian-phone" class="block text-sm font-medium text-gray-700 mb-1">Guardian Phone <span class="text-gray-400">(optional)</span></label>
+                        <input type="tel" id="qac-guardian-phone"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            placeholder="+1 555 000 0000">
+                    </div>
+                </form>
+
+                <div id="quick-add-child-error" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700"></div>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button id="cancel-quick-add-child-btn"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="submit-quick-add-child-btn"
+                        class="px-4 py-2 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700 transition-colors flex items-center">
+                        <i class="fas fa-plus mr-1"></i>Add Child
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Check-in Modal -->
@@ -869,6 +931,94 @@
                 await Modal.error('Network error. Please try again.');
             }
         };
+
+        // Quick Add Child modal
+        const quickAddChildModal = document.getElementById('quick-add-child-modal');
+
+        document.getElementById('quick-add-child-btn').addEventListener('click', () => {
+            // Reset form and error state
+            document.getElementById('quick-add-child-form').reset();
+            const errorDiv = document.getElementById('quick-add-child-error');
+            errorDiv.classList.add('hidden');
+            errorDiv.textContent = '';
+            quickAddChildModal.classList.remove('hidden');
+            document.getElementById('qac-first-name').focus();
+        });
+
+        document.getElementById('close-quick-add-child-modal').addEventListener('click', () => {
+            quickAddChildModal.classList.add('hidden');
+        });
+
+        document.getElementById('cancel-quick-add-child-btn').addEventListener('click', () => {
+            quickAddChildModal.classList.add('hidden');
+        });
+
+        document.getElementById('submit-quick-add-child-btn').addEventListener('click', async () => {
+            const firstName = document.getElementById('qac-first-name').value.trim();
+            const lastName = document.getElementById('qac-last-name').value.trim();
+            const birthDate = document.getElementById('qac-birth-date').value;
+            const guardianPhone = document.getElementById('qac-guardian-phone').value.trim();
+
+            const errorDiv = document.getElementById('quick-add-child-error');
+
+            if (!firstName || !lastName || !birthDate) {
+                errorDiv.textContent = 'First name, last name, and birth date are required.';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            errorDiv.classList.add('hidden');
+
+            const submitBtn = document.getElementById('submit-quick-add-child-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Adding...';
+
+            const childData = {
+                first_name: firstName,
+                last_name: lastName,
+                birth_date: birthDate,
+            };
+            if (guardianPhone) {
+                childData.guardian_phone = guardianPhone;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/children`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(childData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success !== false) {
+                    quickAddChildModal.classList.add('hidden');
+
+                    // If a search is active, refresh results to include the new child
+                    const searchInput = document.getElementById('child-search');
+                    if (searchInput && searchInput.value.trim().length >= 2) {
+                        await searchChildren(searchInput.value.trim());
+                    }
+
+                    await Modal.success(`${firstName} ${lastName} has been added successfully and is now available for check-in.`, {
+                        title: 'Child Added'
+                    });
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to add child. Please try again.';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error adding child:', error);
+                errorDiv.textContent = 'Network error. Please try again.';
+                errorDiv.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-plus mr-1"></i>Add Child';
+            }
+        });
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', initPage);

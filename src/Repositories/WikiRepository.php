@@ -114,16 +114,16 @@ class WikiRepository extends BaseRepository
     {
         $fields = array_keys($data);
         $placeholders = array_fill(0, count($fields), '?');
-        
+
         $sql = "INSERT INTO wiki_categories (" . implode(', ', $fields) . ") 
                 VALUES (" . implode(', ', $placeholders) . ")";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(array_values($data));
-        
+
         return (int) $this->db->lastInsertId();
     }
-    
+
     /**
      * Update category
      */
@@ -140,7 +140,7 @@ class WikiRepository extends BaseRepository
         $params[] = $id;
 
         $sql = "UPDATE wiki_categories SET " . implode(', ', $fields) . " WHERE id = ?";
-        
+
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($params);
     }

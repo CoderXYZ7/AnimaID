@@ -35,7 +35,7 @@ function getDefaultConfig() {
         api: {
             baseUrl: isDevelopment
                 ? window.location.origin + '/api'
-                : 'https://animaidsgn.mywire.org/api',
+                : window.location.origin + '/api',
             port: isDevelopment ? 80 : 443
         },
         system: {
@@ -65,10 +65,6 @@ async function initConfig() {
         // Backward compatibility
         window.API_BASE_URL = window.ANIMAID_CONFIG.api.baseUrl;
 
-        console.log('AnimaID Config loaded:', {
-            environment: window.ANIMAID_CONFIG.system.environment,
-            apiUrl: window.ANIMAID_CONFIG.api.baseUrl
-        });
     }
     return window.ANIMAID_CONFIG;
 }

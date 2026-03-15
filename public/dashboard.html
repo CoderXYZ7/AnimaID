@@ -132,7 +132,7 @@
                             <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.reports">Reports</p>
+                            <p class="text-sm font-medium text-gray-600" data-i18n="dashboard.stats.animators">Animators</p>
                             <p class="text-2xl font-bold text-gray-900" id="stats-reports">-</p>
                         </div>
                     </div>
@@ -362,57 +362,69 @@
 
         // Load stats from API endpoints
         async function loadStats() {
-            try {
-                // Load all stats in parallel
-                const endpoints = [
-                    { url: '/users?page=1&limit=1', elementId: 'stats-users' },
-                    { url: '/children?page=1&limit=1', elementId: 'stats-children' },
-                    { url: '/calendar?page=1&limit=1', elementId: 'stats-activities' },
-                    { url: '/reports', elementId: 'stats-reports', isReports: true }
-                ];
+            // Show loading state
+            ['stats-users', 'stats-children', 'stats-activities', 'stats-reports'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '-';
+            });
 
-                // Fetch all counts simultaneously
-                const promises = endpoints.map(async (endpoint) => {
-                    try {
-                        const response = await fetch(`${API_BASE_URL}${endpoint.url}`, {
-                            headers: {
-                                'Authorization': `Bearer ${userToken}`
-                            }
-                        });
+            // Each entry: url, elementId, and a resolver function that extracts the count from the response data
+            const endpoints = [
+                {
+                    url: '/users?page=1&limit=1',
+                    elementId: 'stats-users',
+                    resolve: (data) => data.pagination ? data.pagination.total : (data.users ? data.users.length : null)
+                },
+                {
+                    url: '/children?page=1&limit=1',
+                    elementId: 'stats-children',
+                    resolve: (data) => data.pagination ? data.pagination.total : (data.children ? data.children.length : null)
+                },
+                {
+                    url: '/calendar/events?page=1&limit=1',
+                    elementId: 'stats-activities',
+                    resolve: (data) => data.pagination ? data.pagination.total : (data.events ? data.events.length : null)
+                },
+                {
+                    url: '/animators?page=1&limit=1',
+                    elementId: 'stats-reports',
+                    resolve: (data) => data.pagination ? data.pagination.total : (data.animators ? data.animators.length : null)
+                }
+            ];
 
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data.success) {
-                                if (endpoint.isReports) {
-                                    // For reports, count the number of available report types
-                                    return { elementId: endpoint.elementId, count: data.reports ? data.reports.length : 0 };
-                                } else if (data.pagination) {
-                                    return { elementId: endpoint.elementId, count: data.pagination.total };
-                                }
+            // Fetch all counts simultaneously
+            const promises = endpoints.map(async (endpoint) => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}${endpoint.url}`, {
+                        headers: { 'Authorization': `Bearer ${userToken}` }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success !== false) {
+                            const count = endpoint.resolve(data);
+                            if (count !== null && count !== undefined) {
+                                return { elementId: endpoint.elementId, count };
                             }
                         }
-                        return { elementId: endpoint.elementId, count: '-' };
-                    } catch (error) {
-                        console.error(`Error loading stats for ${endpoint.elementId}:`, error);
-                        return { elementId: endpoint.elementId, count: '-' };
                     }
-                });
+                    return { elementId: endpoint.elementId, count: '?' };
+                } catch (error) {
+                    console.error(`Error loading stats for ${endpoint.elementId}:`, error);
+                    return { elementId: endpoint.elementId, count: '?' };
+                }
+            });
 
-                // Wait for all requests to complete
-                const results = await Promise.all(promises);
+            // Wait for all requests to complete
+            const results = await Promise.all(promises);
 
-                // Update the DOM with the results
-                results.forEach(result => {
-                    const element = document.getElementById(result.elementId);
-                    if (element) {
-                        element.textContent = result.count;
-                    }
-                });
-
-            } catch (error) {
-                console.error('Error loading stats:', error);
-                // Keep default values
-            }
+            // Update the DOM with the results
+            results.forEach(result => {
+                const element = document.getElementById(result.elementId);
+                if (element) {
+                    element.textContent = result.count;
+                }
+            });
         }
 
         // Logout functionality

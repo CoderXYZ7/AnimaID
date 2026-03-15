@@ -19,14 +19,8 @@ return [
         'refresh_expiration_days' => 7, // Refresh token expires in 7 days
     ],
 
-    // Default Admin Account
-    // This account will be created automatically on first run
-    'default_admin' => [
-        'username' => 'admin',
-        'email' => 'admin@animaid.local',
-        'password' => 'Admin123!@#', // Change this immediately after first login
-        'auto_create' => true, // Set to false after initial setup
-    ],
+    // Admin seeding is handled via environment variables, not hardcoded here.
+    // Set ADMIN_USERNAME, ADMIN_EMAIL, and ADMIN_PASSWORD in your .env file.
 
     // System Settings
     'system' => [

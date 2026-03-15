@@ -1,226 +1,236 @@
 #!/bin/bash
+# AnimaID Deployment Script
+# Usage: sudo bash scripts/deploy.sh [--skip-pull] [--skip-tests] [--no-backup]
 
-# AnimaID Quick Deployment Script
-# This script automates the deployment process
+set -euo pipefail
 
-set -e  # Exit on error
+# ── Colours ──────────────────────────────────────────────────────────────────
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+BLUE='\033[0;34m'; BOLD='\033[1m'; NC='\033[0m'
 
-echo "========================================="
-echo "AnimaID Deployment Script"
-echo "========================================="
-echo ""
+info()  { echo -e "${BLUE}[INFO]${NC}  $*"; }
+ok()    { echo -e "${GREEN}[OK]${NC}    $*"; }
+warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
+error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
+die()   { error "$*"; exit 1; }
+step()  { echo; echo -e "${BOLD}── $* ──────────────────────────────────────${NC}"; }
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# ── Flags ────────────────────────────────────────────────────────────────────
+SKIP_PULL=false
+SKIP_TESTS=false
+NO_BACKUP=false
 
-# Check if running as root
-if [ "$EUID" -ne 0 ]; then 
-    echo -e "${RED}Please run as root or with sudo${NC}"
-    exit 1
-fi
+for arg in "$@"; do
+    case $arg in
+        --skip-pull)   SKIP_PULL=true ;;
+        --skip-tests)  SKIP_TESTS=true ;;
+        --no-backup)   NO_BACKUP=true ;;
+        --help)
+            echo "Usage: sudo bash scripts/deploy.sh [--skip-pull] [--skip-tests] [--no-backup]"
+            exit 0 ;;
+        *) die "Unknown argument: $arg" ;;
+    esac
+done
 
-# Get the actual user (not root when using sudo)
+# ── Preflight ─────────────────────────────────────────────────────────────────
+echo -e "${BOLD}AnimaID Deployment${NC}"
+echo "────────────────────────────────────────────"
+
+[ "$EUID" -ne 0 ] && die "Run with sudo: sudo bash scripts/deploy.sh"
+
 ACTUAL_USER=${SUDO_USER:-$USER}
-PROJECT_DIR=$(pwd)
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_DIR"
 
-echo "Project directory: $PROJECT_DIR"
-echo "Running as: $ACTUAL_USER"
-echo ""
+info "Project: $PROJECT_DIR"
+info "User:    $ACTUAL_USER"
+info "Branch:  $(git rev-parse --abbrev-ref HEAD)"
+info "Commit:  $(git rev-parse --short HEAD)"
 
-# Check dependencies
-echo -e "${YELLOW}Checking system dependencies...${NC}"
-echo ""
+# ── Dependency checks ─────────────────────────────────────────────────────────
+step "Checking dependencies"
 
-MISSING_DEPS=0
+MISSING=0
 
-# Check PHP
-if command -v php &> /dev/null; then
-    PHP_VERSION=$(php -r "echo PHP_VERSION;" 2>/dev/null || echo "unknown")
-    echo -e "${GREEN}✓ PHP installed${NC} (version $PHP_VERSION)"
-    
-    # Check PHP version (only if we got a valid version)
-    if [ "$PHP_VERSION" != "unknown" ]; then
-        PHP_MAJOR=$(php -r "echo PHP_MAJOR_VERSION;" 2>/dev/null || echo "0")
-        PHP_MINOR=$(php -r "echo PHP_MINOR_VERSION;" 2>/dev/null || echo "0")
-        if [ "$PHP_MAJOR" -lt 8 ] || ([ "$PHP_MAJOR" -eq 8 ] && [ "$PHP_MINOR" -lt 1 ]); then
-            echo -e "${RED}✗ PHP 8.1 or higher required (found $PHP_VERSION)${NC}"
-            MISSING_DEPS=1
-        fi
-    fi
-else
-    echo -e "${RED}✗ PHP not installed${NC}"
-    MISSING_DEPS=1
-fi
-
-# Check Composer
-if command -v composer &> /dev/null; then
-    COMPOSER_VERSION=$(composer --version --no-ansi --no-interaction 2>/dev/null | head -n1 || echo "Composer (version unknown)")
-    echo -e "${GREEN}✓ Composer installed${NC} ($COMPOSER_VERSION)"
-else
-    echo -e "${RED}✗ Composer not installed${NC}"
-    MISSING_DEPS=1
-fi
-
-# Check Git
-if command -v git &> /dev/null; then
-    GIT_VERSION=$(git --version)
-    echo -e "${GREEN}✓ Git installed${NC} ($GIT_VERSION)"
-else
-    echo -e "${RED}✗ Git not installed${NC}"
-    MISSING_DEPS=1
-fi
-
-# Check required PHP extensions
-echo ""
-echo "Checking PHP extensions..."
-REQUIRED_EXTS=("pdo" "sqlite3" "mbstring" "openssl" "json")
-for ext in "${REQUIRED_EXTS[@]}"; do
-    if php -m 2>/dev/null | grep -iq "^$ext$"; then
-        echo -e "${GREEN}✓ $ext${NC}"
+check_cmd() {
+    if command -v "$1" &>/dev/null; then
+        ok "$1 found"
     else
-        echo -e "${RED}✗ $ext (missing)${NC}"
-        MISSING_DEPS=1
+        error "$1 not found"
+        MISSING=1
     fi
+}
+
+check_cmd php
+check_cmd composer
+check_cmd git
+
+PHP_MAJOR=$(php -r "echo PHP_MAJOR_VERSION;" 2>/dev/null || echo 0)
+PHP_MINOR=$(php -r "echo PHP_MINOR_VERSION;" 2>/dev/null || echo 0)
+if [[ "$PHP_MAJOR" -lt 8 ]] || [[ "$PHP_MAJOR" -eq 8 && "$PHP_MINOR" -lt 1 ]]; then
+    error "PHP 8.1+ required (found $(php -r 'echo PHP_VERSION;'))"
+    MISSING=1
+fi
+
+for ext in pdo sqlite3 mbstring openssl json; do
+    php -m 2>/dev/null | grep -qi "^${ext}$" \
+        && ok "php-$ext" \
+        || { error "php-$ext missing"; MISSING=1; }
 done
 
-echo ""
+[ "$MISSING" -eq 1 ] && die "Fix missing dependencies and re-run."
 
-# If dependencies are missing, show installation instructions
-if [ $MISSING_DEPS -eq 1 ]; then
-    echo -e "${RED}=========================================${NC}"
-    echo -e "${RED}Missing Dependencies Detected!${NC}"
-    echo -e "${RED}=========================================${NC}"
-    echo ""
-    echo "Please install the missing dependencies before continuing."
-    echo ""
-    echo -e "${YELLOW}For Ubuntu/Debian:${NC}"
-    echo "  sudo apt update"
-    echo "  sudo apt install -y php php-cli php-common php-sqlite3 \\"
-    echo "                      php-mbstring php-xml php-curl git"
-    echo ""
-    echo "  # Install Composer"
-    echo "  curl -sS https://getcomposer.org/installer | php"
-    echo "  sudo mv composer.phar /usr/local/bin/composer"
-    echo "  sudo chmod +x /usr/local/bin/composer"
-    echo ""
-    echo -e "${YELLOW}For CentOS/RHEL:${NC}"
-    echo "  sudo yum install -y php php-cli php-pdo php-mbstring php-xml git"
-    echo ""
-    echo "  # Install Composer"
-    echo "  curl -sS https://getcomposer.org/installer | php"
-    echo "  sudo mv composer.phar /usr/local/bin/composer"
-    echo "  sudo chmod +x /usr/local/bin/composer"
-    echo ""
-    echo -e "${YELLOW}After installing dependencies, run this script again.${NC}"
-    echo ""
-    exit 1
-fi
+# ── Environment file ──────────────────────────────────────────────────────────
+step "Environment"
 
-echo -e "${GREEN}✓ All dependencies satisfied${NC}"
-echo ""
-
-# Step 1: Pull latest changes
-echo -e "${YELLOW}[1/7] Pulling latest changes...${NC}"
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-echo "Pulling from branch: $CURRENT_BRANCH"
-sudo -u $ACTUAL_USER git pull origin $CURRENT_BRANCH
-echo -e "${GREEN}✓ Changes pulled${NC}"
-echo ""
-
-# Step 2: Install dependencies
-echo -e "${YELLOW}[2/7] Installing dependencies...${NC}"
-sudo -u $ACTUAL_USER composer install --no-dev --optimize-autoloader
-echo -e "${GREEN}✓ Dependencies installed${NC}"
-echo ""
-
-# Step 3: Check .env file
-echo -e "${YELLOW}[3/7] Checking environment configuration...${NC}"
 if [ ! -f .env ]; then
-    echo -e "${RED}✗ .env file not found!${NC}"
-    echo "Creating .env from template..."
+    warn ".env not found — copying from .env.example"
     cp .env.example .env
-    echo -e "${YELLOW}⚠ IMPORTANT: Edit .env and set JWT_SECRET!${NC}"
-    echo "Generate secret with: openssl rand -base64 64"
-    read -p "Press enter to continue after editing .env..."
-else
-    echo -e "${GREEN}✓ .env file exists${NC}"
+    JWT=$(openssl rand -base64 48)
+    sed -i "s|^JWT_SECRET=.*|JWT_SECRET=${JWT}|" .env
+    ok "Generated JWT_SECRET"
+    warn "Review .env and set ADMIN_PASSWORD, CORS_ORIGINS, etc. before continuing."
+    read -rp "Press Enter after editing .env, or Ctrl-C to abort..."
 fi
 
-# Check config.php file
-if [ ! -f config/config.php ]; then
-    echo -e "${YELLOW}⚠ config/config.php not found, creating from default...${NC}"
-    cp config/configDefault.php config/config.php
-    echo -e "${GREEN}✓ config/config.php created${NC}"
-else
-    echo -e "${GREEN}✓ config/config.php exists${NC}"
-fi
-echo ""
-
-# Step 4: Set permissions
-echo -e "${YELLOW}[4/7] Setting file permissions...${NC}"
-bash scripts/maintenance/fix-permissions.sh
-echo -e "${GREEN}✓ Permissions set${NC}"
-echo ""
-
-# Step 5: Run migrations
-echo -e "${YELLOW}[5/7] Running database migrations...${NC}"
-sudo -u $ACTUAL_USER php database/migrate.php migrate
-echo -e "${GREEN}✓ Migrations completed${NC}"
-echo ""
-
-# Step 6: Verify installation
-echo -e "${YELLOW}[6/7] Verifying installation...${NC}"
-
-# Check PHP version
-PHP_VERSION=$(php -r "echo PHP_VERSION;")
-echo "PHP Version: $PHP_VERSION"
-
-# Check required extensions
-REQUIRED_EXTS=("pdo" "sqlite3" "mbstring" "openssl" "json")
-for ext in "${REQUIRED_EXTS[@]}"; do
-    if php -m | grep -q "^$ext$"; then
-        echo -e "${GREEN}✓ $ext extension installed${NC}"
-    else
-        echo -e "${RED}✗ $ext extension missing${NC}"
-    fi
+# Warn about unset critical vars
+for var in JWT_SECRET APP_ENV ADMIN_USERNAME ADMIN_PASSWORD CORS_ORIGINS; do
+    grep -qE "^${var}=.+" .env || warn "$var is not set in .env"
 done
 
-# Check database
-if [ -f database/animaid.db ]; then
-    echo -e "${GREEN}✓ Database file exists${NC}"
-else
-    echo -e "${RED}✗ Database file not found${NC}"
+APP_ENV=$(grep -oP "(?<=^APP_ENV=).+" .env 2>/dev/null || echo "production")
+info "APP_ENV=$APP_ENV"
+
+if [ ! -f config/config.php ]; then
+    cp config/configDefault.php config/config.php
+    ok "Created config/config.php from default"
 fi
 
-echo ""
+# ── Backup ────────────────────────────────────────────────────────────────────
+step "Backup"
 
-# Step 7: Restart web server
-echo -e "${YELLOW}[7/7] Restarting web server...${NC}"
-if systemctl is-active --quiet apache2; then
-    systemctl restart apache2
-    echo -e "${GREEN}✓ Apache restarted${NC}"
-elif systemctl is-active --quiet nginx; then
-    systemctl restart nginx
-    echo -e "${GREEN}✓ Nginx restarted${NC}"
+if [ "$NO_BACKUP" = true ]; then
+    warn "Backup skipped (--no-backup)"
+elif [ -f database/animaid.db ]; then
+    BACKUP_DIR="database/backups"
+    mkdir -p "$BACKUP_DIR"
+    BACKUP_FILE="$BACKUP_DIR/animaid_$(date +%Y%m%d_%H%M%S).db"
+    cp database/animaid.db "$BACKUP_FILE"
+    ok "Database backed up → $BACKUP_FILE"
+
+    # Keep only the last 10 backups
+    ls -t "$BACKUP_DIR"/*.db 2>/dev/null | tail -n +11 | xargs -r rm --
+    info "Retained last 10 backups"
 else
-    echo -e "${YELLOW}⚠ No web server detected (Apache/Nginx)${NC}"
+    info "No database yet — skipping backup"
 fi
-echo ""
 
-# Final summary
-echo "========================================="
-echo -e "${GREEN}Deployment Complete!${NC}"
-echo "========================================="
-echo ""
-echo "Next steps:"
-echo "1. Verify .env configuration (especially JWT_SECRET)"
-echo "2. Access the application in your browser"
-echo "3. Login with default credentials (change immediately!)"
-echo "   - Username: admin"
-echo "   - Password: Admin123!@#"
-echo ""
-echo "For more information, see docs/DEPLOYMENT.md"
-echo ""
+# ── Git pull ──────────────────────────────────────────────────────────────────
+step "Code update"
+
+if [ "$SKIP_PULL" = true ]; then
+    warn "Git pull skipped (--skip-pull)"
+else
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    sudo -u "$ACTUAL_USER" git pull origin "$BRANCH"
+    ok "Pulled latest from $BRANCH ($(git rev-parse --short HEAD))"
+fi
+
+# ── Composer install ──────────────────────────────────────────────────────────
+step "Dependencies"
+
+COMPOSER_FLAGS="--no-interaction --no-ansi --optimize-autoloader"
+if [ "$APP_ENV" = "production" ]; then
+    COMPOSER_FLAGS="$COMPOSER_FLAGS --no-dev"
+    info "Installing production dependencies only"
+else
+    info "Installing all dependencies (dev environment)"
+fi
+
+# shellcheck disable=SC2086
+sudo -u "$ACTUAL_USER" composer install $COMPOSER_FLAGS
+ok "Composer dependencies installed"
+
+# ── Database migrations ───────────────────────────────────────────────────────
+step "Database migrations"
+
+sudo -u "$ACTUAL_USER" php database/migrate.php migrate
+ok "Migrations complete"
+
+# ── Admin seeding ─────────────────────────────────────────────────────────────
+step "Admin user"
+
+ADMIN_USER=$(grep -oP "(?<=^ADMIN_USERNAME=).+" .env 2>/dev/null || echo "")
+ADMIN_PASS=$(grep -oP "(?<=^ADMIN_PASSWORD=).+" .env 2>/dev/null || echo "")
+
+if [ -n "$ADMIN_USER" ] && [ -n "$ADMIN_PASS" ]; then
+    ADMIN_EXISTS=$(php -r "
+        \$db = new PDO('sqlite:database/animaid.db');
+        \$stmt = \$db->query('SELECT COUNT(*) FROM users WHERE is_admin = 1 LIMIT 1');
+        echo \$stmt->fetchColumn();
+    " 2>/dev/null || echo "0")
+
+    if [ "$ADMIN_EXISTS" = "0" ]; then
+        ADMIN_EMAIL=$(grep -oP "(?<=^ADMIN_EMAIL=).+" .env 2>/dev/null || echo "${ADMIN_USER}@localhost")
+        HASH=$(php -r "echo password_hash('${ADMIN_PASS}', PASSWORD_BCRYPT, ['cost' => 12]);")
+        php -r "
+            \$db = new PDO('sqlite:database/animaid.db');
+            \$db->exec(\"INSERT INTO users (username, email, password_hash, is_active, is_admin, created_at)
+                VALUES ('${ADMIN_USER}', '${ADMIN_EMAIL}', '${HASH}', 1, 1, datetime('now'))\");
+        "
+        ok "Admin user '${ADMIN_USER}' seeded"
+    else
+        info "Admin user already exists — skipping seed"
+    fi
+else
+    warn "ADMIN_USERNAME or ADMIN_PASSWORD not set in .env — skipping admin seed"
+fi
+
+# ── Permissions ───────────────────────────────────────────────────────────────
+step "File permissions"
+
+bash scripts/maintenance/fix-permissions.sh
+ok "Permissions set"
+
+# ── Tests (non-production only) ───────────────────────────────────────────────
+if [ "$SKIP_TESTS" = false ] && [ "$APP_ENV" != "production" ]; then
+    step "Tests"
+    if sudo -u "$ACTUAL_USER" composer test 2>&1; then
+        ok "All tests passed"
+    else
+        warn "Some tests failed — review output above"
+        read -rp "Continue deploy anyway? [y/N] " CONTINUE
+        [[ "$CONTINUE" =~ ^[Yy]$ ]] || die "Deploy aborted."
+    fi
+elif [ "$SKIP_TESTS" = true ]; then
+    warn "Tests skipped (--skip-tests)"
+else
+    info "Tests skipped in production (run manually with: composer test)"
+fi
+
+# ── Web server reload ─────────────────────────────────────────────────────────
+step "Web server"
+
+if systemctl is-active --quiet apache2 2>/dev/null; then
+    systemctl reload apache2
+    ok "Apache reloaded"
+elif systemctl is-active --quiet nginx 2>/dev/null; then
+    systemctl reload nginx
+    ok "Nginx reloaded"
+else
+    warn "No running web server detected (Apache/Nginx) — skipping reload"
+fi
+
+# ── Summary ───────────────────────────────────────────────────────────────────
+echo
+echo -e "${BOLD}${GREEN}────────────────────────────────────────────"
+echo -e " Deployment complete"
+echo -e "────────────────────────────────────────────${NC}"
+echo
+info "Commit:  $(git rev-parse --short HEAD) — $(git log -1 --pretty=%s)"
+BACKUP_COUNT=$(ls database/backups/*.db 2>/dev/null | wc -l || echo 0)
+info "Backups: $BACKUP_COUNT file(s) in database/backups/"
+if [ -n "${ADMIN_USER:-}" ] && [ "${ADMIN_EXISTS:-1}" = "0" ]; then
+    ok "Admin login: ${ADMIN_USER} (password from ADMIN_PASSWORD in .env)"
+fi
+echo

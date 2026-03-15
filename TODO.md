@@ -1,49 +1,65 @@
-# Project Audit & Modernization Plan
+# AnimaID — TODO
 
-## 🚨 Critical Architectural Issues
+## 🔴 Critical / Security
 
-- [ ] **Unified Architecture**: The project is currently split between a legacy monolithic core (`src/Auth.php`, `api/index.php`) and a dormant modern core (`Slim 4`, `src/Services/`, `api/index-new.php`).
-    - **Goal**: Fully migrate to the Slim 4 architecture.
-- [ ] **Refactor "God Class" (`src/Auth.php`)**: This file violates SRP by handling Auth, Calendar, Attendance, Spaces, and Wiki.
-    - [x] Move Calendar logic to `CalendarService`
-    - [ ] Move Attendance logic to `AttendanceService` (De-prioritized by user request)
-    - [x] Move Wiki logic to `WikiService`
-    - [x] Move Space Booking logic to `SpaceService`
-    - [x] Implement Space Management Frontend (`spaces.html`)
-- [ ] **Replace Monolithic Router**: The `api/index.php` file (2700+ lines) uses a massive switch statement and manual JSON parsing. 
-    - **Goal**: Replace with Slim 4 Controllers and Routing Middleware.
+- [x] **Fix CORS**: `api/index.php:13` sets `Access-Control-Allow-Origin: *` — restrict to configured origins from `configDefault.php`
+- [x] **Remove hardcoded admin credentials** from `config/configDefault.php` (lines 24–28) — force password change on first login instead
+- [x] **Enforce JWT secret from env** — `configDefault.php:16` has a committed fallback secret that would be used in production if `.env` is missing
+- [x] **Disable debug mode by default** — `src/Config/ConfigManager.php:69` defaults `APP_DEBUG` to `true`
+- [x] **Remove token-in-query-string support** — `api/index.php:96–97` accepts `?token=` which exposes tokens in logs and browser history
+- [x] **Implement rate limiting** — configured in `configDefault.php` but never applied anywhere; login endpoint is unprotected against brute force
 
-## 🛠 Code Quality & Testing
+---
 
-- [x] **Implement Test Suite**: `phpunit.xml` points to non-existent directories (`tests/Unit`, `tests/Integration`).
-    - [x] Create `tests/Unit` and `tests/Integration` directories.
-    - [ ] Replace ad-hoc scripts (`tests/test_auth.php`, etc.) with proper PHPUnit test classes.
-    - [x] Write unit tests for the new Services.
-        - *Blocked*: PHPUnit requires `mbstring` extension which is missing in the environment.
-- [ ] **Remove Hardcoded Logic**: Move report definitions and business rules from `api/index.php` into configuration files or Service classes.
+## 🟠 Architecture Migration (Slim 4)
 
-## 💾 Database & Data Management
+The migration is now complete. All modules run through the Slim 4 entry point.
 
-- [ ] **Standardize Migrations**: The `database/migrations` folder is sparse.
-    - [x] Create a "baseline" migration that captures the entire current schema (users, roles, events, etc.).
-    - [ ] Deprecate `init.php` in favor of migration-based setup.
-- [ ] **Database Scalability**: Monitor SQLite performance. Consider abstraction to allow seamless switching to MySQL/PostgreSQL if needed (using Doctrine or sticking with PDO abstraction).
+- [x] **Migrate Attendance module** to `AttendanceController` + `AttendanceService`
+- [x] **Migrate Communications module** to `CommunicationsController` + `CommunicationsService`
+- [x] **Migrate Media module** to `MediaController` + `MediaService`
+- [x] **Migrate Reports module** to `ReportsController` + `ReportsService`
+- [x] **Switch entry point** from legacy `api/index.php` to Slim 4 app — migration complete
+- [ ] **Delete `src/Auth.php`** — still referenced by `scripts/check_permissions.php`; defer until that script is updated
+- [x] **Delete `api/index-legacy.php`** — deleted (had no external references)
+- [x] **Delete `database/init.php`** — deleted (only a comment reference in migration file)
+- [x] **Retire `src/JWT.php`** — deleted; all JWT handling now via `src/Security/JwtManager.php`
 
-## 🔒 Security Improvements
+---
 
-- [ ] **Fix CORS Configuration**: `Access-Control-Allow-Origin: *` is currently set in `api/index.php`.
-    - [ ] Restrict allowed origins in the Slim middleware config.
-- [ ] **Standardize Token Handling**: Stop using manual token parsing in `api/index.php`.
-    - [ ] Use the `AuthMiddleware` and `JwtManager` classes provided in the new architecture.
+## 🟡 Code Quality & Testing
 
-## ⚡ Frontend & Inconsistencies
+- [x] **Replace ad-hoc test scripts** (`tests/test_auth.php`, etc.) with proper PHPUnit classes
+- [x] **Write unit tests for Services** — unit test coverage added for all major services
+- [ ] **Write integration tests** covering API endpoints end-to-end
+- [x] **Fix password field name inconsistency** — schema uses `password_hash`, `AuthService` uses `password`, `UserService` uses both — pick one
+- [ ] **Standardize error responses** — partially done via exception classes in `src/Exceptions/`; HTTP status codes still inconsistent in some places
+- [x] **Remove/guard 59+ `console.log` statements** in frontend JS before production builds
+- [x] **Add database indexes** on frequently queried columns: `email`, `username`, `status`, dates, and foreign keys
 
-- [ ] **Decouple Frontend**: `public/js/apiService.js` relies on `window.location.origin`.
-- [ ] **Fix Routing**: `index.php` manually serves HTML files.
-    - [ ] Let the web server (Apache/Nginx) or the Slim app handle static file routing more efficiently.
+---
 
-## 📋 Action Plan (Prioritized)
+## 🟡 Database
 
-1.  **Resume Migration**: Switch entry point to `api/index-new.php` and finish implementing missing Controllers for Attendance and Wiki.
-2.  **Service Extraction**: Extract logic from `Auth.php` into the dedicated Service classes (which already exist but are effectively unused).
-3.  **Testing**: Set up the PHPUnit environment to ensure the migration doesn't break existing features.
+- [ ] **Deprecate `init.php`** — `database/init.php` has been deleted; ensure `scripts/check_permissions.php` and any other scripts no longer reference `src/Auth.php`
+- [ ] **Consider soft deletes** — current schema uses hard `ON DELETE CASCADE`, no recovery possible
+- [ ] **Database abstraction** — SQLite is fine for now but PDO abstraction should allow switching to MySQL/PostgreSQL if needed
+
+---
+
+## 🟢 Frontend
+
+- [x] **Similarity resolver** for `children.html` and `animators.html` — detect and flag near-duplicate entries
+- [x] **New child quick-add button** in `attendance.html` for fast insertion without leaving the page
+- [x] **Functional counters on dashboard** — previously static/empty
+- [x] **Remake wiki top bar** with new AnimaID logo icon
+- [x] **Complete `apiService.js`** — all pages now use centralized API service
+- [x] **Remove hardcoded production URL** from `public/dashboard.html` — use `config.js.php` consistently on all pages
+
+---
+
+## 🔵 Missing Features
+
+- [x] **Email notifications** — `EmailService` created; SMTP integration complete
+- [x] **Audit logging** — `AuditService` + `AuditMiddleware` created; audit migration added; middleware registered in `api/index.php`
+- [ ] **Two-factor authentication** — present as a feature flag, not implemented

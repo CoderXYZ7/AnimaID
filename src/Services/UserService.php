@@ -79,7 +79,7 @@ class UserService
         $userData = [
             'username' => $data['username'],
             'email' => $data['email'],
-            'password' => $hashedPassword,
+            'password_hash' => $hashedPassword,
             'full_name' => $data['full_name'] ?? null,
             'is_active' => $data['is_active'] ?? 1,
             'created_at' => date('Y-m-d H:i:s')
@@ -145,7 +145,7 @@ class UserService
         // Hash new password if provided
         if (!empty($data['password'])) {
             $bcryptCost = $this->config->get('security.bcrypt_cost', 12);
-            $updateData['password'] = password_hash($data['password'], PASSWORD_BCRYPT, ['cost' => $bcryptCost]);
+            $updateData['password_hash'] = password_hash($data['password'], PASSWORD_BCRYPT, ['cost' => $bcryptCost]);
         }
 
         $updateData['updated_at'] = date('Y-m-d H:i:s');
@@ -181,7 +181,7 @@ class UserService
         }
 
         // Verify current password
-        if (!password_verify($currentPassword, $user['password'])) {
+        if (!password_verify($currentPassword, $user['password_hash'])) {
             throw new \Exception('Current password is incorrect');
         }
 
@@ -193,7 +193,7 @@ class UserService
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => $bcryptCost]);
 
         return $this->userRepository->update($userId, [
-            'password' => $hashedPassword,
+            'password_hash' => $hashedPassword,
             'updated_at' => date('Y-m-d H:i:s')
         ]);
     }

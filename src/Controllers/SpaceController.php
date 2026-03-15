@@ -60,7 +60,6 @@ class SpaceController
                 'success' => true,
                 'data' => $space
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -156,7 +155,6 @@ class SpaceController
                 'success' => true,
                 'data' => $bookings
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -174,7 +172,7 @@ class SpaceController
         try {
             $data = json_decode($request->getBody()->getContents(), true);
             $currentUser = $request->getAttribute('user');
-            
+
             $bookingId = $this->spaceService->createBooking($data, $currentUser['id']);
 
             return $this->jsonResponse($response, [
@@ -182,7 +180,6 @@ class SpaceController
                 'data' => ['id' => $bookingId],
                 'message' => 'Booking created successfully'
             ], 201);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -205,7 +202,6 @@ class SpaceController
                 'success' => true,
                 'message' => 'Booking cancelled successfully'
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -220,7 +216,7 @@ class SpaceController
     private function jsonResponse(Response $response, array $data, int $status = 200): Response
     {
         $response->getBody()->write(json_encode($data));
-        
+
         return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($status);

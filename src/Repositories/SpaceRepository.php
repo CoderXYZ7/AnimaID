@@ -18,7 +18,7 @@ class SpaceRepository extends BaseRepository
         // Add parent_id and type to allowed fields if not using BaseRepository generic insert (which I am not? Wait, SpaceRepository extends BaseRepository)
         // BaseRepository insert uses array keys.
         // So I just need to make sure the Service passes the right keys.
-        
+
         // However, I previously overrode createBooking but NOT insert/update for spaces.
         // The BaseRepository insert method looks like:
         /*
@@ -34,10 +34,10 @@ class SpaceRepository extends BaseRepository
         // So I don't need to change insert/update in Repository if I use the BaseRepository methods.
         // I DO need to update findAllActive to perhaps order by hierarchy or return parent_id.
         // Actually findAllActive calls `SELECT *`, so it automagically includes new columns.
-        
+
         return parent::insert($data);
     }
-    
+
     /**
      * Find all active spaces ordered by hierarchy
      */
@@ -64,7 +64,7 @@ class SpaceRepository extends BaseRepository
              LEFT JOIN spaces s ON sb.space_id = s.id
              WHERE sb.start_time < ? 
              AND sb.end_time > ?";
-        
+
         $params = [$endDate, $startDate];
 
         if ($spaceId) {
@@ -84,7 +84,7 @@ class SpaceRepository extends BaseRepository
     {
         return $this->findBookings(null, $startDate, $endDate);
     }
-    
+
     /**
      * Check for overlapping bookings considering hierarchy (Parent/Child blocking)
      * Returns the conflicting space info array if conflict found, or null if safe.
@@ -94,24 +94,26 @@ class SpaceRepository extends BaseRepository
         // 1. Resolve all related Space IDs (Self, Ancestors, Descendants)
         // Note: Booking a child blocks the parent? Yes, usually.
         // Booking a parent blocks the child? Yes.
-        
+
         $relatedIds = array_unique(array_merge(
             [$spaceId],
             $this->getAncestorIds($spaceId),
             $this->getDescendantIds($spaceId)
         ));
-        
-        if (empty($relatedIds)) return null;
+
+        if (empty($relatedIds)) {
+            return null;
+        }
 
         $placeholders = str_repeat('?,', count($relatedIds) - 1) . '?';
-        
+
         $sql = "SELECT sb.*, s.name as space_name FROM space_bookings sb
                 JOIN spaces s ON sb.space_id = s.id
                 WHERE sb.space_id IN ($placeholders)
                 AND sb.status != 'rejected'
                 AND sb.start_time < ? 
                 AND sb.end_time > ?";
-        
+
         $params = $relatedIds;
         $params[] = $endTime;
         $params[] = $startTime;
@@ -124,7 +126,7 @@ class SpaceRepository extends BaseRepository
         $sql .= " LIMIT 1";
 
         $result = $this->queryOne($sql, $params);
-        
+
         if ($result) {
             return [
                 'id' => $result['id'],
@@ -133,7 +135,7 @@ class SpaceRepository extends BaseRepository
                 'end_time' => $result['end_time']
             ];
         }
-        
+
         return null;
     }
 
@@ -141,13 +143,15 @@ class SpaceRepository extends BaseRepository
     {
         $ids = [];
         $currentId = $spaceId;
-        
+
         // Prevent infinite loops with depth limit
         $depth = 0;
         while ($depth < 10) {
             $parent = $this->queryOne("SELECT parent_id FROM spaces WHERE id = ?", [$currentId]);
-            if (!$parent || !$parent['parent_id']) break;
-            
+            if (!$parent || !$parent['parent_id']) {
+                break;
+            }
+
             $ids[] = $parent['parent_id'];
             $currentId = $parent['parent_id'];
             $depth++;
@@ -160,16 +164,16 @@ class SpaceRepository extends BaseRepository
         $ids = [];
         // Direct children
         $children = $this->query("SELECT id FROM spaces WHERE parent_id = ?", [$spaceId]);
-        
+
         foreach ($children as $child) {
             $ids[] = $child['id'];
             // Recursively get grandchildren
             $ids = array_merge($ids, $this->getDescendantIds($child['id']));
         }
-        
+
         return $ids;
     }
-    
+
     /**
      * Check for overlapping bookings
      */
@@ -180,7 +184,7 @@ class SpaceRepository extends BaseRepository
                 AND status != 'rejected'
                 AND start_time < ? 
                 AND end_time > ?";
-        
+
         $params = [$spaceId, $endTime, $startTime];
 
         if ($excludeBookingId) {
@@ -199,7 +203,7 @@ class SpaceRepository extends BaseRepository
     {
         $fields = ['space_id', 'event_id', 'booked_by', 'start_time', 'end_time', 'purpose', 'status'];
         $placeholders = array_fill(0, count($fields), '?');
-        
+
         $insertData = [];
         foreach ($fields as $field) {
             $insertData[] = $data[$field] ?? null;
@@ -208,7 +212,7 @@ class SpaceRepository extends BaseRepository
         $stmt = $this->db->prepare(
             "INSERT INTO space_bookings (" . implode(', ', $fields) . ") VALUES (" . implode(', ', $placeholders) . ")"
         );
-        
+
         $stmt->execute($insertData);
         return (int) $this->db->lastInsertId();
     }
@@ -235,7 +239,7 @@ class SpaceRepository extends BaseRepository
 
         $params[] = $id;
         $sql = "UPDATE space_bookings SET " . implode(', ', $fields) . " WHERE id = ?";
-        
+
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($params);
     }
@@ -250,7 +254,7 @@ class SpaceRepository extends BaseRepository
             [$id]
         );
     }
-    
+
     /**
      * Delete booking
      */

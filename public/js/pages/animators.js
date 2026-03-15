@@ -11,6 +11,7 @@ let state = {
     currentAnimatorId: null,
     tempDocuments: [],
     tempNotes: [],
+    currentAnimatorsData: [], // Cache the last-loaded page for duplicate detection
 };
 
 // Initialization flags
@@ -43,6 +44,7 @@ async function initializePageWhenReady() {
             await loadAnimators();
             addEventListeners();
             ui.showMainContent();
+            initDuplicateCheck();
         } catch (error) {
             console.error('Page initialization error:', error);
             localStorage.removeItem('animaid_token');
@@ -96,6 +98,7 @@ async function checkAnimatorsPermission() {
 async function loadAnimators(page = 1, filters = {}) {
     try {
         const data = await apiService.getAnimators({ page, limit: 10, ...filters });
+        state.currentAnimatorsData = data.animators;
         ui.renderAnimatorsList(data.animators);
         ui.renderPagination(data.pagination);
         state.currentPage = page;
@@ -569,3 +572,183 @@ window.editNote = (animatorId, noteId) => {
     // For simplicity, we'll just show an alert. In a real app, you'd open a modal
     alert('Edit note functionality would open a modal here');
 };
+
+// ---------------------------------------------------------------------------
+// Duplicate detection
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute the Levenshtein edit distance between two strings.
+ */
+function editDistance(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({length: m + 1}, (_, i) => Array.from({length: n + 1}, (_, j) => i || j));
+    for (let i = 1; i <= m; i++)
+        for (let j = 1; j <= n; j++)
+            dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    return dp[m][n];
+}
+
+/**
+ * Find potential duplicate animators in `items`.
+ *
+ * Two records are considered duplicates when:
+ *   - Their emails match (non-empty, case-insensitive), OR
+ *   - Their full names are identical (case-insensitive, trimmed), OR
+ *   - Their first names are identical AND their last names differ by at most 2
+ *     characters (typo check).
+ *
+ * @param {Array}    items  Array of animator objects.
+ * @param {Function} keyFn  Returns the primary comparison key (email) for an item.
+ * @returns {Array} Array of [itemA, itemB] pairs that are potential duplicates.
+ */
+function findDuplicates(items, keyFn) {
+    const pairs = [];
+    for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+            const a = items[i];
+            const b = items[j];
+
+            // Primary key: email match.
+            const emailA = keyFn(a);
+            const emailB = keyFn(b);
+            if (emailA && emailA === emailB) {
+                pairs.push([a, b]);
+                continue;
+            }
+
+            // Secondary key: full-name comparison.
+            const fullA = (a.first_name + ' ' + a.last_name).toLowerCase().trim();
+            const fullB = (b.first_name + ' ' + b.last_name).toLowerCase().trim();
+            if (fullA === fullB) {
+                pairs.push([a, b]);
+                continue;
+            }
+
+            // Similar last names with same first name.
+            const firstA = (a.first_name || '').toLowerCase().trim();
+            const firstB = (b.first_name || '').toLowerCase().trim();
+            const lastA  = (a.last_name  || '').toLowerCase().trim();
+            const lastB  = (b.last_name  || '').toLowerCase().trim();
+            if (firstA === firstB && firstA !== '' && editDistance(lastA, lastB) <= 2) {
+                pairs.push([a, b]);
+            }
+        }
+    }
+    return pairs;
+}
+
+/**
+ * Show a dismissible duplicates modal (or a brief inline notice when none found).
+ */
+function showDuplicatesModal(pairs) {
+    const existing = document.getElementById('duplicates-modal');
+    if (existing) existing.remove();
+
+    if (pairs.length === 0) {
+        const notice = document.createElement('div');
+        notice.id = 'no-duplicates-notice';
+        notice.className = 'fixed bottom-6 right-6 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg z-50 text-sm';
+        notice.textContent = 'No duplicate animators found.';
+        document.body.appendChild(notice);
+        setTimeout(() => notice.remove(), 3000);
+        return;
+    }
+
+    const getStatusColor = (status) => {
+        const colors = {
+            'active':     'bg-green-100 text-green-800',
+            'inactive':   'bg-gray-100 text-gray-800',
+            'suspended':  'bg-red-100 text-red-800',
+            'terminated': 'bg-orange-100 text-orange-800',
+        };
+        return colors[status] || 'bg-gray-100 text-gray-800';
+    };
+
+    const rows = pairs.map(([a, b]) => `
+        <tr class="border-b border-gray-100">
+            <td class="py-2 px-3 text-sm font-medium text-gray-900">${a.first_name} ${a.last_name}</td>
+            <td class="py-2 px-3 text-sm text-gray-600">${a.email || '—'}</td>
+            <td class="py-2 px-3 text-sm">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(a.status)}">${a.status}</span>
+            </td>
+            <td class="py-2 px-3 text-sm font-medium text-gray-900">${b.first_name} ${b.last_name}</td>
+            <td class="py-2 px-3 text-sm text-gray-600">${b.email || '—'}</td>
+            <td class="py-2 px-3 text-sm">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(b.status)}">${b.status}</span>
+            </td>
+        </tr>
+    `).join('');
+
+    const modal = document.createElement('div');
+    modal.id = 'duplicates-modal';
+    modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
+    modal.innerHTML = `
+        <div class="relative top-10 mx-auto p-6 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold text-gray-900">Potential Duplicate Animators</h3>
+                <button id="close-duplicates-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+                Found <strong>${pairs.length}</strong> suspicious pair${pairs.length !== 1 ? 's' : ''}.
+                Review the entries below and merge or remove duplicates as needed.
+            </p>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Name (A)</th>
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Email (A)</th>
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Status (A)</th>
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Name (B)</th>
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Email (B)</th>
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Status (B)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="dismiss-duplicates-btn"
+                    class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm transition-colors">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const close = () => modal.remove();
+    document.getElementById('close-duplicates-modal').addEventListener('click', close);
+    document.getElementById('dismiss-duplicates-btn').addEventListener('click', close);
+    modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+}
+
+/**
+ * Wire up the "Check Duplicates" button in the animators-list header.
+ */
+function initDuplicateCheck() {
+    const header = document.querySelector('#animators-list')?.closest('.bg-white')?.querySelector('.px-6.py-4.border-b');
+    if (!header) return;
+
+    if (document.getElementById('check-duplicates-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'check-duplicates-btn';
+    btn.className = 'bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-sm transition-colors ml-3';
+    btn.innerHTML = '<i class="fas fa-clone mr-1"></i>Check Duplicates';
+
+    header.classList.add('flex', 'items-center', 'justify-between');
+    header.appendChild(btn);
+
+    btn.addEventListener('click', () => {
+        const pairs = findDuplicates(
+            state.currentAnimatorsData,
+            item => (item.email || '').toLowerCase().trim()
+        );
+        showDuplicatesModal(pairs);
+    });
+}

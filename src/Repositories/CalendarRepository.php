@@ -106,18 +106,18 @@ class CalendarRepository extends BaseRepository
     public function addParticipant(int $eventId, array $participantData): int
     {
         $data = array_merge($participantData, ['event_id' => $eventId]);
-        
+
         // We'll use a direct insert here since BaseRepository->insert targets $this->table (calendar_events)
         // Ideally BaseRepository should allow specifying table, but this works for now
         $fields = array_keys($data);
         $placeholders = array_fill(0, count($fields), '?');
-        
+
         $sql = "INSERT INTO event_participants (" . implode(', ', $fields) . ") 
                 VALUES (" . implode(', ', $placeholders) . ")";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(array_values($data));
-        
+
         return (int) $this->db->lastInsertId();
     }
 
@@ -148,7 +148,7 @@ class CalendarRepository extends BaseRepository
         $params[] = $participantId;
 
         $sql = "UPDATE event_participants SET " . implode(', ', $fields) . " WHERE id = ?";
-        
+
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($params);
     }
@@ -165,7 +165,7 @@ class CalendarRepository extends BaseRepository
 
         return $result ? (int) $result['id'] : null;
     }
-    
+
     /**
      * Delete participant
      */

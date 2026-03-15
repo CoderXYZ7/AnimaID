@@ -29,11 +29,17 @@ class WikiController
             $params = $request->getQueryParams();
             $page = (int) ($params['page'] ?? 1);
             $limit = (int) ($params['limit'] ?? 20);
-            
+
             $filters = [];
-            if (isset($params['search'])) $filters['search'] = $params['search'];
-            if (isset($params['category_id'])) $filters['category_id'] = $params['category_id'];
-            if (isset($params['is_published'])) $filters['is_published'] = $params['is_published'];
+            if (isset($params['search'])) {
+                $filters['search'] = $params['search'];
+            }
+            if (isset($params['category_id'])) {
+                $filters['category_id'] = $params['category_id'];
+            }
+            if (isset($params['is_published'])) {
+                $filters['is_published'] = $params['is_published'];
+            }
 
             $result = $this->wikiService->getPages($page, $limit, $filters);
 
@@ -42,7 +48,6 @@ class WikiController
                 'data' => $result['pages'],
                 'pagination' => $result['pagination']
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -59,7 +64,7 @@ class WikiController
     {
         try {
             $id = $args['id'];
-            
+
             // Check if ID is numeric, otherwise treat as slug
             if (is_numeric($id)) {
                 $page = $this->wikiService->getPage((int)$id);
@@ -78,7 +83,6 @@ class WikiController
                 'success' => true,
                 'data' => $page
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -96,7 +100,7 @@ class WikiController
         try {
             $data = json_decode($request->getBody()->getContents(), true);
             $currentUser = $request->getAttribute('user');
-            
+
             $page = $this->wikiService->createPage($data, $currentUser['id']);
 
             return $this->jsonResponse($response, [
@@ -104,7 +108,6 @@ class WikiController
                 'data' => $page,
                 'message' => 'Page created successfully'
             ], 201);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -131,7 +134,6 @@ class WikiController
                 'data' => $page,
                 'message' => 'Page updated successfully'
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -154,7 +156,6 @@ class WikiController
                 'success' => true,
                 'message' => 'Page deleted successfully'
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -176,7 +177,6 @@ class WikiController
                 'success' => true,
                 'data' => $categories
             ]);
-
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -191,7 +191,7 @@ class WikiController
     private function jsonResponse(Response $response, array $data, int $status = 200): Response
     {
         $response->getBody()->write(json_encode($data));
-        
+
         return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($status);

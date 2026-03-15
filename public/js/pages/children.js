@@ -1,7 +1,5 @@
 // public/js/pages/children.js
 
-console.log('Children script loaded');
-
 const API_BASE_URL = window.location.origin + '/api';
 
 // DOM Elements
@@ -22,6 +20,7 @@ let currentChildId = null;
 let tempGuardians = []; // Store guardians temporarily during child creation
 let tempDocuments = []; // Store documents temporarily during child creation
 let tempNotes = []; // Store notes temporarily during child creation
+let currentChildrenData = []; // Cache the last-loaded page for duplicate detection
 
 // Initialize page
 async function initPage() {
@@ -77,6 +76,9 @@ async function initPage() {
         loadingScreen.classList.add('hidden');
         mainContent.classList.remove('hidden');
 
+        // Wire up duplicate-check button
+        initDuplicateCheck();
+
     } catch (error) {
         console.error('Page initialization error:', error);
         showErrorScreen();
@@ -112,6 +114,7 @@ async function loadChildren(page = 1, filters = {}) {
 
         const data = await response.json();
 
+        currentChildrenData = data.children;
         displayChildren(data.children);
         updatePagination(data.pagination);
 
@@ -388,8 +391,6 @@ function addEventListeners() {
                 }
             });
 
-            console.log('Sending child data:', childData);
-
             const method = currentChildId ? 'PUT' : 'POST';
             const url = currentChildId ? `${API_BASE_URL}/children/${currentChildId}` : `${API_BASE_URL}/children`;
 
@@ -403,7 +404,6 @@ function addEventListeners() {
             });
 
             const data = await response.json();
-            console.log('Response:', response.status, data);
 
             if (response.ok) {
                 const childId = data.child_id || data.child?.id || currentChildId;
@@ -546,9 +546,6 @@ window.viewChild = async function(childId) {
         // Load child details
         const url = new URL(`${API_BASE_URL}/children/${childId}`);
         url.searchParams.set('token', userToken);
-
-        console.log('userToken:', userToken);
-        console.log('url:', url.toString());
 
         // Use fetch with credentials for better header support
         const response = await fetch(url, {
@@ -920,8 +917,6 @@ function setupViewModalListeners() {
             e.stopPropagation();
             const documentId = parseInt(this.getAttribute('data-doc-id'));
             const childId = parseInt(this.getAttribute('data-child-id'));
-            console.log('Download button clicked for doc:', documentId, 'child:', childId);
-            console.log('window.downloadDocument exists:', typeof window.downloadDocument);
             try {
                 window.downloadDocument(documentId, childId);
             } catch (error) {
@@ -1622,8 +1617,6 @@ window.deleteDocument = async function(childId, documentId) {
 
 // Download document
 window.downloadDocument = async function(documentId, childId) {
-    console.log('downloadDocument function called with:', { documentId, childId });
-
     // Use currentChildId if childId is not provided (for backwards compatibility)
     const targetChildId = childId || currentChildId;
     if (!targetChildId) {
@@ -1631,10 +1624,7 @@ window.downloadDocument = async function(documentId, childId) {
         return;
     }
 
-    console.log('Downloading document:', { documentId, childId: targetChildId, userToken: userToken ? 'present' : 'missing' });
-
     const downloadUrl = `${API_BASE_URL}/children/${targetChildId}/documents/${documentId}`;
-    console.log('Download URL:', downloadUrl);
 
     try {
         const response = await fetch(downloadUrl, {
@@ -1646,9 +1636,6 @@ window.downloadDocument = async function(documentId, childId) {
             credentials: 'include'
         });
 
-        console.log('Download response status:', response.status);
-        console.log('Download response headers:', Object.fromEntries(response.headers.entries()));
-
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Download failed with response:', errorText);
@@ -1656,7 +1643,6 @@ window.downloadDocument = async function(documentId, childId) {
         }
 
         const blob = await response.blob();
-        console.log('Blob size:', blob.size, 'type:', blob.type);
 
         const contentDisposition = response.headers.get('Content-Disposition');
         let filename = 'document';
@@ -1664,7 +1650,6 @@ window.downloadDocument = async function(documentId, childId) {
             const match = contentDisposition.match(/filename="(.+)"/);
             if (match) filename = match[1];
         }
-        console.log('Filename:', filename);
 
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -1674,8 +1659,6 @@ window.downloadDocument = async function(documentId, childId) {
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-
-        console.log('Download completed successfully');
     } catch (error) {
         console.error('Error downloading document:', error);
         alert('Failed to download document: ' + error.message);
@@ -1766,3 +1749,171 @@ function formatDate(dateString) {
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', initPage);
+
+// ---------------------------------------------------------------------------
+// Duplicate detection
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute the Levenshtein edit distance between two strings.
+ */
+function editDistance(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({length: m + 1}, (_, i) => Array.from({length: n + 1}, (_, j) => i || j));
+    for (let i = 1; i <= m; i++)
+        for (let j = 1; j <= n; j++)
+            dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    return dp[m][n];
+}
+
+/**
+ * Find potential duplicate children in `items`.
+ *
+ * Two records are considered duplicates when:
+ *   - Their full names are identical (case-insensitive, trimmed), OR
+ *   - Their first names are identical AND their last names differ by at most 2
+ *     characters (catches typos such as "Rossi" vs "RossI" or "Bossi").
+ *
+ * @param {Array}    items  Array of child objects.
+ * @param {Function} keyFn  Returns the comparison key string for an item.
+ * @returns {Array} Array of [itemA, itemB] pairs that are potential duplicates.
+ */
+function findDuplicates(items, keyFn) {
+    const pairs = [];
+    for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+            const a = items[i];
+            const b = items[j];
+
+            const keyA = keyFn(a);
+            const keyB = keyFn(b);
+
+            // Exact full-name match.
+            if (keyA === keyB) {
+                pairs.push([a, b]);
+                continue;
+            }
+
+            // Same first name + similar last name (edit distance <= 2).
+            const firstA = (a.first_name || '').toLowerCase().trim();
+            const firstB = (b.first_name || '').toLowerCase().trim();
+            const lastA  = (a.last_name  || '').toLowerCase().trim();
+            const lastB  = (b.last_name  || '').toLowerCase().trim();
+
+            if (firstA === firstB && firstA !== '' && editDistance(lastA, lastB) <= 2) {
+                pairs.push([a, b]);
+            }
+        }
+    }
+    return pairs;
+}
+
+/**
+ * Show a dismissible duplicates modal (or a brief inline notice when no
+ * duplicates were found).
+ */
+function showDuplicatesModal(pairs) {
+    // Remove any previous instance.
+    const existing = document.getElementById('duplicates-modal');
+    if (existing) existing.remove();
+
+    if (pairs.length === 0) {
+        // Brief toast-style notice instead of a full modal.
+        const notice = document.createElement('div');
+        notice.id = 'no-duplicates-notice';
+        notice.className = 'fixed bottom-6 right-6 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg z-50 text-sm';
+        notice.textContent = 'No duplicate children found.';
+        document.body.appendChild(notice);
+        setTimeout(() => notice.remove(), 3000);
+        return;
+    }
+
+    const rows = pairs.map(([a, b]) => `
+        <tr class="border-b border-gray-100">
+            <td class="py-2 px-3 text-sm font-medium text-gray-900">${a.first_name} ${a.last_name}</td>
+            <td class="py-2 px-3 text-sm text-gray-600">${a.birth_date || '—'}</td>
+            <td class="py-2 px-3 text-sm">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(a.status)}">${a.status}</span>
+            </td>
+            <td class="py-2 px-3 text-sm font-medium text-gray-900">${b.first_name} ${b.last_name}</td>
+            <td class="py-2 px-3 text-sm text-gray-600">${b.birth_date || '—'}</td>
+            <td class="py-2 px-3 text-sm">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(b.status)}">${b.status}</span>
+            </td>
+        </tr>
+    `).join('');
+
+    const modal = document.createElement('div');
+    modal.id = 'duplicates-modal';
+    modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
+    modal.innerHTML = `
+        <div class="relative top-10 mx-auto p-6 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold text-gray-900">Potential Duplicate Children</h3>
+                <button id="close-duplicates-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+                Found <strong>${pairs.length}</strong> suspicious pair${pairs.length !== 1 ? 's' : ''}.
+                Review the entries below and merge or remove duplicates as needed.
+            </p>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Name (A)</th>
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Birthdate (A)</th>
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Status (A)</th>
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Name (B)</th>
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Birthdate (B)</th>
+                            <th class="py-2 px-3 text-left text-xs font-medium text-gray-500 uppercase">Status (B)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="dismiss-duplicates-btn"
+                    class="px-5 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-sm transition-colors">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const close = () => modal.remove();
+    document.getElementById('close-duplicates-modal').addEventListener('click', close);
+    document.getElementById('dismiss-duplicates-btn').addEventListener('click', close);
+    modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+}
+
+/**
+ * Wire up the "Check Duplicates" button inserted into the children-list header.
+ */
+function initDuplicateCheck() {
+    const header = document.querySelector('#children-list')?.closest('.bg-white')?.querySelector('.px-6.py-4.border-b');
+    if (!header) return;
+
+    // Avoid adding the button twice.
+    if (document.getElementById('check-duplicates-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'check-duplicates-btn';
+    btn.className = 'bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-sm transition-colors ml-3';
+    btn.innerHTML = '<i class="fas fa-clone mr-1"></i>Check Duplicates';
+
+    // Make the header row flex so the button sits next to the title.
+    header.classList.add('flex', 'items-center', 'justify-between');
+    header.appendChild(btn);
+
+    btn.addEventListener('click', () => {
+        const pairs = findDuplicates(
+            currentChildrenData,
+            item => (item.first_name + ' ' + item.last_name).toLowerCase().trim()
+        );
+        showDuplicatesModal(pairs);
+    });
+}

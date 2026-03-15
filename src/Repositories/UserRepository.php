@@ -71,7 +71,7 @@ class UserRepository extends BaseRepository
     public function findWithRoles(int $userId): ?array
     {
         $user = $this->findById($userId);
-        
+
         if (!$user) {
             return null;
         }
@@ -92,7 +92,7 @@ class UserRepository extends BaseRepository
     public function findWithPermissions(int $userId): ?array
     {
         $user = $this->findById($userId);
-        
+
         if (!$user) {
             return null;
         }

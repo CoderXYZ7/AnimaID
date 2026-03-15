@@ -66,7 +66,7 @@ class ConfigManager
                 'name' => $this->env('APP_NAME', 'AnimaID'),
                 'version' => '0.9',
                 'environment' => $this->env('APP_ENV', 'development'),
-                'debug' => $this->env('APP_DEBUG', 'true') === 'true',
+                'debug' => $this->env('APP_DEBUG', 'false') === 'true',
                 'timezone' => $this->env('APP_TIMEZONE', 'Europe/Rome'),
                 'locale' => $this->env('APP_LOCALE', 'it_IT'),
             ],
@@ -152,12 +152,17 @@ class ConfigManager
 
     private function generateDefaultSecret(): string
     {
-        // Generate a random secret if none is provided
-        // This should only be used in development
-        if ($this->env('APP_ENV') === 'production') {
-            throw new \Exception('JWT_SECRET must be set in production environment');
+        // Generate a random secret if none is provided.
+        // This fallback is only permitted in the development environment.
+        $env = $this->env('APP_ENV', 'development');
+        if ($env !== 'development') {
+            throw new \Exception('JWT_SECRET must be set in environment for non-development environments');
         }
-        
+
+        // In development, log a warning and return a random secret.
+        error_log('WARNING: JWT_SECRET is not set. Falling back to a randomly generated secret. '
+            . 'All existing tokens will be invalidated on each restart.');
+
         return bin2hex(random_bytes(32));
     }
 

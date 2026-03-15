@@ -48,7 +48,7 @@ class AnimatorRepository extends BaseRepository
         }
 
         $query = "SELECT * FROM {$this->table}";
-        
+
         if (!empty($conditions)) {
             $query .= " WHERE " . implode(' AND ', $conditions);
         }
@@ -66,7 +66,7 @@ class AnimatorRepository extends BaseRepository
     public function findWithLinkedUsers(int $animatorId): ?array
     {
         $animator = $this->findById($animatorId);
-        
+
         if (!$animator) {
             return null;
         }
@@ -87,7 +87,7 @@ class AnimatorRepository extends BaseRepository
     public function findWithDocuments(int $animatorId): ?array
     {
         $animator = $this->findById($animatorId);
-        
+
         if (!$animator) {
             return null;
         }
@@ -106,7 +106,7 @@ class AnimatorRepository extends BaseRepository
     public function findWithNotes(int $animatorId): ?array
     {
         $animator = $this->findById($animatorId);
-        
+
         if (!$animator) {
             return null;
         }

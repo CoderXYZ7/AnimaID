@@ -61,7 +61,7 @@ class SystemController
             [
                 'name' => 'Authentication',
                 'path' => '/api/auth',
-                'status' => 'migrated', 
+                'status' => 'migrated',
                 'details' => 'Fully migrated to Slim 4 + JWT'
             ],
             [
@@ -115,7 +115,7 @@ class SystemController
     private function jsonResponse(Response $response, array $data, int $status = 200): Response
     {
         $response->getBody()->write(json_encode($data));
-        
+
         return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($status);

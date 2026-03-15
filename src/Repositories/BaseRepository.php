@@ -32,7 +32,7 @@ abstract class BaseRepository
         $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE {$this->primaryKey} = ?");
         $stmt->execute([$id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $result ?: null;
     }
 
@@ -59,7 +59,7 @@ abstract class BaseRepository
 
         $stmt = $this->db->prepare($query);
         $stmt->execute($params);
-        
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -83,7 +83,7 @@ abstract class BaseRepository
         $stmt = $this->db->prepare($query);
         $stmt->execute($params);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return (int) $result['count'];
     }
 
@@ -119,7 +119,7 @@ abstract class BaseRepository
 
         $params[] = $id;
 
-        $query = "UPDATE {$this->table} SET " . implode(', ', $fields) . 
+        $query = "UPDATE {$this->table} SET " . implode(', ', $fields) .
                  " WHERE {$this->primaryKey} = ?";
 
         $stmt = $this->db->prepare($query);
@@ -143,7 +143,7 @@ abstract class BaseRepository
         $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM {$this->table} WHERE {$this->primaryKey} = ?");
         $stmt->execute([$id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $result['count'] > 0;
     }
 
@@ -189,7 +189,7 @@ abstract class BaseRepository
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $result ?: null;
     }
 }
