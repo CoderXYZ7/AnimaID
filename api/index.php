@@ -29,6 +29,7 @@ use AnimaID\Services\CommunicationService;
 use AnimaID\Services\MediaService;
 use AnimaID\Services\PermissionService;
 use AnimaID\Services\ReportService;
+use AnimaID\Services\RoleService;
 use AnimaID\Services\SpaceService;
 use AnimaID\Services\UserService;
 use AnimaID\Services\WikiService;
@@ -40,6 +41,7 @@ use AnimaID\Controllers\ChildController;
 use AnimaID\Controllers\CommunicationController;
 use AnimaID\Controllers\MediaController;
 use AnimaID\Controllers\ReportController;
+use AnimaID\Controllers\RoleController;
 use AnimaID\Controllers\SpaceController;
 use AnimaID\Controllers\SystemController;
 use AnimaID\Controllers\UserController;
@@ -105,6 +107,7 @@ $animatorService      = new AnimatorService($animatorRepository, $config, $pdo);
 $attendanceService    = new AttendanceService($attendanceRepository, $config);
 $communicationService = new CommunicationService($communicationRepository, $config);
 $mediaService         = new MediaService($mediaRepository, $config);
+$roleService          = new RoleService($roleRepository, $config, $pdo);
 $reportService        = new ReportService($pdo);
 $auditService         = new AuditService($pdo, $config);
 
@@ -120,6 +123,7 @@ $animatorController      = new AnimatorController($animatorService);
 $attendanceController    = new AttendanceController($attendanceService);
 $communicationController = new CommunicationController($communicationService);
 $mediaController         = new MediaController($mediaService);
+$roleController          = new RoleController($roleService);
 $reportController        = new ReportController($reportService);
 
 // Middleware
@@ -180,6 +184,7 @@ $app->group('/api', function ($group) use (
     $communicationController,
     $mediaController,
     $reportController,
+    $roleController,
     $permissionService
 ) {
 
@@ -241,6 +246,21 @@ $app->group('/api', function ($group) use (
         $group->put('/{id}', [$userController, 'update']);
         $group->delete('/{id}', [$userController, 'delete']);
     })->add(new PermissionMiddleware($permissionService, ['admin.users', 'users.manage'], 'any'));
+
+    // Role routes
+    $group->group('/roles', function ($group) use ($roleController, $permissionService) {
+        $group->get('', [$roleController, 'index']);
+        $group->get('/{id}', [$roleController, 'show']);
+
+        $group->post('', [$roleController, 'create'])
+            ->add(new PermissionMiddleware($permissionService, ['admin.users'], 'any'));
+
+        $group->put('/{id}', [$roleController, 'update'])
+            ->add(new PermissionMiddleware($permissionService, ['admin.users'], 'any'));
+
+        $group->delete('/{id}', [$roleController, 'delete'])
+            ->add(new PermissionMiddleware($permissionService, ['admin.users'], 'any'));
+    });
 
     // Calendar routes
     $group->group('/calendar', function ($group) use ($calendarController, $permissionService) {

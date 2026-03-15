@@ -30,7 +30,7 @@ class ReportController
 
             return $this->jsonResponse($response, [
                 'success' => true,
-                'data'    => $reports
+                'reports' => $reports
             ]);
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [

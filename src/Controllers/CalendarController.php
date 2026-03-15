@@ -44,7 +44,7 @@ class CalendarController
 
             return $this->jsonResponse($response, [
                 'success' => true,
-                'data' => $result['events'],
+                'events' => $result['events'],
                 'pagination' => $result['pagination']
             ]);
         } catch (\Exception $e) {

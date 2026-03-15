@@ -73,12 +73,12 @@ export const apiService = {
     addChildGuardian: (id, data) => fetchFromApi(`${window.location.origin}/api/children/${id}/guardians`, { method: 'POST', body: JSON.stringify(data) }),
 
     // Calendar
-    getEvents: (filters = {}) => fetchFromApi(`${window.location.origin}/api/calendar/events?${new URLSearchParams(filters)}`),
-    getEvent: (id) => fetchFromApi(`${window.location.origin}/api/calendar/events/${id}`),
-    createEvent: (data) => fetchFromApi(`${window.location.origin}/api/calendar/events`, { method: 'POST', body: JSON.stringify(data) }),
-    updateEvent: (id, data) => fetchFromApi(`${window.location.origin}/api/calendar/events/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    deleteEvent: (id) => fetchFromApi(`${window.location.origin}/api/calendar/events/${id}`, { method: 'DELETE' }),
-    getEventParticipants: (id) => fetchFromApi(`${window.location.origin}/api/calendar/events/${id}/participants`),
+    getEvents: (filters = {}) => fetchFromApi(`${window.location.origin}/api/calendar?${new URLSearchParams(filters)}`),
+    getEvent: (id) => fetchFromApi(`${window.location.origin}/api/calendar/${id}`),
+    createEvent: (data) => fetchFromApi(`${window.location.origin}/api/calendar`, { method: 'POST', body: JSON.stringify(data) }),
+    updateEvent: (id, data) => fetchFromApi(`${window.location.origin}/api/calendar/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    deleteEvent: (id) => fetchFromApi(`${window.location.origin}/api/calendar/${id}`, { method: 'DELETE' }),
+    getEventParticipants: (id) => fetchFromApi(`${window.location.origin}/api/calendar/${id}/participants`),
 
     // Attendance
     getAttendance: (filters = {}) => fetchFromApi(`${window.location.origin}/api/attendance?${new URLSearchParams(filters)}`),
@@ -103,7 +103,7 @@ export const apiService = {
     uploadFile: (folderId, formData) => fetchFromApi(`${window.location.origin}/api/media`, { method: 'POST', body: formData }, false),
     downloadFile: (id) => fetchFromApi(`${window.location.origin}/api/media/files/${id}`, { headers: { 'Accept': '*/*' } }, false),
     deleteFile: (id) => fetchFromApi(`${window.location.origin}/api/media/files/${id}`, { method: 'DELETE' }),
-    shareFile: (id) => fetchFromApi(`${window.location.origin}/api/media/files/${id}/share`, { method: 'POST' }),
+    shareFile: (id) => fetchFromApi(`${window.location.origin}/api/media/share`, { method: 'POST', body: JSON.stringify({ file_id: id }) }),
     getShared: (token) => fetch(`${window.location.origin}/api/media/shared/${token}`).then(r => r.json()),
 
     // Wiki
@@ -128,5 +128,5 @@ export const apiService = {
     updateSpace: (id, data) => fetchFromApi(`${window.location.origin}/api/spaces/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     deleteSpace: (id) => fetchFromApi(`${window.location.origin}/api/spaces/${id}`, { method: 'DELETE' }),
     getSpaceBookings: (id) => fetchFromApi(`${window.location.origin}/api/spaces/${id}/bookings`),
-    createBooking: (id, data) => fetchFromApi(`${window.location.origin}/api/spaces/${id}/bookings`, { method: 'POST', body: JSON.stringify(data) }),
+    createBooking: (data) => fetchFromApi(`${window.location.origin}/api/spaces/bookings`, { method: 'POST', body: JSON.stringify(data) }),
 };

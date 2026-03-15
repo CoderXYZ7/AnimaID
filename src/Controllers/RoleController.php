@@ -4,39 +4,33 @@ namespace AnimaID\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use AnimaID\Services\UserService;
+use AnimaID\Services\RoleService;
 
 /**
- * User Controller
- * Handles user management endpoints
+ * Role Controller
+ * Handles role management endpoints
  */
-class UserController
+class RoleController
 {
-    private UserService $userService;
+    private RoleService $roleService;
 
-    public function __construct(UserService $userService)
+    public function __construct(RoleService $roleService)
     {
-        $this->userService = $userService;
+        $this->roleService = $roleService;
     }
 
     /**
-     * List users
-     * GET /api/users
+     * List all roles
+     * GET /api/roles
      */
     public function index(Request $request, Response $response): Response
     {
         try {
-            $params = $request->getQueryParams();
-            $page = (int) ($params['page'] ?? 1);
-            $limit = (int) ($params['limit'] ?? 20);
-            $search = $params['search'] ?? '';
-
-            $result = $this->userService->getUsers($page, $limit, $search);
+            $roles = $this->roleService->getAllRoles();
 
             return $this->jsonResponse($response, [
                 'success' => true,
-                'users' => array_map([$this, 'sanitizeUser'], $result['users']),
-                'pagination' => $result['pagination']
+                'roles' => $roles
             ]);
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
@@ -47,25 +41,25 @@ class UserController
     }
 
     /**
-     * Get single user
-     * GET /api/users/{id}
+     * Get single role with its permissions
+     * GET /api/roles/{id}
      */
     public function show(Request $request, Response $response, array $args): Response
     {
         try {
-            $userId = (int) $args['id'];
-            $user = $this->userService->getUserById($userId);
+            $roleId = (int) $args['id'];
+            $role = $this->roleService->getRoleById($roleId);
 
-            if (!$user) {
+            if (!$role) {
                 return $this->jsonResponse($response, [
                     'success' => false,
-                    'error' => 'User not found'
+                    'error' => 'Role not found'
                 ], 404);
             }
 
             return $this->jsonResponse($response, [
                 'success' => true,
-                'user' => $this->sanitizeUser($user)
+                'role' => $role
             ]);
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
@@ -76,23 +70,20 @@ class UserController
     }
 
     /**
-     * Create user
-     * POST /api/users
+     * Create a new role
+     * POST /api/roles
      */
     public function create(Request $request, Response $response): Response
     {
         try {
             $data = json_decode($request->getBody()->getContents(), true);
-            $currentUser = $request->getAttribute('user');
 
-            $data['created_by'] = $currentUser['id'];
-
-            $user = $this->userService->createUser($data);
+            $role = $this->roleService->createRole($data);
 
             return $this->jsonResponse($response, [
                 'success' => true,
-                'user' => $this->sanitizeUser($user),
-                'message' => 'User created successfully'
+                'role' => $role,
+                'message' => 'Role created successfully'
             ], 201);
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
@@ -103,21 +94,21 @@ class UserController
     }
 
     /**
-     * Update user
-     * PUT /api/users/{id}
+     * Update a role
+     * PUT /api/roles/{id}
      */
     public function update(Request $request, Response $response, array $args): Response
     {
         try {
-            $userId = (int) $args['id'];
+            $roleId = (int) $args['id'];
             $data = json_decode($request->getBody()->getContents(), true);
 
-            $user = $this->userService->updateUser($userId, $data);
+            $role = $this->roleService->updateRole($roleId, $data);
 
             return $this->jsonResponse($response, [
                 'success' => true,
-                'user' => $this->sanitizeUser($user),
-                'message' => 'User updated successfully'
+                'role' => $role,
+                'message' => 'Role updated successfully'
             ]);
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
@@ -128,19 +119,19 @@ class UserController
     }
 
     /**
-     * Delete user
-     * DELETE /api/users/{id}
+     * Delete a role
+     * DELETE /api/roles/{id}
      */
     public function delete(Request $request, Response $response, array $args): Response
     {
         try {
-            $userId = (int) $args['id'];
+            $roleId = (int) $args['id'];
 
-            $this->userService->deleteUser($userId);
+            $this->roleService->deleteRole($roleId);
 
             return $this->jsonResponse($response, [
                 'success' => true,
-                'message' => 'User deleted successfully'
+                'message' => 'Role deleted successfully'
             ]);
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
@@ -148,36 +139,6 @@ class UserController
                 'error' => $e->getMessage()
             ], 400);
         }
-    }
-
-    /**
-     * Get user statistics
-     * GET /api/users/stats
-     */
-    public function stats(Request $request, Response $response): Response
-    {
-        try {
-            $stats = $this->userService->getStatistics();
-
-            return $this->jsonResponse($response, [
-                'success' => true,
-                'data' => $stats
-            ]);
-        } catch (\Exception $e) {
-            return $this->jsonResponse($response, [
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Remove sensitive fields from a user array
-     */
-    private function sanitizeUser(array $user): array
-    {
-        unset($user['password_hash']);
-        return $user;
     }
 
     /**

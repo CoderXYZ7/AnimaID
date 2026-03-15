@@ -100,7 +100,7 @@ class AuthController
 
             return $this->jsonResponse($response, [
                 'success' => true,
-                'user' => $user
+                'user' => $this->sanitizeUser($user)
             ]);
         } catch (\Exception $e) {
             return $this->jsonResponse($response, [
@@ -108,6 +108,15 @@ class AuthController
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Remove sensitive fields from a user array
+     */
+    private function sanitizeUser(array $user): array
+    {
+        unset($user['password_hash']);
+        return $user;
     }
 
     /**

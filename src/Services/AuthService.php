@@ -98,11 +98,15 @@ class AuthService
             return null;
         }
 
+        $userWithRoles = $this->userRepository->findWithRoles($user['id']);
+        $roles = array_column($userWithRoles['roles'] ?? [], 'name');
+
         return [
             'id' => $user['id'],
             'username' => $user['username'],
             'email' => $user['email'],
-            'full_name' => $user['full_name']
+            'full_name' => $user['full_name'],
+            'roles' => $roles
         ];
     }
 
