@@ -157,31 +157,24 @@ step "Database migrations"
 sudo -u "$ACTUAL_USER" php database/migrate.php migrate
 ok "Migrations complete"
 
-# ── Admin seeding ─────────────────────────────────────────────────────────────
-step "Admin user"
+# ── Admin + permissions seeding ───────────────────────────────────────────────
+step "Admin user & permissions"
 
 ADMIN_USER=$(grep -oP "(?<=^ADMIN_USERNAME=).+" .env 2>/dev/null || echo "")
 ADMIN_PASS=$(grep -oP "(?<=^ADMIN_PASSWORD=).+" .env 2>/dev/null || echo "")
+ADMIN_EMAIL=$(grep -oP "(?<=^ADMIN_EMAIL=).+" .env 2>/dev/null || echo "")
 
 if [ -n "$ADMIN_USER" ] && [ -n "$ADMIN_PASS" ]; then
-    ADMIN_EXISTS=$(php -r "
-        \$db = new PDO('sqlite:database/animaid.db');
-        \$stmt = \$db->query('SELECT COUNT(*) FROM users WHERE is_admin = 1 LIMIT 1');
-        echo \$stmt->fetchColumn();
-    " 2>/dev/null || echo "0")
-
-    if [ "$ADMIN_EXISTS" = "0" ]; then
-        ADMIN_EMAIL=$(grep -oP "(?<=^ADMIN_EMAIL=).+" .env 2>/dev/null || echo "${ADMIN_USER}@localhost")
-        HASH=$(php -r "echo password_hash('${ADMIN_PASS}', PASSWORD_BCRYPT, ['cost' => 12]);")
-        php -r "
-            \$db = new PDO('sqlite:database/animaid.db');
-            \$db->exec(\"INSERT INTO users (username, email, password_hash, is_active, is_admin, created_at)
-                VALUES ('${ADMIN_USER}', '${ADMIN_EMAIL}', '${HASH}', 1, 1, datetime('now'))\");
-        "
-        ok "Admin user '${ADMIN_USER}' seeded"
-    else
-        info "Admin user already exists — skipping seed"
-    fi
+    RESULT=$(ADMIN_USERNAME="$ADMIN_USER" \
+             ADMIN_EMAIL="$ADMIN_EMAIL" \
+             ADMIN_PASSWORD="$ADMIN_PASS" \
+             sudo -u "$ACTUAL_USER" php docker/seed_admin.php 2>&1)
+    case "$RESULT" in
+        created*) ok "Admin user '${ADMIN_USER}' seeded with all permissions" ;;
+        exists*)  info "Admin user already exists — permissions refreshed" ;;
+        skipped*) warn "$RESULT" ;;
+        *)        warn "Seeder: $RESULT" ;;
+    esac
 else
     warn "ADMIN_USERNAME or ADMIN_PASSWORD not set in .env — skipping admin seed"
 fi
