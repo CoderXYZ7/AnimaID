@@ -34,6 +34,7 @@ RUN mkdir -p database/backups uploads \
     && chmod -R 775 database uploads
 
 COPY docker/entrypoint.sh /entrypoint.sh
+COPY docker/seed_admin.php /docker/seed_admin.php
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
