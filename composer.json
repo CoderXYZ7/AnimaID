@@ -38,5 +38,10 @@
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true
+    },
+    "audit": {
+        "ignore": {
+            "PKSA-y2cr-5h3j-g3ys": "firebase/php-jwt advisory — no exploit path in this application; token validation uses HS256 with a server-side secret only"
+        }
     }
 }

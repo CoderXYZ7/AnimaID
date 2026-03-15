@@ -16,7 +16,8 @@ COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 # Clone project from GitHub
 ARG REPO_URL=https://github.com/CoderXYZ7/AnimaID.git
 ARG BRANCH=master
-RUN git clone --depth=1 --branch=${BRANCH} ${REPO_URL} /var/www/html
+RUN git clone --depth=1 --branch=${BRANCH} ${REPO_URL} /var/www/html \
+    && git config --global --add safe.directory /var/www/html
 
 WORKDIR /var/www/html
 
