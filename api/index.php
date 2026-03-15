@@ -10,6 +10,7 @@ use AnimaID\Config\ConfigManager;
 use AnimaID\Security\JwtManager;
 use AnimaID\Repositories\AnimatorRepository;
 use AnimaID\Repositories\AttendanceRepository;
+use AnimaID\Repositories\CalendarRepository;
 use AnimaID\Repositories\ChildRepository;
 use AnimaID\Repositories\CommunicationRepository;
 use AnimaID\Repositories\MediaRepository;

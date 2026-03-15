@@ -6,6 +6,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_sqlite zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Use production PHP ini (display_errors=Off, log_errors=On)
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
