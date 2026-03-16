@@ -228,9 +228,11 @@ $app->group('/api', function ($group) use (
             ->add(new PermissionMiddleware($permissionService, ['wiki.moderate'], 'any'));
     });
 
-    // System Status
+    // System Status & Config
     $group->get('/system/status', [$systemController, 'status'])
         ->add(new PermissionMiddleware($permissionService, ['admin.system.view'], 'any'));
+
+    $group->get('/system/config', [$systemController, 'config']);
 
     // Auth routes
     $group->post('/auth/logout', [$authController, 'logout']);

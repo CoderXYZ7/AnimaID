@@ -20,6 +20,22 @@ class SystemController
     }
 
     /**
+     * Get public config/feature flags
+     * GET /api/system/config
+     */
+    public function config(Request $request, Response $response): Response
+    {
+        return $this->jsonResponse($response, [
+            'success' => true,
+            'config'  => [
+                'features' => [
+                    'show_medical_data' => true,
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Get system status
      * GET /api/system/status
      */

@@ -43,7 +43,7 @@ class AnimatorController
 
             return $this->jsonResponse($response, [
                 'success'    => true,
-                'data'       => $result['animators'],
+                'animators'  => $result['animators'],
                 'pagination' => $result['pagination']
             ]);
         } catch (\Exception $e) {

@@ -43,7 +43,7 @@ class ChildController
 
             return $this->jsonResponse($response, [
                 'success'    => true,
-                'data'       => $result['children'],
+                'children'   => $result['children'],
                 'pagination' => $result['pagination']
             ]);
         } catch (\Exception $e) {
