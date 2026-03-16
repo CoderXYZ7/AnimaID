@@ -84,16 +84,16 @@ class AnimatorService
         $animatorData = [
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
-            'birth_date' => $data['birth_date'] ?? null,
-            'birth_place' => $data['birth_place'] ?? null,
-            'fiscal_code' => $data['fiscal_code'] ?? null,
-            'phone' => $data['phone'] ?? null,
-            'email' => $data['email'] ?? null,
-            'address' => $data['address'] ?? null,
-            'city' => $data['city'] ?? null,
-            'postal_code' => $data['postal_code'] ?? null,
-            'status' => $data['status'] ?? 'active',
-            'hire_date' => $data['hire_date'] ?? date('Y-m-d'),
+            'birth_date' => !empty($data['birth_date']) ? $data['birth_date'] : null,
+            'birth_place' => !empty($data['birth_place']) ? $data['birth_place'] : null,
+            'fiscal_code' => !empty($data['fiscal_code']) ? $data['fiscal_code'] : null,
+            'phone' => !empty($data['phone']) ? $data['phone'] : null,
+            'email' => !empty($data['email']) ? $data['email'] : null,
+            'address' => !empty($data['address']) ? $data['address'] : null,
+            'city' => !empty($data['city']) ? $data['city'] : null,
+            'postal_code' => !empty($data['postal_code']) ? $data['postal_code'] : null,
+            'status' => !empty($data['status']) ? $data['status'] : 'active',
+            'hire_date' => !empty($data['hire_date']) ? $data['hire_date'] : date('Y-m-d'),
             'notes' => $data['notes'] ?? null,
             'created_by' => $createdBy,
             'created_at' => date('Y-m-d H:i:s')
@@ -265,15 +265,15 @@ class AnimatorService
             throw new \Exception('Invalid status value');
         }
 
-        // Validate dates
-        if (isset($data['birth_date'])) {
+        // Validate dates (skip empty strings — optional fields)
+        if (!empty($data['birth_date'])) {
             $date = \DateTime::createFromFormat('Y-m-d', $data['birth_date']);
             if (!$date || $date->format('Y-m-d') !== $data['birth_date']) {
                 throw new \Exception('Invalid birth date format (expected Y-m-d)');
             }
         }
 
-        if (isset($data['hire_date'])) {
+        if (!empty($data['hire_date'])) {
             $date = \DateTime::createFromFormat('Y-m-d', $data['hire_date']);
             if (!$date || $date->format('Y-m-d') !== $data['hire_date']) {
                 throw new \Exception('Invalid hire date format (expected Y-m-d)');

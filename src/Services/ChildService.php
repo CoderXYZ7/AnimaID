@@ -250,7 +250,7 @@ class ChildService
         }
 
         // Validate birth date format
-        if (isset($data['birth_date'])) {
+        if (!empty($data['birth_date'])) {
             $date = \DateTime::createFromFormat('Y-m-d', $data['birth_date']);
             if (!$date || $date->format('Y-m-d') !== $data['birth_date']) {
                 throw new \Exception('Invalid birth date format (expected Y-m-d)');
