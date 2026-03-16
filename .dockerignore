@@ -1,9 +1,0 @@
-.git
-.env
-database/*.db
-database/backups/
-uploads/
-vendor/
-node_modules/
-*.log
-.DS_Store

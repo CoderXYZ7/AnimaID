@@ -2,7 +2,7 @@ FROM php:8.2-apache
 
 # System dependencies
 RUN apt-get update && apt-get install -y \
-    unzip curl libsqlite3-dev libzip-dev \
+    git unzip curl libsqlite3-dev libzip-dev \
     && docker-php-ext-install pdo pdo_sqlite zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -16,10 +16,13 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN a2enmod rewrite
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
-WORKDIR /var/www/html
+# Clone project from GitHub
+ARG REPO_URL=https://github.com/CoderXYZ7/AnimaID.git
+ARG BRANCH=master
+RUN git clone --depth=1 --branch=${BRANCH} ${REPO_URL} /var/www/html \
+    && git config --global --add safe.directory /var/www/html
 
-# Copy project files from local build context
-COPY . /var/www/html
+WORKDIR /var/www/html
 
 # Install PHP dependencies (production only)
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi --no-security-blocking
