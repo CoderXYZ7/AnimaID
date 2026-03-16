@@ -96,7 +96,7 @@ class ChildRepository extends BaseRepository
         }
 
         $child['documents'] = $this->query(
-            "SELECT * FROM child_documents WHERE child_id = ? ORDER BY uploaded_at DESC",
+            "SELECT * FROM child_documents WHERE child_id = ? ORDER BY created_at DESC",
             [$childId]
         );
 
@@ -167,7 +167,7 @@ class ChildRepository extends BaseRepository
     public function getDocuments(int $childId): array
     {
         return $this->query(
-            "SELECT * FROM child_documents WHERE child_id = ? ORDER BY uploaded_at DESC",
+            "SELECT * FROM child_documents WHERE child_id = ? ORDER BY created_at DESC",
             [$childId]
         );
     }

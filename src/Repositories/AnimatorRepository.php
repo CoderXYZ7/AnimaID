@@ -93,7 +93,7 @@ class AnimatorRepository extends BaseRepository
         }
 
         $animator['documents'] = $this->query(
-            "SELECT * FROM animator_documents WHERE animator_id = ? ORDER BY uploaded_at DESC",
+            "SELECT * FROM animator_documents WHERE animator_id = ? ORDER BY created_at DESC",
             [$animatorId]
         );
 
@@ -160,7 +160,7 @@ class AnimatorRepository extends BaseRepository
     public function getDocuments(int $animatorId): array
     {
         return $this->query(
-            "SELECT * FROM animator_documents WHERE animator_id = ? ORDER BY uploaded_at DESC",
+            "SELECT * FROM animator_documents WHERE animator_id = ? ORDER BY created_at DESC",
             [$animatorId]
         );
     }
