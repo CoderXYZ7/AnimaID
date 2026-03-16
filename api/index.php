@@ -41,6 +41,7 @@ use AnimaID\Controllers\ChildController;
 use AnimaID\Controllers\CommunicationController;
 use AnimaID\Controllers\MediaController;
 use AnimaID\Controllers\ReportController;
+use AnimaID\Controllers\PermissionController;
 use AnimaID\Controllers\RoleController;
 use AnimaID\Controllers\SpaceController;
 use AnimaID\Controllers\SystemController;
@@ -125,6 +126,7 @@ $communicationController = new CommunicationController($communicationService);
 $mediaController         = new MediaController($mediaService);
 $roleController          = new RoleController($roleService);
 $reportController        = new ReportController($reportService);
+$permissionController    = new PermissionController($permissionService);
 
 // Middleware
 $authMiddleware = new AuthMiddleware($authService);
@@ -185,6 +187,7 @@ $app->group('/api', function ($group) use (
     $mediaController,
     $reportController,
     $roleController,
+    $permissionController,
     $permissionService
 ) {
 
@@ -263,6 +266,9 @@ $app->group('/api', function ($group) use (
         $group->delete('/{id}', [$roleController, 'delete'])
             ->add(new PermissionMiddleware($permissionService, ['admin.users'], 'any'));
     });
+
+    // Permissions route
+    $group->get('/permissions', [$permissionController, 'index']);
 
     // Calendar routes
     $group->group('/calendar', function ($group) use ($calendarController, $permissionService) {

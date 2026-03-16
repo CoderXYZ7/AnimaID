@@ -24,34 +24,34 @@ class PermissionRepository extends BaseRepository
     }
 
     /**
-     * Get all permissions grouped by category
+     * Get all permissions grouped by module
      */
-    public function getAllGroupedByCategory(): array
+    public function getAllGroupedByModule(): array
     {
         $permissions = $this->query(
-            "SELECT * FROM {$this->table} ORDER BY category, name"
+            "SELECT * FROM {$this->table} ORDER BY module, name"
         );
 
         $grouped = [];
         foreach ($permissions as $permission) {
-            $category = $permission['category'];
-            if (!isset($grouped[$category])) {
-                $grouped[$category] = [];
+            $module = $permission['module'];
+            if (!isset($grouped[$module])) {
+                $grouped[$module] = [];
             }
-            $grouped[$category][] = $permission;
+            $grouped[$module][] = $permission;
         }
 
         return $grouped;
     }
 
     /**
-     * Get permissions by category
+     * Get permissions by module
      */
-    public function getByCategory(string $category): array
+    public function getByCategory(string $module): array
     {
         return $this->query(
-            "SELECT * FROM {$this->table} WHERE category = ? ORDER BY name",
-            [$category]
+            "SELECT * FROM {$this->table} WHERE module = ? ORDER BY name",
+            [$module]
         );
     }
 
@@ -61,10 +61,10 @@ class PermissionRepository extends BaseRepository
     public function getCategories(): array
     {
         $result = $this->query(
-            "SELECT DISTINCT category FROM {$this->table} ORDER BY category"
+            "SELECT DISTINCT module FROM {$this->table} ORDER BY module"
         );
 
-        return array_column($result, 'category');
+        return array_column($result, 'module');
     }
 
     /**
@@ -77,13 +77,13 @@ class PermissionRepository extends BaseRepository
              INNER JOIN role_permissions rp ON p.id = rp.permission_id
              INNER JOIN user_roles ur ON rp.role_id = ur.role_id
              WHERE ur.user_id = ?
-             ORDER BY p.category, p.name",
+             ORDER BY p.module, p.name",
             [$userId]
         );
     }
 
     /**
-     * Get permissions for a user grouped by category
+     * Get permissions for a user grouped by module
      */
     public function getForUserGrouped(int $userId): array
     {
@@ -91,11 +91,11 @@ class PermissionRepository extends BaseRepository
 
         $grouped = [];
         foreach ($permissions as $permission) {
-            $category = $permission['category'];
-            if (!isset($grouped[$category])) {
-                $grouped[$category] = [];
+            $module = $permission['module'];
+            if (!isset($grouped[$module])) {
+                $grouped[$module] = [];
             }
-            $grouped[$category][] = $permission;
+            $grouped[$module][] = $permission;
         }
 
         return $grouped;

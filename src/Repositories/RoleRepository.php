@@ -62,7 +62,7 @@ class RoleRepository extends BaseRepository
             "SELECT p.* FROM permissions p
              INNER JOIN role_permissions rp ON p.id = rp.permission_id
              WHERE rp.role_id = ?
-             ORDER BY p.category, p.name",
+             ORDER BY p.module, p.name",
             [$roleId]
         );
     }

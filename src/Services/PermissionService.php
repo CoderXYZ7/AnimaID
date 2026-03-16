@@ -35,11 +35,19 @@ class PermissionService
     }
 
     /**
-     * Get all permissions grouped by category
+     * Get all permissions grouped by module
+     */
+    public function getAllGroupedByModule(): array
+    {
+        return $this->permissionRepository->getAllGroupedByModule();
+    }
+
+    /**
+     * Get all permissions grouped by category (alias)
      */
     public function getAllPermissionsGrouped(): array
     {
-        return $this->permissionRepository->getAllGroupedByCategory();
+        return $this->getAllGroupedByModule();
     }
 
     /**
