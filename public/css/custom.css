@@ -109,4 +109,60 @@ body.dark {
     color: #93c5fd;
 }
 
-/* Theme Switcher specific styles removed to allow it to fit in header/navbar */
+/* Additional dark mode overrides for public/info pages */
+
+.dark .text-gray-700 {
+    color: #d1d5db;
+}
+
+.dark .text-gray-500 {
+    color: #9ca3af;
+}
+
+.dark .text-gray-400 {
+    color: #6b7280;
+}
+
+.dark .text-gray-300 {
+    color: #6b7280;
+}
+
+.dark .text-orange-600 {
+    color: #fb923c;
+}
+
+.dark .bg-gray-200 {
+    background-color: #374151;
+}
+
+.dark .hover\:bg-gray-300:hover {
+    background-color: #4b5563;
+}
+
+/* Hero gradient section override */
+.dark .from-blue-50 {
+    --tw-gradient-from: #1e3a5f;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(30 58 95 / 0));
+}
+
+.dark .to-green-50 {
+    --tw-gradient-to: #14532d;
+}
+
+/* Gray scale backgrounds */
+.dark .bg-gray-600 {
+    background-color: #1f2937;
+}
+
+/* Card/section elements for public page */
+.dark .border-t {
+    border-color: var(--border-dark);
+}
+
+.dark .bg-orange-100 {
+    background-color: #7c2d12;
+}
+
+.dark .text-orange-800 {
+    color: #fdba74;
+}

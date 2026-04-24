@@ -49,3 +49,6 @@ config/config.php
 
 # Workfiles
 workfiles/*
+
+# Editor
+.*

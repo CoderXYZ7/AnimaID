@@ -1,6 +1,6 @@
 // public/js/i18nInit.js
-// i18n initialization and theme switching logic (without language selector UI)
-import { initI18n, getCurrentLanguage, t } from '../src/js/i18n.js';
+// i18n initialization, theme switching, and language selector UI
+import { initI18n, changeLanguage, getCurrentLanguage, availableLanguages, t } from '../src/js/i18n.js';
 
 // Apply saved theme immediately to prevent flash of wrong theme
 (function applyThemeImmediately() {
@@ -28,6 +28,9 @@ async function initializeI18nAndTheme() {
 
     // Initialize theme switcher button
     initThemeSwitcher();
+
+    // Initialize language selector if container exists
+    initLanguageSelector();
 }
 
 // Initialize theme switcher button
@@ -57,6 +60,32 @@ function initThemeSwitcher() {
             newSwitcher.innerHTML = '<i class="fas fa-sun"></i>';
         }
     }
+}
+
+// Initialize language selector dropdown
+function initLanguageSelector() {
+    const container = document.getElementById('language-selector-container');
+    if (!container || document.getElementById('language-select')) return;
+
+    const select = document.createElement('select');
+    select.id = 'language-select';
+    select.className = 'px-2 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+
+    Object.values(availableLanguages).forEach(lang => {
+        const option = document.createElement('option');
+        option.value = lang.code;
+        option.textContent = `${lang.flag} ${lang.name}`;
+        if (lang.code === getCurrentLanguage()) option.selected = true;
+        select.appendChild(option);
+    });
+
+    select.addEventListener('change', async (event) => {
+        if (await changeLanguage(event.target.value)) {
+            window.location.reload();
+        }
+    });
+
+    container.appendChild(select);
 }
 
 // Function to apply translations to elements with data-i18n attribute
@@ -92,6 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Also check when header.js has finished loading
 document.addEventListener('headerLoaded', () => {
-    // Re-init theme switcher after header loads (in case it loads after initial check)
     initThemeSwitcher();
+    initLanguageSelector();
 });
