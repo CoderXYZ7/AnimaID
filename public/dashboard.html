@@ -381,7 +381,7 @@
                     resolve: (data) => data.pagination ? data.pagination.total : (data.children ? data.children.length : null)
                 },
                 {
-                    url: '/calendar/events?page=1&limit=1',
+                    url: '/calendar?page=1&limit=1',
                     elementId: 'stats-activities',
                     resolve: (data) => data.pagination ? data.pagination.total : (data.events ? data.events.length : null)
                 },

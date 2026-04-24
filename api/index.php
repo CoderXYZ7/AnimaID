@@ -243,14 +243,20 @@ $app->group('/api', function ($group) use (
     $group->get('/auth/me', [$authController, 'me']);
 
     // User routes (require admin permissions)
-    $group->group('/users', function ($group) use ($userController) {
-        $group->get('', [$userController, 'index']);
-        $group->get('/stats', [$userController, 'stats']);
-        $group->get('/{id}', [$userController, 'show']);
-        $group->post('', [$userController, 'create']);
-        $group->put('/{id}', [$userController, 'update']);
-        $group->delete('/{id}', [$userController, 'delete']);
-    })->add(new PermissionMiddleware($permissionService, ['admin.users', 'users.manage'], 'any'));
+    $group->group('/users', function ($group) use ($userController, $permissionService) {
+        $group->get('', [$userController, 'index'])
+            ->add(new PermissionMiddleware($permissionService, ['admin.users', 'admin.users.view', 'users.manage'], 'any'));
+        $group->get('/stats', [$userController, 'stats'])
+            ->add(new PermissionMiddleware($permissionService, ['admin.users', 'admin.users.view', 'users.manage'], 'any'));
+        $group->get('/{id}', [$userController, 'show'])
+            ->add(new PermissionMiddleware($permissionService, ['admin.users', 'admin.users.view', 'users.manage'], 'any'));
+        $group->post('', [$userController, 'create'])
+            ->add(new PermissionMiddleware($permissionService, ['admin.users', 'admin.users.create', 'users.manage'], 'any'));
+        $group->put('/{id}', [$userController, 'update'])
+            ->add(new PermissionMiddleware($permissionService, ['admin.users', 'admin.users.edit', 'users.manage'], 'any'));
+        $group->delete('/{id}', [$userController, 'delete'])
+            ->add(new PermissionMiddleware($permissionService, ['admin.users', 'admin.users.delete', 'users.manage'], 'any'));
+    });
 
     // Role routes
     $group->group('/roles', function ($group) use ($roleController, $permissionService) {
