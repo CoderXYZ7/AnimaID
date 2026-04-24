@@ -325,7 +325,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.email}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex flex-wrap gap-1">
-                            ${user.roles.map(role => `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${role}</span>`).join('')}
+                            ${(user.roles || []).map(role => `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${role}</span>`).join('')}
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">

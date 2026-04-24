@@ -368,20 +368,9 @@
                     return;
                 }
 
-                // Check if user has admin permissions
+                // Check if user has admin permissions (API enforces the actual permission)
                 const hasPermission = await checkAdminPermission();
                 if (!hasPermission) {
-                    showErrorScreen();
-                    return;
-                }
-
-                // Double-check user roles from token
-                const hasAdminRole = currentUser.roles && currentUser.roles.some(role =>
-                    role.name === 'technical_admin' ||
-                    role.permissions && role.permissions.some(perm => perm.startsWith('admin.'))
-                );
-
-                if (!hasAdminRole) {
                     showErrorScreen();
                     return;
                 }

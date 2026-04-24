@@ -173,6 +173,35 @@ class UserRepository extends BaseRepository
     }
 
     /**
+     * Fetch role names for multiple users in a single query.
+     * Returns a map of user_id → string[]
+     *
+     * @param int[] $userIds
+     */
+    public function getRolesByUserIds(array $userIds): array
+    {
+        if (empty($userIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+        $rows = $this->query(
+            "SELECT ur.user_id, r.name
+             FROM user_roles ur
+             INNER JOIN roles r ON ur.role_id = r.id
+             WHERE ur.user_id IN ($placeholders)",
+            $userIds
+        );
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[$row['user_id']][] = $row['name'];
+        }
+
+        return $map;
+    }
+
+    /**
      * Count active users
      */
     public function countActive(): int

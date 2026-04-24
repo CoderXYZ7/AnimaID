@@ -34,6 +34,14 @@ class UserService
         $users = $this->userRepository->getPaginated($page, $limit, $search);
         $total = $this->userRepository->count();
 
+        if (!empty($users)) {
+            $rolesMap = $this->userRepository->getRolesByUserIds(array_column($users, 'id'));
+            foreach ($users as &$user) {
+                $user['roles'] = $rolesMap[$user['id']] ?? [];
+            }
+            unset($user);
+        }
+
         return [
             'users' => $users,
             'pagination' => [
