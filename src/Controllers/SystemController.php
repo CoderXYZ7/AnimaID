@@ -4,6 +4,7 @@ namespace AnimaID\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use AnimaID\Config\ConfigManager;
 use PDO;
 
 /**
@@ -13,10 +14,12 @@ use PDO;
 class SystemController
 {
     private PDO $pdo;
+    private ConfigManager $config;
 
-    public function __construct(PDO $pdo)
+    public function __construct(PDO $pdo, ConfigManager $config)
     {
-        $this->pdo = $pdo;
+        $this->pdo    = $pdo;
+        $this->config = $config;
     }
 
     /**
