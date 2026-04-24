@@ -116,7 +116,7 @@ $auditService         = new AuditService($pdo, $config);
 $authController          = new AuthController($authService);
 $userController          = new UserController($userService);
 $calendarController      = new CalendarController($calendarService);
-$systemController        = new SystemController($pdo);
+$systemController        = new SystemController($pdo, $config);
 $wikiController          = new WikiController($wikiService);
 $spaceController         = new SpaceController($spaceService);
 $childController         = new ChildController($childService);
@@ -236,6 +236,13 @@ $app->group('/api', function ($group) use (
         ->add(new PermissionMiddleware($permissionService, ['admin.system.view'], 'any'));
 
     $group->get('/system/config', [$systemController, 'config']);
+
+    // Backup management
+    $group->get('/system/backups', [$systemController, 'listBackups'])
+        ->add(new PermissionMiddleware($permissionService, ['admin.system.view'], 'any'));
+
+    $group->post('/system/backup', [$systemController, 'createBackup'])
+        ->add(new PermissionMiddleware($permissionService, ['admin.system.view'], 'any'));
 
     // Auth routes
     $group->post('/auth/logout', [$authController, 'logout']);

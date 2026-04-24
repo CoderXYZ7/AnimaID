@@ -58,6 +58,72 @@ class SystemController
     }
 
     /**
+     * List backups
+     * GET /api/system/backups
+     */
+    public function listBackups(Request $request, Response $response): Response
+    {
+        $backupPath = $this->config->get('backup.path');
+
+        if (!is_dir($backupPath)) {
+            return $this->jsonResponse($response, ['success' => true, 'backups' => [], 'total_size_formatted' => '0 B']);
+        }
+
+        $files = glob($backupPath . '*.{db,sql,gz,zip}', GLOB_BRACE) ?: [];
+        $backups = [];
+        $totalBytes = 0;
+
+        foreach ($files as $file) {
+            $size = filesize($file);
+            $totalBytes += $size;
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            $backups[] = [
+                'name'           => basename($file),
+                'type'           => in_array($ext, ['db', 'sql']) ? 'database' : 'archive',
+                'size_formatted' => $this->formatBytes($size),
+                'created_at'     => date('Y-m-d H:i:s', filemtime($file)),
+            ];
+        }
+
+        usort($backups, fn($a, $b) => strcmp($b['created_at'], $a['created_at']));
+
+        return $this->jsonResponse($response, [
+            'success'             => true,
+            'backups'             => $backups,
+            'total_size_formatted' => $this->formatBytes($totalBytes),
+        ]);
+    }
+
+    /**
+     * Create a database backup
+     * POST /api/system/backup
+     */
+    public function createBackup(Request $request, Response $response): Response
+    {
+        $backupPath = $this->config->get('backup.path');
+        $dbFile     = $this->config->get('database.file');
+
+        if (!is_dir($backupPath) && !mkdir($backupPath, 0755, true)) {
+            return $this->jsonResponse($response, ['success' => false, 'error' => 'Cannot create backup directory'], 500);
+        }
+
+        $filename   = 'backup_' . date('Y-m-d_H-i-s') . '.db';
+        $dest       = $backupPath . $filename;
+        $dbSuccess  = copy($dbFile, $dest);
+
+        return $this->jsonResponse($response, [
+            'success' => $dbSuccess,
+            'results' => [
+                'database' => [
+                    'success'  => $dbSuccess,
+                    'filename' => $dbSuccess ? $filename : null,
+                    'error'    => $dbSuccess ? null : 'Failed to copy database file',
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Check database connection
      */
     private function checkDatabase(): bool
@@ -126,6 +192,14 @@ class SystemController
                 'details' => 'Running on legacy api/index.php'
             ]
         ];
+    }
+
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes >= 1073741824) return round($bytes / 1073741824, 2) . ' GB';
+        if ($bytes >= 1048576)    return round($bytes / 1048576, 2) . ' MB';
+        if ($bytes >= 1024)       return round($bytes / 1024, 2) . ' KB';
+        return $bytes . ' B';
     }
 
     /**
