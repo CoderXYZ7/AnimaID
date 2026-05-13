@@ -10,6 +10,17 @@
     --text-dark: #f9fafb;
     --card-background-dark: #1f2937;
     --border-dark: #374151;
+
+    --theme-transition: background-color 0.2s ease, color 0.2s ease,
+                        border-color 0.2s ease, fill 0.2s ease,
+                        box-shadow 0.2s ease;
+}
+
+/* Smooth, consistent theme transitions everywhere.
+   Only color-related properties are transitioned so this doesn't
+   interfere with transforms, opacity, or height animations. */
+*, *::before, *::after {
+    transition: var(--theme-transition);
 }
 
 body.dark {
@@ -165,4 +176,22 @@ body.dark {
 
 .dark .text-orange-800 {
     color: #fdba74;
+}
+
+/* Language selector dropdown */
+#language-select {
+    background-color: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.dark #language-select {
+    background-color: var(--card-background-dark);
+    color: var(--text-dark);
+    border-color: var(--border-dark);
+}
+
+.dark #language-select option {
+    background-color: var(--card-background-dark);
+    color: var(--text-dark);
 }
