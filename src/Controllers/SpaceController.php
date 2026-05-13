@@ -138,6 +138,31 @@ class SpaceController
     }
 
     /**
+     * Get all bookings across all spaces (for calendar view)
+     * GET /api/spaces/bookings
+     */
+    public function getAllBookings(Request $request, Response $response): Response
+    {
+        try {
+            $params = $request->getQueryParams();
+            $start  = isset($params['start']) ? $this->normalizeDate($params['start']) : null;
+            $end    = isset($params['end'])   ? $this->normalizeDate($params['end'])   : null;
+
+            $bookings = $this->spaceService->getAllBookings($start, $end);
+
+            return $this->jsonResponse($response, [
+                'success' => true,
+                'data'    => $bookings,
+            ]);
+        } catch (\Exception $e) {
+            return $this->jsonResponse($response, [
+                'success' => false,
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Get space bookings
      * GET /api/spaces/{id}/bookings
      */
@@ -207,6 +232,19 @@ class SpaceController
                 'success' => false,
                 'error' => $e->getMessage()
             ], 400);
+        }
+    }
+
+    /**
+     * Normalize an ISO 8601 date string (possibly with timezone offset) to
+     * 'Y-m-d H:i:s' so SQLite datetime comparisons work correctly.
+     */
+    private function normalizeDate(string $date): string
+    {
+        try {
+            return (new \DateTime($date))->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            return $date;
         }
     }
 

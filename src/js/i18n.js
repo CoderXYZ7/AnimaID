@@ -48,6 +48,7 @@ const resources = {
             "nav.media": "Media Manager",
             "nav.wiki": "Wiki",
             "nav.reports": "Reports",
+            "nav.spaces": "Spaces",
 
             // Common
             "common.loading": "Loading...",
@@ -81,6 +82,7 @@ const resources = {
             "status.denied": "Access Denied",
             "status.denied.message": "You need to be logged in to access this page.",
             "status.denied.button": "Go to Login",
+            "common.accessDenied": "Access Denied",
 
             // Dashboard
             "dashboard.welcome": "Welcome to AnimaID",
@@ -90,6 +92,7 @@ const resources = {
             "dashboard.stats.activities": "Activities",
             "dashboard.stats.children": "Children",
             "dashboard.stats.reports": "Reports",
+            "dashboard.stats.animators": "Animators",
             "dashboard.permissions": "Your Permissions",
 
             // Footer
@@ -252,6 +255,24 @@ const resources = {
             "info.privacy.title": "Privacy Policy",
             "info.privacy.lastUpdated": "Last updated: November 20, 2025",
 
+            // Contact Page (extended)
+            "info.contact.technicalSupport": "Technical Support",
+            "info.contact.bugReports": "Bug Reports",
+            "info.contact.email": "Email",
+            "info.contact.phone": "Phone",
+            "info.contact.github": "GitHub",
+            "info.contact.name": "Name",
+            "info.contact.emailField": "Email",
+            "info.contact.subject": "Subject",
+            "info.contact.messageInput": "Message",
+            "info.contact.sendMessage": "Send Message",
+            "info.contact.githubLink": "github.com/CoderXYZ7/AnimaID",
+            "info.contact.responseTime": "Response time: Within 24 hours",
+
+            // Applets Page (extended)
+            "info.applets.future.title": "Future Applets",
+            "info.applets.future.description": "Applets and integrations planned for future implementation",
+
             // Animators Management
             "animators.loading": "Loading animators management...",
             "animators.title": "Animators Management",
@@ -326,6 +347,7 @@ const resources = {
             "animators.noteContentPlaceholder": "Detailed content of the note",
             "animators.markPrivate": "Mark as private (only staff can view)",
             "animators.saveNote": "Save Note",
+            "animators.other": "Other",
             "animators.accessDenied": "Access Denied",
             "animators.accessDeniedMessage": "You don't have permission to access animators management.",
 
@@ -390,6 +412,7 @@ const resources = {
             "nav.media": "Gestore Media",
             "nav.wiki": "Wiki",
             "nav.reports": "Rapporti",
+            "nav.spaces": "Spazi",
 
             // Common
             "common.loading": "Caricamento...",
@@ -423,6 +446,7 @@ const resources = {
             "status.denied": "Accesso Negato",
             "status.denied.message": "Devi essere loggato per accedere a questa pagina.",
             "status.denied.button": "Vai al Login",
+            "common.accessDenied": "Accesso Negato",
 
             // Dashboard
             "dashboard.welcome": "Benvenuto in AnimaID",
@@ -432,6 +456,7 @@ const resources = {
             "dashboard.stats.activities": "Attività",
             "dashboard.stats.children": "Bambini",
             "dashboard.stats.reports": "Rapporti",
+            "dashboard.stats.animators": "Animatori",
             "dashboard.permissions": "I Tuoi Permessi",
 
             // Footer
@@ -557,6 +582,8 @@ const resources = {
             "info.documentation.apiEndpoints": "Riferimento Endpoint API",
             "info.documentation.authSystem": "Sistema Autenticazione",
             "info.documentation.accessWiki": "Accedi Wiki",
+            "info.documentation.adminStaffManual": "Manuale per Amministratori e Staff",
+            "info.documentation.itManual": "Manuale per Utenti IT",
             "info.documentation.sourceCode": "Codice Sorgente",
             "info.documentation.sourceCode.desc": "Esplora il codice sorgente open-source su GitHub.",
             "info.documentation.reportIssues": "Segnala Problemi",
@@ -705,6 +732,7 @@ const resources = {
             "animators.noteContentPlaceholder": "Contenuto dettagliato della nota",
             "animators.markPrivate": "Segna come privato (solo staff può visualizzare)",
             "animators.saveNote": "Salva Nota",
+            "animators.other": "Altro",
             "animators.accessDenied": "Accesso Negato",
             "animators.accessDeniedMessage": "Non hai i permessi per accedere alla gestione animatori.",
 

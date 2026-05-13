@@ -194,6 +194,10 @@ $app->group('/api', function ($group) use (
     // Space Routes
     $group->group('/spaces', function ($group) use ($spaceController, $permissionService) {
         $group->get('', [$spaceController, 'index']);
+
+        // Static sub-routes must be declared before /{id} to avoid being matched as an id
+        $group->get('/bookings', [$spaceController, 'getAllBookings']);
+
         $group->get('/{id}', [$spaceController, 'show']);
 
         $group->post('', [$spaceController, 'create'])
