@@ -2,10 +2,10 @@
 // i18n initialization, theme switching, and language selector UI
 import { initI18n, changeLanguage, getCurrentLanguage, availableLanguages, t } from '../src/js/i18n.js';
 
-// Apply saved theme immediately to prevent flash of wrong theme
+// Sync dark class to body (html is already handled by the inline head script)
 (function applyThemeImmediately() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
         document.body.classList.add('dark');
     }
 })();
@@ -44,21 +44,17 @@ function initThemeSwitcher() {
         themeSwitcher.parentNode.replaceChild(newSwitcher, themeSwitcher);
 
         newSwitcher.addEventListener('click', () => {
-            body.classList.toggle('dark');
-            const isDarkMode = body.classList.contains('dark');
+            const isDarkMode = body.classList.toggle('dark');
+            document.documentElement.classList.toggle('dark', isDarkMode);
             localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
             newSwitcher.innerHTML = isDarkMode ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
         });
 
         // Set initial icon based on current theme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            body.classList.add('dark');
-            newSwitcher.innerHTML = '<i class="fas fa-moon"></i>';
-        } else {
-            body.classList.remove('dark');
-            newSwitcher.innerHTML = '<i class="fas fa-sun"></i>';
-        }
+        const isDark = localStorage.getItem('theme') === 'dark';
+        document.documentElement.classList.toggle('dark', isDark);
+        body.classList.toggle('dark', isDark);
+        newSwitcher.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
     }
 }
 
