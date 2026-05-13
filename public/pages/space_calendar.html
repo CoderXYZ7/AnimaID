@@ -143,6 +143,76 @@
         #booking-modal.flex {
             backdrop-filter: blur(4px);
         }
+
+        /* ── Dark mode overrides for FullCalendar ──────────────── */
+        body.dark .fc {
+            --fc-border-color: #374151;
+            --fc-button-bg-color: #1f2937;
+            --fc-button-border-color: #374151;
+            --fc-button-text-color: #93c5fd;
+            --fc-button-hover-bg-color: #374151;
+            --fc-button-hover-border-color: #4b5563;
+            --fc-button-active-bg-color: #1e3a5f;
+            --fc-button-active-border-color: #3b82f6;
+            --fc-today-bg-color: #1e2736;
+            --fc-page-bg-color: #111827;
+            --fc-neutral-bg-color: #1f2937;
+            --fc-list-event-hover-bg-color: #374151;
+        }
+
+        body.dark .fc-toolbar-title {
+            color: #f9fafb !important;
+        }
+
+        body.dark .fc-button-primary {
+            background-color: #1f2937 !important;
+            border-color: #374151 !important;
+            color: #93c5fd !important;
+        }
+
+        body.dark .fc-button-primary:hover {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #bfdbfe !important;
+        }
+
+        body.dark .fc-button-primary:not(:disabled).fc-button-active,
+        body.dark .fc-button-primary:not(:disabled):active {
+            background-color: #1e3a5f !important;
+            border-color: #3b82f6 !important;
+            color: #60a5fa !important;
+        }
+
+        body.dark .fc-col-header-cell {
+            background-color: #1e2736;
+        }
+
+        body.dark .fc-col-header-cell-cushion {
+            color: #9ca3af;
+        }
+
+        body.dark .fc-timegrid-slot-label-cushion {
+            color: #6b7280;
+        }
+
+        body.dark .fc-theme-standard td,
+        body.dark .fc-theme-standard th {
+            border-color: #374151;
+        }
+
+        body.dark .fc-daygrid-day,
+        body.dark .fc-timegrid-col {
+            background-color: #111827;
+        }
+
+        body.dark .fc-scrollgrid {
+            border-color: #374151;
+        }
+
+        body.dark .fc-daygrid-day-number,
+        body.dark .fc-daygrid-more-link {
+            color: #d1d5db;
+        }
     </style>
 </head>
 

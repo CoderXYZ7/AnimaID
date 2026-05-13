@@ -379,7 +379,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        renderCommunications(data.communications);
+                        renderCommunications(data.data);
                         renderPagination(data.pagination);
                     } else {
                         showError('Failed to load communications');
