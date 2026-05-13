@@ -431,6 +431,7 @@
             modal.classList.remove('hidden');
         }
 
+        document.getElementById('add-booking-btn').addEventListener('click', () => openModal({}));
         document.getElementById('close-modal').addEventListener('click', () => modal.classList.add('hidden'));
         document.getElementById('cancel-btn').addEventListener('click', () => modal.classList.add('hidden'));
 
